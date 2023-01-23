@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bézier Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js",
+                    "bezier": "../bezier/bezier.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Bézier Splines</h1>
+            <h2>Continuity Between two Bézier Curves</h2>
+            <h3>Theorem: \(C^k\)-Continuity</h3>
+            <p>
+                Assume that \(F(u)=\sum_{i=0}^n\,B_i^{\Delta_l,n}\,\mathbf{b}_i\) and \(G(u)=\sum_{i=0}^n\,B_i^{\Delta_r,n}\,\mathbf{c}_i\) are Bézier curves over \(\Delta_l=[r,s]\) and \(\Delta_r=[s,t]\) respectively, \(r < s < t\). \(F,G\) are \(C^k\)-continuous at \(s\)
+                \[
+                    \Leftrightarrow \mathbf{c}_i=\mathbf{b}^i_{n-i}(t)~\forall\,0\leq i\leq k
+                    \Leftrightarrow \mathbf{b}_{j}=\mathbf{c}^{n-j}_0(r)~\forall\,n-k\leq j\leq n
+                \]
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div class="grid-container"
+                style="display: inline-grid;
+                    grid-template-columns: auto auto auto;
+                    gap: 1px;
+                    background-color: white;
+                    padding: 4px; 
+                    margin: 0px; 
+                    width: 550px;
+                    border: 1px solid teal">
+                <div class="grid-item" style="text-align: left; border: 1px solid teal">
+                    <button type="button" id="animation_c" style="float: left;">animation</button>
+                </div>
+                <div class="grid-item" style="text-align: left; border: 1px solid teal">
+                    <input type="checkbox" id="c1-continuity" name="c1-contonuity">
+                    <label for="c1-contonuity">C1-continuous</label>
+                </div>
+                <div class="grid-item" style="text-align: left; border: 1px solid teal">
+                    <input type="checkbox" id="c2-continuity" name="c2-continuity" style="display: inline-block">
+                    <label for="c2-contonuity" style="display: inline-block">C2-continuous</label>
+                </div>
+                <div class="grid-item" style="text-align: left; border: 1px solid teal">
+                    <input type='checkbox' id='r-interval-1' name='r-interval-1' checked>
+                    <label for='r-interval-1'>Intevals l = [0,1], r = [1,2]</label>
+                </div>
+                <div class="grid-item" style="text-align: left; border: 1px solid teal">
+                    <input type='checkbox' id='r-interval-2' name='r-interval-2'>
+                    <label for='r-interval-2'>Intevals l = [0,1], r = [1,3]</label>
+                </div>
+            </div>
+            <div id="d3js_canvas"></div>
+            <script type="module" src="./bezierSplines.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>B-Spline Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            .gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw": "../common/draw.js",
+                    "bsplines": "../b-splines/bsplines.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>B-Spline Curves</h1>
+            <h2>Shape Properties of B-Splines</h2>
+            <h3>Theorem: Shape Properties of B-Spline Curves</h3>
+            <p>
+                Let \(F(u)=\sum_{i=0}^{m-1}\,N_i^n (u)\,\mathbf{d}_i\) be a B-spline curve of degree \(n\) over the 
+                knot vector \(T\). Then the following properties hold true on \(\left[t_n,t_m\right]\):
+            </p>
+            <ul>
+                <li>In general there is no endpoint interpolation.</li>
+                <li>
+                    For \(t_i\leq u < t_{i+1}\), \(F(u)\) lies in the convex hull of the \(n+1\) control points 
+                    \(\mathbf{d}_{i-n}\ldots,\mathbf{d}_i\), the local convex hull.
+                </li>
+                <li>
+                    Local control: For \(u\in [t_i,t_{i+1})\) the curve is independent of \(\mathbf{d}_j\) for 
+                    \(j < i-n\) and \(j > i\).
+                </li>
+                <li>
+                    If \(n\) control points coincide, then the curve goes through this point and is tangent 
+                    to the control polygon.
+                </li>
+                <li>
+                    If \(n\) control points are on a line, then the curve touches this line.
+                </li>
+                <li>
+                    If \(n+1\) control points are on a line \(L\), then \(F(u)\in L\) for \(t_i\leq u < t_{i+1}\), 
+                    i.e. a whole segment of the curve \(F(u)\) coincides with \(L.\)
+                </li>
+                <li>
+                    Derivative: 
+                    \[ 
+                        F'(u)=\sum_{i=0}^{m-2}\,N_{i+1}^{n-1} (u)\,\mathbf{d}_i^* \quad\text{with}\quad 
+                        \mathbf{d}_i^* = \frac{n}{t_{i+n+1}-t_{i+1}}\,(\mathbf{d}_{i+1}-\mathbf{d}_i) 
+                    \]
+                </li>
+                <li>
+                    If \(n\) knots \(t_i=t_{i+1}=\cdots=t_{i+n-1}\) coincide, then \(F(t_{i})=\mathbf{d}_{i-1}\), 
+                    i.e. the curve goes through a control point and is tangent to the control polygon.
+                </li>
+                <li>
+                    If \(\phi\) is an affine map, then (affine invariance): 
+                    \[ 
+                        \phi\left(\sum_{i=0}^{m-1}\,N_i^n (u)\,\mathbf{d}_i\right)=\sum_{i=0}^{m-1}\,N_i^n (u)\,\phi(\mathbf{d}_i) 
+                    \]
+                </li>
+                <li>
+                    Variation diminishing property: If \(H\) is a hyper plane in \(\mathbb{R}^d\), then 
+                    \[ 
+                    \#(F\cap H)\leq{}\#(H\cap\text{control polygon}) 
+                    \]
+                </li>
+            </ul>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div class="grid-container"
+            style="display: grid;
+                grid-template-areas:  'slider checkbox1'  'slider checkbox2' 'slider checkbox3';
+                gap: 1px;
+                background-color: white;
+                padding: 1px; 
+                margin: 0 auto; 
+                width: 450px;
+                border: 1px solid teal">
+            <div class="grid-item" style="grid-area: slider; text-align: left; border: 1px solid teal">
+                <label for="bspline_degree_slider" 
+		            style="text-align: left; margin-left: 5px; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+					degree = <span id="degree_value">3</span>
+				</label>
+				<input type="range" min="1" max="4" step="1" value="3"  id="bspline_degree_slider"; style="display: inline; width: 90px">
+            </div>
+            <div class="grid-item" style="grid-area: checkbox1; text-align: left; border: 1px solid teal">
+                <input type="checkbox" id="n_coincident" name="n_coincident" style="display: inline-box; margin-left: 5px">
+				<label for="n_coincident" style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+		            n coincident control points
+                </label>	
+            </div>
+            <div class="grid-item" style="grid-area: checkbox2; text-align: left; border: 1px solid teal">
+                <input type="checkbox" id="n_aligned" style="display: inline-box; margin-left: 5px" name="n_aligned">
+                <label for="n_aligned" style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+				    n control points on a line
+                </label>
+            </div>
+            <div class="grid-item" style="grid-area: checkbox3; text-align: left; border: 1px solid teal">
+                <input type="checkbox" id="n_1_aligned" style="display: inline-box; margin-left: 5px" name="n_1_aligned">
+		    	<label for="n_1_aligned" style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+		            n+1 control points aligned
+                </label>
+            </div>
+            </div>
+                <div id="d3js_canvas"></div>
+                <script type="module" src="./shapeProperties.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 750px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

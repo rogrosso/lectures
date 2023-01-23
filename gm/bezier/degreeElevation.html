@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bézier Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js",
+                    "bezier": "../bezier/bezier.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Bézier Curves</h1>
+            <h2>Degree Elevation</h2>
+            <h3>Theorem: Degree Elevation</h3>
+            <p>
+                Let \(F(u)=\sum_{i=0}^n\,B_i^{\Delta,n}(u)\,\mathbf{b}_i\) a Bezier curve of degree \(n\)
+                over \(\Delta=[s,t]\).
+                Assume \(F(u)=\sum_{i=0}^{n+1}\,B_i^{\Delta,{n+1}}(u)\,\mathbf{b}_i^*\) as Bézier curve of
+                degree \(n+1\) over \(\Delta=[s,t]\). Then:
+                \[
+                \mathbf{b}_i^*=\frac{i}{n+1}\,\mathbf{b}_{i-1}+(1-\frac{i}{n+1})\,\mathbf{b}_i\,,\quad i= 0,\dots,n+1
+                \]
+                where \(\mathbf{b}_{-1}=\mathbf{b}_{n+1}=\mathbf{0}\)
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+            <div id="d3js_canvas"></div>
+            <script type="module" src="./degreeElevation.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

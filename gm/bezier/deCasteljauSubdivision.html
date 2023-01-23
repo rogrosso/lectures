@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bézier Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw": "../common/draw.js",
+                    "bezier": "../bezier/bezier.js",
+                    "gaussEliminationFactory" : "../../common/gaussElimination.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Bézier Curves</h1>
+            <h2>de Casteljau Subdivision</h2>
+            <p>
+                Let \(F(u)=\sum_{i=0}^n\,B_i^{\Delta,n}(u)\,\mathbf{b}_i\) a Bézier curve over \(\Delta=[s,t]\) and \(q\in [s,t]\). Define:
+                \begin{align}
+                F_l\,(u)&=\sum_{i=0}^n\,B_i^{\Delta_l,n} (u)\,\mathbf{b}_0^i (q)\quad\text{Bézier curve over \(\Delta_l=[s,q]\)}\notag\\
+                F_r\,(u)&=\sum_{i=0}^n\,B_i^{\Delta_r,n} (u)\,\mathbf{b}_i^{n-i} (q)\quad\text{Bézier curve over \(\Delta_r=[q,t]\)}\notag
+                \end{align}
+                where \(\mathbf{b}_i^l(q)\) are points of the de Casteljau algorithm evaluated at \(q\). Then:
+                \[
+                F(u)=\begin{cases}F_l(u),&u\in[s,q]\\F_r(u),&u\in[q,t]\end{cases}
+                \]
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <label for="deCasteljau_u_slider" style="display: inline-block; width: 100px; text-align: right; font-size: 18px; font-family:sans-serif;">
+                    u = <span style="margin-right: 10px" id="u-value">0.33</span>
+                </label>
+                <input type="range" min="0" max="1" step="0.02" value="0.33" id="deCasteljau_u_slider">
+                <div id="d3js_canvas"></div>
+                <script type="module" src="./deCasteljauSubdivision.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

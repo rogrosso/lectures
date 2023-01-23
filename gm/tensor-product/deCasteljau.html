@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tensor Product Surfaces</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.136.0/build/three.module.js",
+                    "OrbitControls": "https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js",
+                    "GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
+                    "colors": "../common/colors.js",
+                    "teapot": "../data/teapot.json",
+                    "tpSurfaces": "./tpSurfaces.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Tensor Product Surfaces</h1>
+            <h2>The de Casteljau Algorithm</h2>
+            <h3>Tensor Product Approach for the de Casteljau Algorithm</h3>
+            <p>
+                Given the surface 
+                \(S(u,v)=\sum_{j=0}^m\,B_j^m(v)\,\left(\sum_{i=0}^n\,B_i^n(u)\,\mathbf{b}_{i,j}\right)=:\sum_{j=0}^m\,B_j^m(v)\,\mathbf{b}_j(u)\)
+                and the parameter values \(u,\, v \in [0,1]\)
+            </p>
+            <ul>
+                <li>
+                    \(m+1\) times de Casteljau in \(u\): \(\mathbf{c}_j=\sum_{i=0}^n B_i^n(u)\mathbf{b}_{i,j}, \; 0\leq j \leq m\)
+                </li>
+                <li>
+                    de Casteljau in \(v\) (once): \(S(u,v)=\sum_{j=0}^m B_j^m(v)\mathbf{c}_j\)
+                </li>
+            </ul>
+            <p>
+                <strong>Remark</strong>: performance issues
+            </p>
+            <ul>
+                <li>
+                    \(m+1\) times de Casteljau in \(u\): \(\mathbf{c}_j=\sum_{i=0}^n B_i^n(u)\mathbf{b}_{i,j}, \; 0\leq j \leq m\)
+                </li>
+                <li>
+                    de Casteljau in \(v\) (once): \(S(u,v)=\sum_{j=0}^m B_j^m(v)\mathbf{c}_j\)
+                </li>
+            </ul>
+            <hr>
+            <div style="border: 1px solid #CC9999; padding: 15px; display: inline-block">
+                <div id="threejs_canvas"></div>
+                <script type="module" src="./deCasteljau.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

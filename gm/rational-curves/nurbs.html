@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NURBS: Rational B-Spline Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw": "../common/draw.js",
+                    "bsplines": "../b-splines/bsplines.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Rational B-Spline Curves</h1>
+            <h2>The de Boord Algorithm for B-Spline Curves</h2>
+            <p>Definition: Rational B-spline curve (NURBS: non-uniform rational B-spline)</p>
+            <p>
+                Given
+                <ul>
+                    <li>degree \(n\)</li>
+                    <li>knot vector \(T\)</li>
+                    <li>control points \(\mathbf{d}_0,\ldots,\mathbf{d}_{m-1}\)</li>
+                    <li>weights \(w_0,\ldots,w_{m-1}\geq 0\) with \(w_0=w_{m-1}=1\)</li>
+                </ul>
+            </p>
+            <p>
+                Then:
+                \[
+                F(u)=\frac{\sum_{i=0}^{m-1}\,N_i^n(u)\,w_i\,\mathbf{d}_i}{\sum_{i=0}^{m-1}\,N_i^n(u)\,w_i}
+                \]
+                is called <em>rational B-spline curve</em>.
+            </p>
+            <p><strong>de Boor Algorithm</strong></p>
+            <p>
+                Given control points \(\mathbf{d}_0,\ldots,\mathbf{d}_{m-1}\), 
+                the weights \(w_0,\ldots,w_{m-1}\geq 0\) with \(w_0=w_{m-1}=1\), 
+                and the knot vector \(T=(t_i)\) of a rational B-spline curve 
+                \( F(u)=\frac{\sum_{i=0}^{m-1}\,N_i^n(u)\,w_i\,\mathbf{d}_i}{\sum_{i=0}^{m-1}\,N_i^n(u)\,w_i} \) 
+                and a parameter interval \(t_j\leq{} u < t_{j+1}\).
+            </p>
+            <p>
+                Evaluate \(F\) at \(u\)
+                \[
+                    \newcommand{\d}{\mathbf{d}}
+                    \begin{align}
+                    \d_i^0 &:= w_i \cdot \d_i\,,\qquad i = j-n, \ldots , j\\
+                    w_i^0 &:= w_i\,,\qquad i = j-n, \ldots , j\\
+                    \d_i^k &:=\frac{t_{i+n+1-k}-u}{t_{i+n+1-k}-t_i}\,\d_{i-1}^{k-1}+\frac{u-t_i}{t_{i+n+1-k}-t_i}\,\d_i^{k-1}\,,\\
+                    w_i^k &:=\frac{t_{i+n+1-k}-u}{t_{i+n+1-k}-t_i}\,w_{i-1}^{k-1}+\frac{u-t_i}{t_{i+n+1-k}-t_i}\,w_i^{k-1}\,,\\
+                    &\mbox{with} \quad k = 1, \ldots, n \quad\mbox{and} \quad i = j-n+k, \ldots, j
+                    \end{align}
+                \]
+            </p>
+            <p>
+                The: \(F(u) = \frac{\mathbf{d}_j^n}{w_j^n}\).
+            </p>
+            <p>
+                Select and drag control points in order to interact with the graphic representation. Use the 
+                sliders to change the values of the weights, and observe how the curve behaves.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; width: 700px; text-align: center; padding: 15px">
+                <hr style="margin-top: -5px; margin-bottom: 2px; padding: 3px">
+                    <div class="grid-container" 
+                        style="display: grid; 
+                            grid-template-columns: auto auto auto auto; 
+                            border: 1px solid honeydew; 
+                            width: 700px;
+                            margin: 0 auto;">
+                        <div class="grid-item" style="text-align: left; border: 0.5px solid ghostwhite">
+                            <label for="rationalBezier_w1" style="font-size: 14px; font-family:sans-serif; padding-left: 4px; padding-right: 4px; width: 70px">
+                            w1 = <span style="margin-right: 10px" id="w1-value">1</span>
+                            </label>
+                            <input type="range" min="0" max="10" step="0.5" value="1" id="rationalBezier_w1" width: 100px>    
+                        </div>
+                        <div class="grid-item" style="text-align: left; border: 0.5px solid ghostwhite">
+                            <label for="rationalBezier_w2" style="font-size: 14px; font-family:sans-serif; padding-left: 4px; padding-right: 4px; width: 70px">
+                            w2 = <span style="margin-right: 10px" id="w2-value">1</span>
+                            </label>
+                            <input type="range" min="0" max="10" step="0.5" value="1" id="rationalBezier_w2">    
+                        </div>
+                        <div class="grid-item" style="text-align: left; border: 0.5px solid ghostwhite">
+                            <label for="rationalBezier_w3" style="font-size: 14px; font-family:sans-serif; padding-left: 4px; padding-right: 4px; width: 70px">
+                            w3 = <span style="margin-right: 10px" id="w3-value">1</span>
+                            </label>
+                            <input type="range" min="0" max="10" step="0.5" value="1" id="rationalBezier_w3">    
+                        </div>
+                        <div class="grid-item" style="text-align: left; border: 0.5px solid ghostwhite">
+                            <label for="rationalBezier_w4" style="font-size: 14px; font-family:sans-serif; padding-left: 4px; padding-right: 4px; width: 70px">
+                            w4 = <span style="margin-right: 10px" id="w4-value">1</span>
+                            </label>
+                            <input type="range" min="0" max="10" step="0.5" value="1" id="rationalBezier_w4">    
+                        </div>
+                        <div class="grid-item" style="text-align: left; border: 0.5px solid ghostwhite">
+                            <label for="rationalBezier_w5" style="font-size: 14px; font-family:sans-serif; padding-left: 4px; padding-right: 4px; width: 70px">
+                            w5 = <span style="margin-right: 10px" id="w5-value">1</span>
+                            </label>
+                            <input type="range" min="0" max="10" step="0.5" value="1" id="rationalBezier_w5">    
+                        </div>
+                        <div class="grid-item" style="text-align: left; border: 0.5px solid ghostwhite">
+                            <label for="rationalBezier_w6" style="font-size: 14px; font-family:sans-serif; padding-left: 4px; padding-right: 4px; width: 70px">
+                            w6 = <span style="margin-right: 10px" id="w6-value">1</span>
+                            </label>
+                            <input type="range" min="0" max="10" step="0.5" value="1" id="rationalBezier_w6">    
+                        </div>
+                        <div class="grid-item" style="text-align: left; border: 0.5px solid ghostwhite">
+                            <label for="rationalBezier_w7" style="font-size: 14px; font-family:sans-serif; padding-left: 4px; padding-right: 4px; width: 70px">
+                            w7 = <span style="margin-right: 10px" id="w7-value">1</span>
+                            </label>
+                            <input type="range" min="0" max="10" step="0.5" value="1" id="rationalBezier_w7">    
+                        </div>
+                        <div class="grid-item" style="text-align: left; border: 1px solid white">
+                            <label for="endpoint_interpolation"
+                                style="display: inline-block; text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+                                endpoint interpolation
+                            </label>
+                            <input type="checkbox" id="endpoint_interpolation" name="uniform_knot" style="margin-left: 4px;">
+                        </div>
+                    </div>
+                <hr style="margin: 3px; padding: 3px">
+                <div id="d3js_canvas"></div>
+                <script type="module" src="./nurbs.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

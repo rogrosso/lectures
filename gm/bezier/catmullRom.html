@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bézier Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js",
+                    "bezier": "../bezier/bezier.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Bézier Interpolation</h1>
+            <h2>The Catmull-Rom Algorithm</h2>
+            <h3>Catmull-Rom Splines</h3>
+            <ul>
+                <li>construct a cubic Bèzier curve between \(\mathbf{p}_i,\mathbf{p}_{i+1}\)</li>
+                <li>specify the tangents at end points of the interval:</li>
+            </ul>
+            <p>
+                \[
+                \begin{align}
+                F' (t_i)&=\frac{\mathbf{p}_{i+1}-\mathbf{p}_{i-1}}{t_{i+1}-t_{i-1}}\\
+                F' (t_{i+1})&=\frac{\mathbf{p}_{i+2}-\mathbf{p}_i}{t_{i+2}-t_{i}}\\
+                F (t_i)&=\mathbf{p}_i\\
+                F (t_{i+1})&=\mathbf{p}_{i+1}
+                \end{align}
+                \]
+            </p>
+            <p>
+                If \(u \in [t_i, t_{i+1}]\), the control points of the cubic Bézier curve can be computed as follows:
+                \[
+                \begin{align}
+                \mathbf{b}^i_0 &= \mathbf{p}_i\\
+                \mathbf{b}^i_1 &= \mathbf{p}_i + \frac{t_{i+1}-t_i}{3(t_{i+1}-t_{i-1})} (\mathbf{p}_{i+1} - \mathbf{p}_{i-1})\\
+                \mathbf{b}^i_2 &= \mathbf{p}_{i+1} - \frac{t_{i+1}-t_i}{3(t_{i+2}-t_{i})} (\mathbf{p}_{i+2} - \mathbf{p}_{i})\\
+                \mathbf{b}^i_3 &= \mathbf{p}_{i+1}\\
+                \end{align}
+                \]
+            </p>
+            <p>
+                At the end points of the interval use natural boundary conditions to estimate the tangents. 
+                That is 
+            </p>
+            <p>
+                \(F''(t_0)=\frac{6}{(t_1-t_0)^2}\left(\mathbf{b}^0_0-2\mathbf{b}^0_1+\mathbf{b}^0_2 \right)\overset{!}{=}0\)
+                and \(F''(t_k)=...=0\). Thus \(\mathbf{b}^0_1=\frac{1}{2}\left(\mathbf{b}^0_0+\mathbf{b}^0_2 \right)\) 
+                and similarly \(\mathbf{b}^{k-1}_2=\frac{1}{2}\left(\mathbf{b}^{k-1}_1+\mathbf{b}^{k-1}_3 \right)\). 
+                For the computations we have used the expression of the derivative of a cubic Bézier at the endpoints
+                in terms of the control points.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+            <div id="d3js_canvas"></div>
+            <script type="module" src="./catmullRom.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

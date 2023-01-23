@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>B-Spline Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw": "../common/draw.js",
+                    "bsplines": "../b-splines/bsplines.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>B-Spline Curves</h1>
+            <h2>Boehm Algorithm</h2>
+            <h3>Algorithm Overview</h3>
+            <p>
+                Insertion of an additional knot \(\bar{t}\) with \(t_j\leq{}\bar{t} < t_{j+1}\), results in a
+                new knot vector 
+                \(\bar{t}_0\leq\cdots\leq\bar{t}_{j-1}\leq\bar{t}_j\leq\bar{t}_{j+1}\leq\bar{t}_{j+2}\leq\cdots\leq\bar{t}_{m+n+1}:\)
+            </p>
+            <p>
+                Every B-spline curve \(F\) over the knot vector \(T\) 
+                has also a unique representation over the knot vector \(\bar{T}\):
+                \[
+                    \newcommand{\d}{\mathbf{d}}
+                    F(u)=\sum_{i=0}^{m-1}\,N_i^n(u)\,\d_i=\sum_{i=0}^m\,\bar{N}_i^n(u)\,\bar{\d}_i
+                \]
+            </p>
+            <p>
+                The control points of the new B-spline curve over the new knot vector are given by:
+                \[
+                    \bar{\d}_i=
+                    \begin{cases}
+                    \d_i & i\leq{}j-n\\
+                    \frac{t_{i+n}-\bar{t}}{t_{i+n}-t_i}\,\d_{i-1}+\frac{\bar{t}-t_i}{t_{i+n}-t_i}\,\d_i & j-n+1\leq{}i\leq{}j\\
+                    \d_{i-1} & j+1\leq{}i
+                    \end{cases}
+                \]
+            </p>
+            <p>
+                Select and drag control points in order to interact with the graphic representation.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div style="text-align: center">
+                    <span style="color: #635F5D">Input B-Spline</span>
+                    <span style="color: black; margin-left: 10px; margin-right: 10px;"> - </span>
+                    <span style="color: #5F9EA0">Boehm knot insertion</span>
+                </div>
+                <div id="d3js_canvas"></div>
+                <script type="module" src="./boehm.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 750px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

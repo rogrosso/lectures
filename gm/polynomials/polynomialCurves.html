@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polynomial Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw": "../common/draw.js",
+                    "bezier": "../bezier/bezier.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Representation of Polynomial Curves</h1>
+            <p>
+                This script compares the representation of polynomials curves given by the same set 
+                of control points but for different basis. In this particular case we compare three polynomial
+                curves generated using the control points \(\{A, B, C, D\}\) and the monomial, Lagrange and 
+                Bernstein polynomials for the basis of the polynomial space of degree \(n=3\):
+                \[
+                \begin{align}
+                F(u)&=\sum_i\,\mathbf{a}_i\,u^i \\
+                G(u)&=\sum_i\,\mathbf{p}_i\,L_i^n(u) \\ 
+                H(u)&=\sum_i\mathbf{b}_i\,B_i^n(u)
+                \end{align} 
+                \]
+                where in this particular case we have chosen \(a_0 = p_0 = b_0 = A, 
+                a_1 = p_1 = b_1 = B, a_2 = p_2 = b_2 = C, a_3 = p_3 = b_3 = D\), and \(\{u^i\}_{i=0}^n\) 
+                is the monomial, \(\{L(u)^i\}_{i=0}^n\) the Lagrange, and \(\{B^n_i(u)\}_{i=0}^n\) the Bernstein 
+                basis. Select and drag the control points in order to see how the curves behave.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="d3js_canvas"></div>
+            </div>
+            <script type="module" src="./polynomialCurves.js"></script>
+            <h3>The JavaScript Code for Neville's Algorithm to evaluate the Lagrange Polynomial</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code-N"></div>
+            <h3>The JavaScript Code for Horner's Scheme to evaluate the Polynomials in the monomial basis</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code-H"></div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Subdivision Surfaces</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.136.0/build/three.module.js",
+                    "OrbitControls": "https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js",
+                    "GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
+                    "colors": "../common/colors.js",
+                    "quadToroidalTetra": "../data/quadToroidalTetra.json",
+                    "quadCube": "../data/quadCube.json",
+                    "quadCube_with_bnd": "../data/quadCube_with_bnd.json",
+                    "quadPawn": "../data/quadPawn.json"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Subdivision Surfaces</h1>
+            <h2>Catmull-Clark Subdivision</h2>
+            <h3>Algorithm Overview</h3>
+            <p>
+                <ul>
+                    <li>only quad meshes</li>
+                    <li>perform first a 1-to-4 face split</li>
+                    <li>update position of old and new vertices, i.e. it is approximating</li>
+                </ul>
+                After a 1-to-4 split of the faces, vertices are denoted as 
+                <ul>
+                    <li>vertex-vertex, are the old input vertices</li>
+                    <li>edge-vertex, are new vertices at the edge midpoint</li>
+                    <li>face-vertex, are new vertices at the face midpoint</li>
+                </ul>
+            </p>
+            <h3>The Subdivision Algorithm</h3>
+            <p>
+                <ul>
+                    <li>1-to-4 split: add face-vertices and edge-vertices</li>
+                    <li>set face-vertices to be the average of the old vertices of the face</li>
+                    <li>
+                        set the edge-vertices to be the average of the adjacent face-vertices and 
+                        the two old endpoints of the edge</li>
+                    <li>update the position of \(\mathbf{v}_{old}\) to \(\mathbf{v}_{new}\) as follows 
+                        (\(N\) is the valence)
+                    </li>
+                </ul>
+                \[
+                    \begin{align*}
+                        v_{new} &= \frac{1}{N}\cdot F + \frac{2}{N}\cdot E + \frac{N-3}{N}\cdot v_{old} \\
+                        E &= \frac{1}{N} \cdot \sum_{i=1}^{N} \frac{v_i + v_{old}}{2} \\
+                        F &= \frac{1}{N} \cdot \sum_{i=1}^{N} v_{face_{i}} \\
+                    \end{align*}
+                \]
+            </p>
+            <div style="border: 1px solid #CC9999; padding: 15px; display: inline-block">
+                <div id="threejs_canvas"></div>
+                <script type="module" src="./catmullClark.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

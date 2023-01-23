@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bézier Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js",
+                    "bezier": "../bezier/bezier.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Geometric Continuity</h1>
+            <h2>Geometric Continuity of Bézier Splines</h2>
+            <p>
+                We follow the Farin-Boehm construction, see "Geometric Continuity of Parametric Curves: 
+                Constructions of Geometrically Continuous Splines" by Brian A. Barsky and Tony D. DeRose. 
+                Without loss of generality we set \(\Delta_F = [0,1]\) and \(\Delta_G = [1,2]\). By the theorem 
+                on the characterization of Geometric continuity we have
+                \[
+                    \begin{align}
+                    G'(1) &= \beta_1 F'(1)\\
+                    G''(1) &= \beta_1^2 F''(1) + \beta_2 F'(1)\\
+                    \end{align}
+                    \]
+                    where \(\beta_1\) and \(\beta_2\) are the \(\beta\)-constraints or also called shape parameters. We use the expresions of the derivative of Bézier curves in terms of the control points for bouth curves and obtain:
+                    \[
+                    \begin{align}
+                    G^0-\text{continuity: } &\mathbf{b}_n = \mathbf{c}_0\\
+                    G^1-\text{continuity: } &\beta_1(\mathbf{b}_n - \mathbf{b}_{n-1}) = \mathbf{c}_1 - \mathbf{c}_0\\
+                    G^2-\text{continuity: } &\beta_1^2 (n-1)(\mathbf{b}_n - 2\mathbf{b}_{n-1} + \mathbf{b}_{n-2})  + \beta_2(\mathbf{b}_n - \mathbf{b}_{n-1})  = (n-1) (\mathbf{c}_2 - 2\mathbf{c}_{1} + \mathbf{c}_{0}) 
+                    \end{align}
+                \]
+                Then, given the left curve \(F\) we construct the \(C^2\) continuity at \(u = 1\) by setting the 
+                first three coefficients \(\mathbf{c}_0, \mathbf{c}_1, \mathbf{c}_2\) of \(G\) as follows:
+                <ul>
+                    <li>\(C^0\)-continuity: \(c_0 = \mathbf{b}_n\) </li>
+                    <li>\(C^1\)-continuity: \(c_1 = \mathbf{b}_n + \beta_1 (\mathbf{b}_n - \mathbf{b}_{n-1})\) </li>
+                    <li>
+                        \(C^2\)-continuity: 
+                        <ul>
+                            <li>
+                                Introduce
+                                \(\hat{\beta}_2 = \frac{\beta_2}{n-1}\;\),
+                                \(\gamma = \frac{1+\beta_1}{\beta_1 + \beta_1^2+ \hat{\beta}_2}\;\), and 
+                                \(\;\mathbf{t} = \mathbf{b}_{n-1} + \beta_1^2 \gamma (\mathbf{b}_{n-1} - \mathbf{b}_{n-2})\)
+                            </li>
+                            <li>
+                                Then, the control point is given by
+                                \(\;\mathbf{c}_2 = \mathbf{c}_1 + \frac{1}{\gamma}(\mathbf{c}_1 - \mathbf{t})\)
+                            </li>
+                        </ul>   
+                    </li>
+                    
+                </ul>
+            </p>
+            <p>
+                Select and drag control points in order to interact with the graphic representation. Use the 
+                sliders to change the values of the beta constraints, and observe how the curve behaves.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; width: 700px; text-align: center; padding: 15px">
+                <div class="grid-container"
+                style="display: inline-grid;
+                    grid-template-columns: auto auto;
+                    gap: 1px;
+                    background-color: white;
+                    padding: 4px; 
+                    margin: 0 auto; 
+                    width: 500px;
+                    border: 1px solid teal">
+                    <div class="grid-item" style="text-align: left; border: 1px solid teal">
+                        <label for="beta1_continuity" 
+                            style="margin-left: 15px; text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+                            β<sub>1</sub> = <span id="beta1_value" style="display: inline-block; width: 1em">1</span>
+                        </label>
+                        <input 
+                            type="range" min="0.5" max="4" step="0.1" value="1" 
+                            id="beta1_continuity"
+                            style="display: inline-block; width: 100px">
+                    </div>
+                    <div class="grid-item" style="text-align: left; border: 1px solid teal">
+                        <label for="beta2_continuity" 
+                            style="margin-left: 15px; text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+                            β<sub>2</sub> = <span id="beta2_value" style="display: inline-block; width: 1em">1</span>
+                        </label>
+                        <input 
+                            type="range" min="-1" max="4" step="0.1" value="1" 
+                            id="beta2_continuity"
+                            style="display: inline; width: 100px">
+                    </div>
+                </div>
+                <div id="d3js_canvas"></div>
+                <script type="module" src="./geometricContinuity.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

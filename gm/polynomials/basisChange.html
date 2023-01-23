@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polynomial Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw": "../common/draw.js",
+                    "bezier": "../bezier/bezier.js",
+                    "gaussEliminationFactory" : "../../common/gaussElimination.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Polynomial Curves</h1>
+            <h2>Change of Basis</h2>
+            <p>
+                This script implements a change of basis between the monomial and the Bernstein representation 
+                of polynomial curves, that is, given the control point in terms of one basis, the script computes
+                the control points in terms of the other basis. the  A change of basis is a vector space is as follows:
+            </p>
+            <p>
+                Let \(\{\mathbf{b}_i\}\) and \(\{\mathbf{d}_i\}\) be two basis of the same vector space. Then each \(\mathbf{b}_i\) can be represented as linear combination:
+                \[
+                \mathbf{b}_i = \sum_j a_{ij}\mathbf{d}_j; \;  \text{or short as} \; \mathbf{b} = \mathbf{A}\cdot \mathbf{d}
+                \].
+                Then the transpose of \(\mathbf{A}\) transforms the coefficients in the following way: Given two linear combinations representing one vector \(\mathbf{v}=\sum_i\,\beta_i\,\mathbf{b}_i=\sum_i\,\delta_i\,\mathbf{d}_i\) then
+                \[
+                \left(\begin{matrix} \vdots \\ \delta_i \\ \vdots\end{matrix}\right) = \mathbf{A}^T\,\left(\begin{matrix} \vdots \\ \beta_i \\ \vdots \end{matrix}\right)
+                \]
+            </p>
+            <p><strong>Note:</strong> if we use the Berstein basis, then we have a Bézier curve</p>
+            <p>
+                Monomial and Berstein basis for degree \(n = 3\)
+                \begin{align*}
+                \left(\begin{matrix}B^3_0(u) \\B^3_1(u)\\B^3_2(u)\\B^3_3(u)\end{matrix}\right)
+                & = \left(\begin{matrix}
+                    1 & -3 &  3 &-1 \\
+                    0 &  3 & -6 & 3 \\
+                    0 &  0 &  3 &-3 \\
+                    0 &  0 &  0 & 1 \\
+                \end{matrix}\right) \\
+                & = A \times \left(\begin{matrix}1\\u\\u^2\\u^3\end{matrix}\right)
+                \end{align*}
+            </p>
+            <hr>
+            <div id="d3js_canvas"></div>
+            <script type="module" src="./basisChange.js"></script>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

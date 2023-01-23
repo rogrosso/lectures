@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>B-Spline Curves</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    //"d3": "https://cdn.skypack.dev/d3@7"
+                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js",
+                    "bsplines": "../b-splines/bsplines.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>B-Splines</h1>
+            <h2>Basis Functions</h2>
+            <p>
+                <strong>Knot vector:</strong> degree \(n\), a sequence of knots \(t_0 < t_1 < t_2 < \ldots{} < t_{m+n}\) 
+                where \(m\) is the number of control points of the curve. 
+                The knot vector  \(T = (t_i)_{i \in \mathbb{Z}}\) defines parameter intervals \([t_i , t_{i+1})\).
+            </p>
+            <p>
+                <strong>Definition: Normalized B-Splines</strong>
+                \[
+                    \begin{align}
+                    N_i^0(u):&=
+                    \begin{cases}1 & t_i\leq u < t_{i+1}\\
+                    0 & \text{otherwise}
+                    \end{cases},\quad i = 0, \ldots, n+m-1\\[2em]
+                    N_i^k (u):&=\frac{u-t_i}{t_{i+k}-t_i}\,N_i^{k-1} (u)+\frac{t_{i+k+1}-u}{t_{i+k+1}-t_{i+1}}
+                    \,N_{i+1}^{k-1} (u),\quad k = 1, \ldots, n
+                    \end{align}
+                \]
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div class="grid-container"
+                style="display: grid;
+                grid-template-columns: auto auto auto;
+                gap: 1px;
+                background-color: aliceblue;
+                padding: 4px; 
+                margin: 0px; 
+                width: 600px;
+                border: 1px solid teal">
+                <div class="grid-item" style="text-align: left;">
+                    <label for="bspline_degree_slider" 
+                        style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+                        degree = <span id="degree_value">3</span>
+                    </label>
+                    <input type="range" min="1" max="5" step="1" value="3" id="bspline_degree_slider" style="display: inline; width: 90px">
+                </div>
+                <div class="grid-item" style="text-align: left;">
+                    <input type="checkbox" id="uniform_knot_vector" name="uniform_knot_vector" style="display: inline">
+                    <label for="uniform_knot_vector" style="display: inline-block; text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif">
+                        uniform knot vector
+                    </label>
+                </div>
+                <div class="grid-item" style="text-align: left;">
+                    <input type="checkbox" id="partition_unity" name="partition_unity" style="display: inline-block;">
+                    <label for="partition_unity"
+                        style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif; margin-left: 10px">
+                        partition of unity
+                    </label>
+                </div>
+            </div>
+                <div id="d3js_canvas"></div>
+                <script type="module" src="./basis.js"></script>
+            </div>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 750px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

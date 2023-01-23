@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Subdivision Surfaces</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gm-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            .sqrt3Subdivision{
+                display: grid;
+                width: 600px;
+                grid-template-columns: auto auto auto;
+                column-gap: 35px;
+            }
+            .sqrt3Smoothing{
+                display: grid;
+                width: 400px;
+                grid-template-columns: auto auto;
+                column-gap: 35px;
+            }
+            figcaption{
+                font-size: 12px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.136.0/build/three.module.js",
+                    "OrbitControls": "https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js",
+                    "GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
+                    "colors": "../common/colors.js",
+                    "trisToroidalTetrahedron": "../data/trisToroidalTetrahedron.json",
+                    "trisCube24": "../data/trisCube24.json",
+                    "trisCube12": "../data/trisCube12.json",
+                    "trisTetrahedron": "../data/trisTetrahedron.json",
+                    "icosahedron_with_bnd": "../data/icosahedron_with_bnd.json"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gm-lecture">
+            <h1>Subdivision Surfaces</h1>
+            <h2>\(\sqrt{3}\) Subdivision</h2>
+            <h3>Algorithm Overview</h3>
+            <ul>
+                <li>1-to-3 face split followed by an edge flip of the input edges</li>
+                <li>After two subdivision we obtain a 1-to-9 split. Therefore the name \(\sqrt{3}\)</li>
+            </ul>
+            <h3>The Subdivision Algorithm</h3>
+            <p>
+                The 1-to- 3 face split works as follows
+                <div class="sqrt3Subdivision" style="position: relative">
+                    <div>
+                        <img src="../data/sqrt_ref1.png" height="200"">
+                        <figcaption>Input mesh</figcaption>
+                    </div>                
+                    <div>
+                        <img src="../data/sqrt_ref2.png" height="200">
+                        <figcaption>1-to-3 face split</figcaption>
+                    </div>
+                    <div>
+                        <img src="../data/sqrt_ref3.png" height="200">
+                        <figcaption>edge flip</figcaption>
+                    </div>
+                </div>
+            </p>
+            <p>
+                Smoothing of inner vertices is carried out as follows:
+                <div class="sqrt3Smoothing" style="position: relative">
+                    <div>
+                        <img src="../data/sqrt_sm1.png" height="200"">
+                        <figcaption>smoothing of old vertices</figcaption>
+                    </div>                
+                    <div>
+                        <img src="../data/sqrt_sm2.png" height="200">
+                        <figcaption>smoothing of new vertices</figcaption>
+                    </div>
+                </div>
+            </p>
+            <p>
+                Boundary vertices are smoothed once after two subdivision steps:
+                <div class="sqrt3Subdivision" style="position: relative">
+                    <div>
+                        <img src="../data/sqrt_bound1.png" width="200"">
+                        <figcaption>old vertex (midpoint)</figcaption>
+                    </div>                
+                    <div>
+                        <img src="../data/sqrt_bound2.png" width="200">
+                        <figcaption>vertex left to midpoint (new vertex)</figcaption>
+                    </div>
+                    <div>
+                        <img src="../data/sqrt_bound3.png" width="200">
+                        <figcaption>vertex right to midpoint (new vertex)</figcaption>
+                    </div>
+                </div>
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; padding: 15px; display: inline-block">
+                <div id="threejs_canvas"></div>
+                <script type="module" src="./sqRoot3.js"></script>
+            </div>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>
