@@ -1,8 +1,12 @@
-import { keyGen } from './utilities.js'
+import { 
+    keyGen,
+    dot,
+    cross,
+    normalize,
+    normal
+} from './utilities.js'
 
 export function halfedgeFactory(fList, vList) {
-    const vertices = []
-    const faces = []
-    const halfedges = []
-    
+    // under construction
+
 }

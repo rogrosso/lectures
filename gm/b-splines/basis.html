@@ -18,8 +18,9 @@
         <script type="importmap">
             {
                 "imports": {
-                    //"d3": "https://cdn.skypack.dev/d3@7"
-                    "d3": "https://unpkg.com/d3@7.7.0?module",
+                    //"d3": "https://cdn.skypack.dev/d3@7",
+                    //"d3": "https://unpkg.com/d3@7.7.0?module",
+                    "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
                     "colors": "../common/colors.js",
                     "draw"  : "../common/draw.js",
                     "bsplines": "../b-splines/bsplines.js"
@@ -50,18 +51,18 @@
             <p>
                 <strong>Knot vector:</strong> degree \(n\), a sequence of knots \(t_0 < t_1 < t_2 < \ldots{} < t_{m+n}\) 
                 where \(m\) is the number of control points of the curve. 
-                The knot vector  \(T = (t_i)_{i \in \mathbb{Z}}\) defines parameter intervals \([t_i , t_{i+1})\).
+                The knot vector  \(T = (t_i)_{i \in \mathbb{Z}}\) defines parameter intervals \([t_i , t_{i+1})\).
             </p>
             <p>
                 <strong>Definition: Normalized B-Splines</strong>
                 \[
                     \begin{align}
                     N_i^0(u):&=
-                    \begin{cases}1 & t_i\leq u < t_{i+1}\\
-                    0 & \text{otherwise}
+                    \begin{cases}1 & t_i\leq u < t_{i+1}\\
+                    0 & \text{otherwise}
                     \end{cases},\quad i = 0, \ldots, n+m-1\\[2em]
-                    N_i^k (u):&=\frac{u-t_i}{t_{i+k}-t_i}\,N_i^{k-1} (u)+\frac{t_{i+k+1}-u}{t_{i+k+1}-t_{i+1}}
-                    \,N_{i+1}^{k-1} (u),\quad k = 1, \ldots, n
+                    N_i^k (u):&=\frac{u-t_i}{t_{i+k}-t_i}\,N_i^{k-1} (u)+\frac{t_{i+k+1}-u}{t_{i+k+1}-t_{i+1}}
+                    \,N_{i+1}^{k-1} (u),\quad k = 1, \ldots, n
                     \end{align}
                 \]
             </p>

@@ -1,10 +1,12 @@
-import * as d3 from "https://unpkg.com/d3@7.7.0?module"
+//import * as d3 from "https://unpkg.com/d3@7.7.0?module"
+//import * as d3 from "https://cdn.skypack.dev/d3@7"
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 
-//export const lineGenerator = d3.line().curve(d3.curveNatural)
-export const lineGenerator = d3.line( d => d.x, d => d.y )
-    .curve(d3.curveLinear)
-export const cpGenerator = d3.line( d => d.x, d => d.y )
-    .curve(d3.curveLinear)
+//export const lineGenerator =  d3.line().curve( curveNatural)
+export const lineGenerator =  d3.line( d => d.x, d => d.y )
+    .curve(  d3.curveLinear)
+export const cpGenerator =  d3.line( d => d.x, d => d.y )
+    .curve(  d3.curveLinear)
 export function axes(config) {
     const {
         selection,
@@ -28,7 +30,7 @@ export function axes(config) {
         .attr('class', className)
         .attr('transform', `translate(${xPos}, ${yPos})`)
 
-    const xAxis = d3.axisBottom(xScale)
+    const xAxis =   d3.axisBottom(xScale)
         .tickSize(-innerHeight)
     if (xTickValues !== undefined) {
         xAxis
@@ -38,7 +40,7 @@ export function axes(config) {
     const xAxisG = g.append('g').call(xAxis)
         .attr('transform', `translate(0, ${innerHeight})`)
     
-    const yAxis = d3.axisLeft(yScale)
+    const yAxis =   d3.axisLeft(yScale)
         .tickSize(-innerWidth)
     const yAxisG = g.append('g').call(yAxis)
         
@@ -104,7 +106,7 @@ export function controlPoints(selection, pts, config) {
         .attr('fill', fillColor)
         .attr('stroke', strokeColor)
         .attr('stroke-width', strokeWidth)
-        .call(d3.drag()
+        .call( d3.drag()
             .on('start', dragstarted)
             .on('drag', dragged)
             .on('end', dragend)
