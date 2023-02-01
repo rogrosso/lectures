@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Geometric Modeling</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.lectures {
+                margin-left: 3em;
+                width: 750px;
+            }
+            li {
+                margin-bottom: 5px;
+            }
+        </style>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="lectures">
+            <h1>Geometric Modeling</h1>
+            <p>
+                This module is concerned with different aspects of modelling three-dimensional curves and surfaces. 
+                Typical areas of application are computer-aided design (CAD), reconstruction of surfaces from 
+                sensor data (reverse engineering) and construction of smooth interpolants. The lecture covers the 
+                following topics:
+            </p>
+            <ul>
+                <li>Polynomial curves</li>
+                <li>Bézier curves</li>
+                <li>B-splines curves</li>
+                <li>Rational Bézier and B-Spline curves</li>
+                <li>Tensor product surfaces</li>
+                <li>Subdivision Surfaces</li>
+            </ul>
+            <p>
+                The implemented algorithm are given below. We strongly recommend to drag control points
+                and interact with the graphics in order to understand the algorithm and their purpose.
+            </p>
+            <ul>
+                <li>Polynomial curves
+                    <ul>
+                       <li><a href="./polynomials/basisChange.html">Change of Basis</a></li> 
+                       <li><a href="./polynomials/bernsteilPolynomials.html">Bernstein Polynomials</a></li> 
+                       <li><a href="./polynomials/polynomialCurves.html">Polynomial Curves</a></li> 
+                    </ul>
+                </li>
+                <li>Bézier
+                    <ul>
+                        <li><a href="./bezier/deCasteljau.html">de Casteljau algorithm</a></li>
+                        <li><a href="./bezier/deCasteljauSubdivision.html">de Casteljau subvidision</a></li>
+                        <li><a href="./bezier/degreeElevation.html">Degree elevation</a></li>
+                        <li><a href="./bezier/bezierSplines.html">Bézier splines</a></li>
+                        <li><a href="./bezier/catmullRom.html">Catmull-Rom interpolation</a></li>
+                    </ul>
+                </li>
+                <li>B-Splines
+                    <ul>
+                        <li><a href="./b-splines/basis.html">B-Spline basis</a></li>
+                        <li><a href="./b-splines/shapeProperties.html">Shape properties of B-Spline curves</a></li>
+                        <li><a href="./b-splines/multipleKnots.html">Multiple knots</a></li>
+                        <li><a href="./b-splines/deBohr.html">de Boor algorithm</a></li>
+                        <li><a href="./b-splines/boehm.html">Boehm algorithm</a></li>
+                    </ul>
+                </li>
+                <li>Ration curves 
+                    <ul>
+                        <li><a href="./rational-curves/rationalBezier.html">Ration Bézier curves</a></li>
+                        <li><a href="./rational-curves/nurbs.html">Ration B-Spline curves</a></li>
+                    </ul>
+                </li>
+                <li>Geometric continuity
+                    <ul>
+                        <li><a href="./geometric-continuity/geometricContinuity.html">Geometric continutity</a></li>
+                    </ul>
+                </li>
+                <li>Tensor product surfaces
+                    <ul>
+                        <li><a href="./tensor-product/deCasteljau.html">Tensor product de Casteljau algorithm</a></li>
+                        <li><a href="./tensor-product/degreeElevation.html">Tensor product degree elevation</a></li>
+                        <li><a href="./tensor-product/deBoor.html">Tensor product de Boor algorithm</a></li>
+                        <li><a href="./tensor-product/boehm.html">Tensor product Boehm algorithm</a></li>
+                    </ul>
+                </li>
+                <li>Subdivision surfaces
+                    <ul>
+                        <li><a href="./subdivision-surfaces/dooSabin.html">Doo-Sabin subdivision</a></li>
+                        <li><a href="./subdivision-surfaces/catmullClark.html">Catmull-Clark subdivision</a></li>
+                        <li><a href="./subdivision-surfaces/loop.html">Loop subdivision</a></li>
+                        <li><a href="./subdivision-surfaces/sqRoot3.html">sqrt(3) subdivision</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometric Modeling" />
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Lectures</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.lectures {
+                margin-left: 3em;
+                width: 750px;
+            }
+            li {
+                margin-bottom: 5px;
+            }
+        </style>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="lectures">
+            <h1>Lectures</h1>
+            <p>
+                This repository include interactive web applications (HTML and Javascript) to demonstrate the 
+                methods discussed in the lectures I am holding at the Friedrich-Alexander-Universität (FAU). 
+                I will start with one of the lectures in the course geometric modeling. Lectures for other courses 
+                will follow in the future.
+            </p>
+            <p>
+                You will find lot of duplicated code. I hope this will become better with future commits, as 
+                far I have time to redesign and implement the code. The web applications are interactive. 
+                I am using <strong>D3</strong> for 2D graphics and <strong>three.js</strong> for surfaces. 
+                Therefore, feel free to use the mouse and menus to interact with the visualization.
+            </p>
+            <h3>Remark</h3>
+            <p>
+                In order to use the code, you need to start the html pages with a live-server. I have been having 
+                problems with the CDNs, in particular unpkg with D3. If a web application 
+                does not work, please, just edit the html file and comment in other CDN.
+            </p>
+            <h2>Content</h2>
+            <ul>
+                <li><a href="./gm/index.html"><strong>Geometric Modeling</strong></a></li>
+                <li><a href="./gp/index.html"><strong>Geometry Processing</strong></a></li>
+                <li><a href="./infovis/index.html"><strong>Information Visualization</strong></a></li>
+            </ul>
+        </div>
+    </body>
+</html>

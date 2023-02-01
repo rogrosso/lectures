@@ -15,10 +15,11 @@ export function normalize(v) {
     v.z /= s 
     return v
 }
+// non-normalized
 export function normal(v0, v1, v2) {
     const e0 = { x: v1.x - v0.x, y: v1.y - v0.y, z: v1.z - v0.z }
     const e1 = { x: v2.x - v0.x, y: v2.y - v0.y, z: v2.z - v0.z }
-    return normalize(cross(e0, e1))
+    return cross(e0, e1)
 }
 export function keyGen(k1, k2) {
     if (k1 > k2) {
@@ -27,4 +28,17 @@ export function keyGen(k1, k2) {
     else {
         return (BigInt(k2) << 32n) | BigInt(k1)
     }
+}
+/*
+export function keyGen(k1, k2) {
+    if (k1 > k2) {
+      return (k1+k2)*(k1+k2+1)/2 + k2
+    }
+    else {
+      return (k1+k2)*(k1+k2+1)/2 + k1
+    }
+}
+*/
+export function isObject(obj) {
+    return obj && typeof obj === 'object' && obj.constructor === Object
 }
