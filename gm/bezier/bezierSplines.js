@@ -245,7 +245,7 @@ d3.select('#r-interval-2').on('input', s => {
 const animation = d3.select('#animation_c').on('click', function() {
     const cont = contCondition
     let u = 0
-    let p = [0,0]
+    let p = null
     if ( u <= cont.s ) {
         p = deCasteljau(bPoints, cont.r, cont.s, u)
     } else {
@@ -271,15 +271,15 @@ const animation = d3.select('#animation_c').on('click', function() {
             .tween('moving-point', function(d) {
                 return function(parameter) {
                     const pos = cont.r + parameter * (cont.t - cont.r)
-                    let p = [0,0]
+                    let p = null
                     if (pos < cont.s) {
                         p = deCasteljau(bPoints, cont.r, cont.s, pos)
                     } else {
                         p = deCasteljau(cPoints, cont.s, cont.t, pos)
                     }
                     d3.select(this)
-                        .attr('cx', p[0])
-                        .attr('cy', p[1])
+                        .attr('cx', p.x)
+                        .attr('cy', p.y)
                     if (parameter === 1) d3.select(this).transition().duration(2000).attr('opacity', 0)
 
                 }
