@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bar Chart</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.infovis-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div.dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1.2em;
+            }
+            option.barchart {
+                min-height: 5em;
+                margin: 1em;
+                padding: 20px;
+                border-style: solid;
+                border-width: 1px;
+                border-color:  paleturquoise;
+                background-color: red;
+            }
+            .dropdown-menu select {
+                margin: 2em;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="infovis-lecture">
+            <h1>Bar Charts</h1>
+            <p>
+                Bar charts can be used to visualize tables containing categorical data by using rectangular bars 
+                with a width and a height. A bar chart compares the sizes of the different categories in the table, 
+                were the size is any measured quantity. In the example below we show a table giving the number of 
+                students according to the faculty. The faculty is the category and the number of students is the 
+                measured size of this category. 
+            </p>
+            <table width="350" style="margin-left: auto; margin-right: auto;">
+                <tbody>
+                    <tr style="vertical-align: top">
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>Faculty<!--Break--></div>
+                        </td>
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>Number of Students<!--Break--></div>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align: top">
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>PhilFak<!--Break--></div>
+                        </td>
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>9278<!--Break--></div>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align: top">
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>WISO<!--Break--></div>
+                        </td>
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>9697<!--Break--></div>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align: top">
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>MedFak<!--Break--></div>
+                        </td>
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>4477<!--Break--></div>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align: top">
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>NatFak<!--Break--></div>
+                        </td>
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>5943<!--Break--></div>
+                        </td>
+                    </tr>
+                    <tr style="vertical-align: top">
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>TechFak<!--Break--></div>
+                        </td>
+                        <td width="" style="padding: 10px;border: solid 1px;">
+                            <div>10262<!--Break--></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                In the example below we implement a bar chart offering some some interaction, 
+                that can visualize different data sets.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="dropdown-menu" class="drondown-menu">
+                    <label for="dropdown-menu">Select a Dataset</label>
+                </div>
+                <div id="d3js_canvas"></div>
+            <script type="module" src="./barchart.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>
