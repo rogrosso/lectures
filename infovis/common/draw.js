@@ -73,3 +73,17 @@ export function axes(config) {
         .attr('stroke', '#8E8883')
     return g
 }
+
+// read csv
+// how to use
+// const csvUrl = '...'
+//fetchCSV(csvUrl).then( text => {
+//    const csvData = d3.csvParse(text)
+//    // ... do the job here
+//})
+export const fetchCSV = async (url) => {
+    const response = await fetch(url)
+    return await response.text()
+}
+
+

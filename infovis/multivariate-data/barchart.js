@@ -3,7 +3,7 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 
 const width = 650
 const height = 400
-const margin = { top:30, bottom: 25, left: 180, right: 20}
+const margin = { top:30, bottom: 25, left: 30, right: 20}
 const innerWidth = width - margin.left - margin.right
 const innerHeight = height - margin.top - margin.bottom
 
