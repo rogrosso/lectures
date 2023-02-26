@@ -307,65 +307,114 @@ function mouseOut() {
 }
 
 const cText = `
-/// the scatter plot
-const g = selection.append('g')
-    .attr('class', 'bars')
-    .attr('transform', \`translate(\${xPos}, \${yPos})\`)
-const tRec = d3.transition()
-    .duration(700)
-    .ease(d3.easeLinear)
-const circleRadius = 10
-const circleOpacity = 0.5
-let colorScale = undefined
-if (cKey === 'origin' || cKey === 'name') {
-    colorScale = d3.scaleOrdinal().domain(d3.map(data, d => d[cKey]).keys()).range(d3.schemeDark2  );
-} else {
-    colorScale = d3.scaleSequential().domain(d3.extent(data,d => d[cKey])).interpolator(d3.interpolateViridis)
+// the scatter plot
+function draw({
+    selection,
+    xKey,
+    yKey,
+    cKey,
+    tKey,
+    data,
+    width,
+    height,
+    xPos,
+    yPos
+}) {
+    // remove all
+    selection.selectAll('*').remove()
+    // prepare data
+    const xScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d[xKey]))
+        .range([0,width]).nice()
+    const yScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d[yKey]))
+        .range([height,0]).nice()
+    // draw axis
+    const propsAxis = {
+        selection: selection,
+        width: width,
+        height: height,
+        xScale: xScale,
+        yScale: yScale,
+        xPos: xPos,
+        yPos: yPos,
+        className: 'scatterPlotAxis',
+        xTickValues: undefined,
+        yTickValues: undefined, //data.map( k => k[key]),
+        xTickSize: -height,
+        yTickSize: -width,
+        xTickFormat: undefined,
+        yTickFormat: undefined
+    }
+    axes(propsAxis)
+    // the scatter plot
+    const g = selection.append('g')
+        .attr('class', 'bars')
+        .attr('transform', \`translate(\${xPos}, \${yPos})\`)
+    const tRec = d3.transition()
+        .duration(700)
+        .ease(d3.easeLinear)
+    const circleRadius = 10
+    const circleOpacity = 0.5
+    let colorScale = undefined
+    if (cKey === 'origin' || cKey === 'name' || cKey === 'Species') {
+        const uKeys = new Set()
+        for(let e of data) {
+            uKeys.add(e[cKey])
+        }
+        colorScale = d3.scaleOrdinal()
+            .domain(Array.from(uKeys))
+            .range(d3.schemeDark2)
+    } else {
+        colorScale = d3.scaleSequential()
+            .domain(d3.extent(data,d => d[cKey]))
+            .interpolator(d3.interpolateViridis)
+    }
+    const circles = g.selectAll('g').data(data, d => d[xKey])
+      .join(
+        enter => {
+            const gEnter = enter.append('g')
+            gEnter.append('circle')
+                .attr('cy', 0)
+                .attr('cx', 0)
+                .attr('r', 0 )
+                .attr('opacity', circleOpacity)
+                .transition(tRec)
+                    .attr('cx', d => xScale(d[xKey]))
+                    .attr('cy', d => yScale(d[yKey])) 
+                    .attr('r', circleRadius)
+                    .attr('fill', d => colorScale(d[cKey]))
+                    .attr('stroke', d => d3.rgb(colorScale(d[cKey])).darker(1))
+                    .attr('stroke-widt', 1.5)
+            gEnter
+                .on('mouseover', function(event,elem) {
+                    const e = gEnter.nodes()
+                    const eIndex = e.indexOf(this)
+                    d3.selectAll('circle')
+                        .attr('fill-opacity', (d,i) => {
+                            if (eIndex === i) return 1
+                            else return 0.3
+                        })
+                    mouseOver()
+                })
+                .on('mousemove', function(event, d) {
+                    mouseMove(
+                        d[tKey],
+                        {
+                            x: event.x,
+                            y: event.y
+                        }
+                    )
+                })
+                .on('mouseout', function(event, d) {
+                    d3.selectAll('circle').attr('fill-opacity', circleOpacity)
+                    mouseOut()
+                })
+        },
+        update => update, // do nothing by update
+        exit => exit.attr('class', (d,i) => console.log('d ' + d)).remove() 
+    ) 
 }
-const circles = g.selectAll('g').data(data, d => d[xKey])
-  .join(
-    enter => {
-        const gEnter = enter.append('g')
-        gEnter.append('circle')
-            .attr('cy', 0)
-            .attr('cx', 0)
-            .attr('r', 0 )
-            .attr('opacity', circleOpacity)
-            .transition(tRec)
-                .attr('cx', d => xScale(d[xKey]))
-                .attr('cy', d => yScale(d[yKey])) 
-                .attr('r', circleRadius)
-                .attr('fill', d => colorScale(d[cKey]))
-                .attr('stroke', d => d3.rgb(colorScale(d[cKey])).darker(1))
-                .attr('stroke-widt', 1.5)
-        gEnter
-            .on('mouseover', function(event,elem) {
-                const e = gEnter.nodes()
-                const eIndex = e.indexOf(this)
-                d3.selectAll('circle')
-                    .attr('fill-opacity', (d,i) => {
-                        if (eIndex === i) return 1
-                        else return 0.3
-                    })
-                mouseOver()
-            })
-            .on('mousemove', function(event, d) {
-                mouseMove(
-                    d['name'],
-                    {
-                        x: event.x,
-                        y: event.y
-                    }
-                )
-            })
-            .on('mouseout', function(event, d) {
-                d3.selectAll('circle').attr('fill-opacity', circleOpacity)
-                mouseOut()
-            })
-    },
-    update => update, // do nothing by update
-    exit => exit.attr('class', (d,i) => console.log('d ' + d)).remove()
-) 
 `
 
 const hlPre = d3.select('#hl-code').append('pre')
