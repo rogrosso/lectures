@@ -20,15 +20,11 @@ export function axes(config) {
         xTickSize,
         yTickSize,
         xTickFormat,
-        yTickFormat
+        yTickFormat,
+        xLabel,
+        yLabel
     } = config
     let fontSize = '14px'
-    // 
-    /*const xRange = xScale.range()
-    const yRange = yScale.range()
-    const innerWidth = xRange[1]
-    const innerHeight = yRange[1]
-    */
     const g = selection
         .append('g')
         .attr('class', className)
@@ -71,6 +67,35 @@ export function axes(config) {
         .attr('stroke', '#635F5D')
     yAxisG.selectAll('line')
         .attr('stroke', '#8E8883')
+
+    // has axes labels?
+    if (xLabel !== undefined) {
+        xAxisG
+            .append('text')
+                .attr('class', 'x-axis-label')
+                .attr('y', 40)
+                .style('font-family', 'sans-serif')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .attr('fill', "#635F5D")
+                .attr('x', width / 2)
+                .text(xLabel)
+            
+    }
+    if (yLabel !== undefined) {
+        yAxisG
+            .append('text')
+                .attr('class', 'x-axis-label')
+                .attr('y', -55)
+                .attr('transform', `rotate(-90)`)
+                .attr('text-anchor', 'middle')
+                .style('font-family', 'sans-serif')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .attr('fill', "#635F5D")
+                .attr('x', -height/2)
+                .text(yLabel)
+    }
     return g
 }
 

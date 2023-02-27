@@ -382,10 +382,12 @@ function smoothVertexVertex(v, onering) {
 }
 `
 const hlDiv = document.getElementById('hl-code')
-const hlPre = document.createElement('pre')
-hlDiv.append(hlPre)
-const hlCode = document.createElement('code') // hlPre.append('code')
-hlCode.setAttribute('class', 'language-javascript')
-hlCode.setAttribute('style', 'border: 1px solid #C1BAA9')
-hlCode.innerHTML = cText
-hlPre.append(hlCode)
+if (hlDiv) {
+    const hlPre = document.createElement('pre')
+    hlDiv.append(hlPre)
+    const hlCode = document.createElement('code') // hlPre.append('code')
+    hlCode.setAttribute('class', 'language-javascript')
+    hlCode.setAttribute('style', 'border: 1px solid #C1BAA9')
+    hlCode.innerHTML = cText
+    hlPre.append(hlCode)
+}

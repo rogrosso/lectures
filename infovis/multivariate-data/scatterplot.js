@@ -4,7 +4,7 @@ import cars from "cars" assert { type: "json" }
 
 cars.columns = Object.keys(cars[0])
 let irisData = null
-const carData = cars
+const carsData = cars
 const datasets = ['cars', 'iris']
 let tKey = 'name' // for the tooltip
 
@@ -22,7 +22,7 @@ let divTooltip = d3.select("body")
 
 const width = 650
 const height = 450
-const margin = { top:30, bottom: 25, left: 60, right: 20}
+const margin = { top:30, bottom: 55, left: 75, right: 20}
 const innerWidth = width - margin.left - margin.right
 const innerHeight = height - margin.top - margin.bottom
 const svg = d3.selectAll("#d3js_canvas")
@@ -96,7 +96,7 @@ function gui({
     const dDiv = gridObj.append('div')
         .attr('class', 'cell')
     const labD = dDiv.append('label')
-        .text('color: ')
+        .text('dataset: ')
     const dSelect = dDiv.append('select')
         .on('change', function(event) {
             handler('dataset', event.target.value)
@@ -124,8 +124,8 @@ function selectHandler(menu, selection) {
                 gProps.ySelection = 'weight'
                 gProps.cSelection = 'origin'
                 gProps.dSelection = 'cars'
-                gProps.keys = carData.columns
-                props.data = carData
+                gProps.keys = carsData.columns
+                props.data = carsData
                 props.tKey = 'name'
             } else if (selection === 'iris') {
                 gProps.xSelection = 'Sepal length'
@@ -152,7 +152,7 @@ const gProps = {
     cSelection: cSelection,
     dSelection: dSelection,
     datasets: datasets,
-    keys: carData.columns,
+    keys: carsData.columns,
     dKeys: datasets,
     handler: selectHandler
 }
@@ -162,7 +162,7 @@ const props = {
     yKey: ySelection,
     cKey: cSelection,
     tKey: tKey,
-    data: cars,
+    data: carsData,
     width: innerWidth,
     height: innerHeight,
     xPos: margin.left,
@@ -218,7 +218,9 @@ function draw({
         xTickSize: -height,
         yTickSize: -width,
         xTickFormat: undefined,
-        yTickFormat: undefined
+        yTickFormat: undefined,
+        xLabel: xKey,
+        yLabel: yKey
     }
     axes(propsAxis)
     // the scatter plot

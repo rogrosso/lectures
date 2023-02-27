@@ -18,30 +18,79 @@
                 margin-bottom: 5px;
             }
         </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.136.0/build/three.module.js",
+                    "OrbitControls": "https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js",
+                    "GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
+                    "colors": "./common/colors.js",
+                    "halfedge": "./common/halfedge.js",
+                    "quadToroidalTetra": "./gm/data/quadToroidalTetra.json",
+                    "quadCube": "./gm/data/quadCube.json",
+                    "quadCube_with_bnd": "./gm/data/quadCube_with_bnd.json",
+                    "quadPawn": "./gm/data/quadPawn.json"
+                }
+            }
+        </script>
     </head>
     <!-- Axes with d3 -->
     <body>
         <div class="lectures">
             <h1>Lectures</h1>
+            <p style="padding-bottom: 0px;">Roberto Grosso</p>
+            <p style="margin: 0px; padding-top: 0px;">Project start: Feb. 2023</p>
             <p>
-                This repository include interactive web applications (HTML and Javascript) to demonstrate the 
-                methods discussed in the lectures I am holding at the Friedrich-Alexander-Universität (FAU). 
-                I will start with one of the lectures in the course geometric modeling. Lectures for other courses 
-                will follow in the future.
+                This repository contains the HTML and Javascript code implementing algorithms discussed in 
+                some of the lectures that I give at the University. They are in the area of geometry processing and 
+                information visualization. This way, the code and some background information about the 
+                algorithms can be freely accessed not only from inside the University. 
             </p>
             <p>
-                You will find lot of duplicated code. I hope this will become better with future commits, as 
-                far I have time to redesign and implement the code. The web applications are interactive. 
-                I am using <strong>D3</strong> for 2D graphics and <strong>three.js</strong> for surfaces. 
-                Therefore, feel free to use the mouse and menus to interact with the visualization.
+                You will find a lot of duplicated code. I hope this will become better in the future. The web 
+                applications are interactive. I am using <strong>D3</strong> for 2D graphics and <strong>three.js</strong> 
+                for surfaces. I strongly recommend to interact with the visualizations by selecting and dragging 
+                points or by zooming and rotating the 3D geometry. Some of the applications also include a kind 
+                of user interface. The code is at this moment certainly buggy. The code was not implemented for 
+                industrial usage. 
             </p>
+            <hr>
+            <p>Example: Catmull-Clark Subdivision Surface</p>
+            <div id="threejs_canvas"></div>
+            <script type="module" src="./gm/subdivision-surfaces/catmullClark.js"></script>
+            <hr>
             <h3>Remark</h3>
             <p>
-                In order to use the code, you need to start the html pages with a live-server. I have been having 
-                problems with the CDNs, in particular unpkg with D3. If a web application 
-                does not work, please, just edit the html file and comment in other CDN.
+                It is recommended to start with the file <em>index.html</em> in the root/main folder in order 
+                to easily navigate through all the applications implemented for the different lectures. In order 
+                to run the code, a <em>live-server</em> is required. I personally use Visual Studio Code and 
+                the <em>live-server</em> plugin. I have been having problems with the CDNs, in particular 
+                <em>unpkg</em> with D3. If a web application does not work, please, just edit the html file and 
+                comment in other CDN.
             </p>
             <h2>Content</h2>
+            <p>
+                The code is organized intro three folders containing the algorithms implemented for three
+                lectures. Everything which is common, either for all of the lectures or within a lecture is 
+                placed in the <em>common</em> folder. The lectures are the following.
+            </p>
+            <h2>Folder gm</h2>
+            <p>
+            This folder contains the web applications implemented for the the course in <em>Geometric Modeling</em>.
+            We have implemented algorithm for polynomial curves, Bézier- and B-Spline curves. We have also implemented
+            algorithms for tensor product and subdivision surfaces. 
+            </p>
+            <h2>Folder gp</h2>
+            <p>
+                This folder contains the web applications implemented for the lectures corresponding to the 
+                course in <em>Geometry Processing</em>.
+            </p>
+            <h2>Folder infovis</h2>
+            <p>
+                This folder contains the web applications implemented for the lectures corresponding to the course in
+                <em>Information Visualization</em>.
+            </p>
+            <p>This are the links to the webspages of the three lectures</p>
             <ul>
                 <li><a href="./gm/index.html"><strong>Geometric Modeling</strong></a></li>
                 <li><a href="./gp/index.html"><strong>Geometry Processing</strong></a></li>
