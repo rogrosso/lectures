@@ -12,7 +12,7 @@
             }
             div.lectures {
                 margin-left: 3em;
-                width: 750px;
+                width: 850px;
             }
             li {
                 margin-bottom: 5px;
@@ -47,6 +47,11 @@
                 algorithms can be freely accessed not only from inside the University. 
             </p>
             <p>
+                In order to see, what is implemented, you can use this website to navigate through the 
+                different topics and algorithms. The code can cloned from the 
+                <a href="https://github.com/rogrosso/lectures">GitHub site</a>.
+            </p>
+            <p>
                 You will find a lot of duplicated code. I hope this will become better in the future. The web 
                 applications are interactive. I am using <strong>D3</strong> for 2D graphics and <strong>three.js</strong> 
                 for surfaces. I strongly recommend to interact with the visualizations by selecting and dragging 
@@ -56,7 +61,7 @@
             </p>
             <hr>
             <p>Example: Catmull-Clark Subdivision Surface</p>
-            <div id="threejs_canvas"></div>
+            <div id="threejs_canvas" data-width="450" data-height="320"></div>
             <script type="module" src="./gm/subdivision-surfaces/catmullClark.js"></script>
             <hr>
             <h3>Remark</h3>
@@ -71,31 +76,23 @@
             <h2>Content</h2>
             <p>
                 The code is organized intro three folders containing the algorithms implemented for three
-                lectures. Everything which is common, either for all of the lectures or within a lecture is 
-                placed in the <em>common</em> folder. The lectures are the following.
+                lectures. The lectures are the following.
             </p>
-            <h2>Folder gm</h2>
+            <strong>Folder gm</strong>: <a href="./gm/index.html"><strong>Geometric Modeling</strong></a></h2>
             <p>
-            This folder contains the web applications implemented for the the course in <em>Geometric Modeling</em>.
             We have implemented algorithm for polynomial curves, Bézier- and B-Spline curves. We have also implemented
             algorithms for tensor product and subdivision surfaces. 
             </p>
-            <h2>Folder gp</h2>
+            <strong>Folder gp</strong>: <a href="./gp/index.html"><strong>Geometry Processing</strong></a>
             <p>
-                This folder contains the web applications implemented for the lectures corresponding to the 
-                course in <em>Geometry Processing</em>.
+                we have implemented basic algorithms the geometry processing, such point cloud registration, 
+                surface reconstruction, fairing and remeshing, ARAP and mesh parametrization.
             </p>
-            <h2>Folder infovis</h2>
+            <strong>Folder infovis</strong>: <a href="./infovis/index.html"><strong>Information Visualization</strong></a>
             <p>
-                This folder contains the web applications implemented for the lectures corresponding to the course in
-                <em>Information Visualization</em>.
+                We have implemented visualization algorithms for colors, multivariate data, networks analysis and
+                visualization, hierarchies, and text.
             </p>
-            <p>This are the links to the webspages of the three lectures</p>
-            <ul>
-                <li><a href="./gm/index.html"><strong>Geometric Modeling</strong></a></li>
-                <li><a href="./gp/index.html"><strong>Geometry Processing</strong></a></li>
-                <li><a href="./infovis/index.html"><strong>Information Visualization</strong></a></li>
-            </ul>
         </div>
     </body>
 </html>

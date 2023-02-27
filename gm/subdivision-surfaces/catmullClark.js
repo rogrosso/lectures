@@ -12,12 +12,17 @@ import { renderBuffers, normalizeMesh, boundingBox } from '../../common/renderBu
 import catmullClarkSubdivision from './catmullClarkSubdivision.js'
 
 const canvas = threejs_canvas
-const width = 600
-const height = 350
+let width = 600
+let height = 350
+if (canvas.dataset.width !== undefined) width = canvas.dataset.width
+if (canvas.dataset.height !== undefined) {
+    height = Math.floor( canvas.dataset.width * height / 600)
+}
+
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(0xf0f8ff)
 const camera = new THREE.PerspectiveCamera(45, width / height, 0.11, 1000)
-const camInitPos = new THREE.Vector3(0, 1.23, 8)
+const camInitPos = new THREE.Vector3(0, 1.23, 9)
 camera.position.copy(camInitPos)
 // add a ground plane to improve perspective view
 const ground = new THREE.Mesh(
