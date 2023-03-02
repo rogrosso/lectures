@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Color Scales</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.infovis-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div#dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1em;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: auto;
+                gap: 1px;
+                background-color: white;
+                padding: 4px; 
+                margin: 2px; 
+                margin-left: 55px;
+                width: 600px;
+                border: 1px solid teal
+            }
+            div.cell {
+                margin: 1px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js",
+                    "cars"  : "../data/cars.json"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="infovis-lecture">
+            <h1>Color Scales</h1>
+            <h2>Color Map</h2>
+            <p>
+                <strong>Assign colors to data values</strong>
+            </p>
+            <ul>
+                <li>
+                    data values might be discrete, e.g. ordinal or categorical data, or continuous, 
+                    e.g. quantitative data representing continuous data such as temperature or humidity
+                </li>
+                <li>
+                    a color map is a scheme to assign colors to data values, i.e. map a discrete / continuous 
+                    domain of data values to a discrete / continuous range of colors
+                </li>
+                <li>
+                    in D3 <strong>color scales</strong> are used to map data values defined in a <em>domain</em> 
+                    to a range of colors
+                <li>
+                    quantitative data: continuous interpolation from data to hue (color), value and saturation 
+                    (probably also to transparency)
+                </li>
+                <li>
+                    categorical or ordinal data: discrete mapping from data to a set of discrete and distinct colors.
+                </li>
+            </ul>
+            <h2>Color Scales</h2>
+            <p>
+                This applicating visualizes different colors scales implemented in D3.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="color-scales" class="grid">
+                </div>
+            <script type="module" src="./colorscales.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>
