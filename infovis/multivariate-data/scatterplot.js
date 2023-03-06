@@ -216,7 +216,7 @@ function draw({
         xTickValues: undefined,
         yTickValues: undefined, //data.map( k => k[key]),
         xTickSize: -height,
-        yTickSize: -width,
+        yTickSize:  width,
         xTickFormat: undefined,
         yTickFormat: undefined,
         xLabel: xKey,

@@ -183,30 +183,36 @@ divDiv.append('hr')
 seqDiv.append('hr')
 cycDiv.append('hr')
 
-catScale(catG, catSel, catMap, iW, iH)
-conScale(divG, divId, divSel, divMap, iW, iH)
-conScale(seqG, seqId, seqSel, seqMap, iW, iH)
-conScale(cycG, cycId, cycSel, cycMap, iW, iH)
+const tooltipConfig = {
+    mouseOver: mouseOver,
+    mouseMove: mouseMove,
+    mouseOut: mouseOut,
+    divTooltip: divTooltip
+}
+catScale(catG, catSel, catMap, iW, iH, tooltipConfig)
+conScale(divG, divId, divSel, divMap, iW, iH, tooltipConfig)
+conScale(seqG, seqId, seqSel, seqMap, iW, iH, tooltipConfig)
+conScale(cycG, cycId, cycSel, cycMap, iW, iH, tooltipConfig)
 
 function catHandler(text, value) {
-    catScale(catG, value, catMap, iW, iH)
+    catScale(catG, value, catMap, iW, iH, tooltipConfig)
 }
 function divHandler(text, value) {
-    conScale(divG, divId, value, divMap, iW, iH)
+    conScale(divG, divId, value, divMap, iW, iH, tooltipConfig)
 }
 function seqHandler(text, value) {
-    conScale(seqG, seqId, value, seqMap, iW, iH)
+    conScale(seqG, seqId, value, seqMap, iW, iH, tooltipConfig)
 }
 function cycHandler(text, value) {
-    conScale(cycG, cycId, value, cycMap, iW, iH)
+    conScale(cycG, cycId, value, cycMap, iW, iH, tooltipConfig)
 }
 
-function mouseOver() {
+function mouseOver(divTooltip) {
     divTooltip
         .style('position', 'absolute')
         .style('display', 'inline-block')
 }
-function mouseMove(hexCol, rgbCol, pos) {
+function mouseMove(divTooltip, hexCol, rgbCol, pos) {
     const {
         x,
         y
@@ -216,7 +222,7 @@ function mouseMove(hexCol, rgbCol, pos) {
             .style('left', `${x + 10}px`)
             .style('top', `${y}px`)
 }
-function mouseOut() {
+function mouseOut(divTooltip) {
     divTooltip
     .style("display", 'none')
 }

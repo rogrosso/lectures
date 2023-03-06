@@ -90,13 +90,13 @@ const guiConfig = {
 }
 dropdown(guiConfig)
 
+// color scale
 const tooltipConfig = {
     mouseOver: mouseOver,
     mouseMove: mouseMove,
     mouseOut: mouseOut,
     divTooltip: divTooltip
 }
-// color scale
 conScale(sclG, colId, colSel, colMap, sclW, sclH, tooltipConfig)
 
 // add svg and append axes
@@ -127,14 +127,18 @@ const axisConfig = {
 }
 axes(axisConfig)
 // draw transfer functions
-transferFunctions(trfG, { colSel: colSel, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale })
-
-function colHandler(text, value) {
-    console.log(value)
-    transferFunctions(trfG, { colSel: value, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale })
-    conScale(sclG, colId, value, colMap, sclW, sclH, tooltipConfig)
+transferFunctions(
+    trfG, 
+    { colSel: colSel, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale}, 
+    colorCurves({colSel, colMap})
+)
+function colHandler(text, colSel) {
+    conScale(sclG, colId, colSel, colMap, sclW, sclH, tooltipConfig)
+    transferFunctions(
+        trfG, { colSel: colSel, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale },
+        colorCurves({colSel: colSel, colMap: colMap})
+    )
 }
-
 function dropdown({
     divObj,
     text,
@@ -178,69 +182,63 @@ function mouseOut(divTooltip) {
     .style("display", 'none')
 }
 
-const cText = `
-// plot transfer functions
-function transferFunctions (selection, props) {
+function hex2rgb(hexString) {
+    const rs = hexString.substring(1, 3)
+    const gs = hexString.substring(3, 5)
+    const bs = hexString.substring(5, 7)
+    return { r: Number('0x' + rs), g: Number('0x' + gs), b: Number('0x' + bs) }
+}
+function rgb2hex(color) {
+    const r = color.r
+    const g = color.g
+    const b = color.b
+    const hex = '#'+
+      r.toString(16).padStart(2,'0')+
+      g.toString(16).padStart(2,'0')+
+      b.toString(16).padStart(2,'0')
+    return hex
+}
+
+function colorCurves(props) {
     const {
-        colSel,
-        colMap,
-        xScale,
-        yScale
+        colSel: colSel, 
+        colMap: colMap,
     } = props
-    selection.selectAll("*").remove()    
-    const id = 'cont-color-scale'
     const nrColors = 100
+    const cmin = 0
+    const cmax = 1
+    const dc = (cmax - cmin) / (nrColors - 1)
     const colorScale = d3.scaleSequential()
-        .domain([0, nrColors])
+        .domain([cmin, cmax])
         .interpolator(d3[colMap.get(colSel).name])
-    // collect points
     const points = []
-    const cstep = nrColors / (nrColors - 1)
-    let c = 0
+    let c = cmin
     for (let i = 0; i < nrColors; i++) {
-        const color = d3.color(colorScale(c))
-            points.push({
-                x: c / nrColors,
-                r: color.r / 255,
-                g: color.g / 255,
-                b: color.b / 255
-            })
-            c += cstep
+        const rgbC = d3.color(colorScale(c))
+        const hexC = rgb2hex(rgbC)
+        const rgbColor = hex2rgb(hexC)
+        points.push({
+            x: c,
+            r: rgbColor.r / 255,
+            g: rgbColor.g / 255,
+            b: rgbColor.b / 255
+        })
+        c += dc
     }
-    function colPath(sel, points, color, c, duration) {
-        // Path
-        const gPath = sel.append('g')
-        gPath
-            .attr('class', 'path-container')
-        const cPath = gPath.append('path')
-            .datum(points)
-            .attr('class', color + '-path')
-            .attr('stroke', color)
-            .attr('stroke-width', 1.5)
-            .attr('fill', 'none')
-            .attr('d', d3.line()
-                .curve(d3.curveBasis)
-                .x(function (d) {
-                    return xScale(d.x)
-                })
-                .y(function (d) {
-                    return yScale(255 * d[c])
-                }))
-            .transition().duration(duration)
-            .delay((d, i) => i * 5)
-            .attrTween('stroke-dasharray', function () {
-                const len = this.getTotalLength();
-                return function (t) {
-                    return (d3.interpolateString("0," + len, len + ",0"))(t)
-                }
-            })
-        return gPath
-    }
-    const duration = 1000
-    colPath(selection, points, 'red', 'r', duration)
-    colPath(selection, points, 'green', 'g', duration)
-    colPath(selection, points, 'blue', 'b', duration)
-    return selection
+    return points
+}   
+
+const cText = `
+// Converts a rgb color string to a hex triplet web color
+function rgb2hex(color) {
+    const r = color[0]
+    const g = color[1]
+    const b = color[2]
+    const hex = '#'+
+      r.toString(16).padStart(2,'0')+
+      g.toString(16).padStart(2,'0')+
+      b.toString(16).padStart(2,'0')
+    return hex
 }
 `
 const hlPre = d3.select('#hl-code').append('pre')

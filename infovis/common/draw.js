@@ -119,7 +119,13 @@ export const fetchCSV = async (url) => {
 
 
 
-export function conScale(selection, scaleId, scale, map, width, height) {
+export function conScale(selection, scaleId, scale, map, width, height, tooltipConfig) {
+    const {
+        mouseOver,
+        mouseMove,
+        mouseOut,
+        divTooltip
+    } = tooltipConfig
     selection.selectAll('*').remove()
     const maxIndex = 30
     const xScale = d3.scaleLinear().domain([0, maxIndex]).range([0,100])
@@ -177,19 +183,19 @@ export function conScale(selection, scaleId, scale, map, width, height) {
                 .attr('width', 0)
                 .attr('height', 0)
                 .on('mouseover', function (event, d) {
-                    mouseOver()
+                    mouseOver(divTooltip)
                 })
                 .on('mousemove', function (event, d) {
                     const pos = d3.pointer(event)
                     const rgbColor = colorScale(cScale(pos[0]))
                     const hexColor = d3.color(rgbColor).formatHex()
-                        mouseMove(hexColor, rgbColor, {
+                        mouseMove(divTooltip, hexColor, rgbColor, {
                             x: event.x,
                             y: event.y
                         })
                 })
                 .on('mouseout', function (event, d) {
-                    mouseOut()
+                    mouseOut(divTooltip)
                 })
                 .transition().duration(1000)
                 .attr('width', width)
@@ -199,7 +205,13 @@ export function conScale(selection, scaleId, scale, map, width, height) {
         )
 }
 
-export function catScale(selection, scale, map, width, height) {
+export function catScale(selection, scale, map, width, height, tooltipConfig) {
+    const {
+        mouseOver,
+        mouseMove,
+        mouseOut,
+        divTooltip
+    } = tooltipConfig
     const nrColors = map.get(scale).n    
     const dx = width / nrColors
     const dy = height
@@ -231,17 +243,17 @@ export function catScale(selection, scale, map, width, height) {
                     .attr('fill', d => d)
                     .style('opacity', 0)
                     .on('mouseover', function (event, d) {
-                        mouseOver()
+                        mouseOver(divTooltip)
                     })
                     .on('mousemove', function (event, d) {
                         const rgbColor = d3.color(d)
-                            mouseMove(d, rgbColor, {
+                            mouseMove(divTooltip, d, rgbColor, {
                                 x: event.x,
                                 y: event.y
                             })
                     })
                     .on('mouseout', function (event, d) {
-                        mouseOut()
+                        mouseOut(divTooltip)
                     })
                     .transition().duration(1000)
                     .delay((d, i) => i * 5)
@@ -267,7 +279,7 @@ export function catScale(selection, scale, map, width, height) {
             }
         )
 }
-export function transferFunctions (selection, props) {
+export function transferFunctions (selection, props, colors) {
     const {
         colSel,
         colMap,
@@ -276,24 +288,38 @@ export function transferFunctions (selection, props) {
     } = props
     selection.selectAll("*").remove()    
     const id = 'cont-color-scale'
+    let points = null
+    if (arguments.length === 3) {
+        points = colors
+    } else {
+        points = colorCurves({colSel, colMap})
+    }
+    /*
     const nrColors = 100
+    const cmin = 0
+    const cmax = 1
+    const dc = (cmax - cmin) / (nrColors - 1)
     const colorScale = d3.scaleSequential()
-        .domain([0, nrColors])
+        .domain([cmin, cmax])
         .interpolator(d3[colMap.get(colSel).name])
-    // collect points
-    const points = []
-    const cstep = nrColors / (nrColors - 1)
-    let c = 0
-    for (let i = 0; i < nrColors; i++) {
-        const color = d3.color(colorScale(c))
+    // collect colors
+    let points = null
+    if (arguments.length === 3) {
+        points = colors
+    } else {
+        points = []
+        let c = cmin
+        for (let i = 0; i < nrColors; i++) {
+            const color = d3.color(colorScale(c))
             points.push({
-                x: c / nrColors,
+                x: c,
                 r: color.r / 255,
                 g: color.g / 255,
                 b: color.b / 255
             })
-            c += cstep
-    }
+            c += dc
+        }
+    } */
     function colPath(sel, points, color, c, duration) {
         // Path
         const gPath = sel.append('g')
@@ -329,3 +355,31 @@ export function transferFunctions (selection, props) {
     colPath(selection, points, 'blue', 'b', duration)
     return selection
 }
+function colorCurves(props) {
+    const {
+        colSel: colSel, 
+        colMap: colMap,
+    } = props
+    const nrColors = 100
+    const cmin = 0
+    const cmax = 1
+    const dc = (cmax - cmin) / (nrColors - 1)
+    const colorScale = d3.scaleSequential()
+        .domain([cmin, cmax])
+        .interpolator(d3[colMap.get(colSel).name])
+    const points = []
+    let c = cmin
+    for (let i = 0; i < nrColors; i++) {
+        const rgbC = d3.color(colorScale(c))
+        const hexC = rgb2hex(color)
+        const rgbColor = hex2rgb(hexC)
+        points.push({
+            x: c,
+            r: rgbColor.r / 255,
+            g: rgbColor.g / 255,
+            b: rgbColor.b / 255
+        })
+        c += dc
+    }
+    return points
+}   

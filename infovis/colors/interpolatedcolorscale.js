@@ -90,13 +90,13 @@ const guiConfig = {
 }
 dropdown(guiConfig)
 
+// color scale
 const tooltipConfig = {
     mouseOver: mouseOver,
     mouseMove: mouseMove,
     mouseOut: mouseOut,
     divTooltip: divTooltip
 }
-// color scale
 conScale(sclG, colId, colSel, colMap, sclW, sclH, tooltipConfig)
 
 // add svg and append axes
@@ -127,12 +127,19 @@ const axisConfig = {
 }
 axes(axisConfig)
 // draw transfer functions
-transferFunctions(trfG, { colSel: colSel, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale })
+transferFunctions(
+    trfG, 
+    { colSel: colSel, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale}, 
+    colorCurves({colSel, colMap})
+)
 
 function colHandler(text, value) {
-    console.log(value)
-    transferFunctions(trfG, { colSel: value, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale })
     conScale(sclG, colId, value, colMap, sclW, sclH, tooltipConfig)
+    transferFunctions(
+        trfG, 
+        { colSel: value, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale },
+        colorCurves({colSel: value, colMap})
+    )
 }
 
 function dropdown({
@@ -177,70 +184,74 @@ function mouseOut(divTooltip) {
     divTooltip
     .style("display", 'none')
 }
-
-const cText = `
-// plot transfer functions
-function transferFunctions (selection, props) {
+function iterpolatedcolor(colors, u, umin, umax) {
+    if (u >= umax) return colors[colors.length - 1]
+    if (u <= umin) return colors[0]
+    const alpha = (u - umin) / (umax - umin)
+    const nrColors = colors.length
+    const x = (nrColors - 1) * alpha
+    const i0 = Math.floor(x) // i0 >= due to line 9
+    const i1 = i0 + 1 // i1 < nrColors due to line 8
+    const dt = x - i0
+    const r = (1 - dt) * colors[i0].r + dt * colors[i1].r
+    const g = (1 - dt) * colors[i0].g + dt * colors[i1].g
+    const b = (1 - dt) * colors[i0].b + dt * colors[i1].b
+    return {r, g, b}
+}
+function colorCurves(props) {
     const {
-        colSel,
-        colMap,
-        xScale,
-        yScale
+        colSel: colSel, 
+        colMap: colMap,
     } = props
-    selection.selectAll("*").remove()    
-    const id = 'cont-color-scale'
-    const nrColors = 100
+    // generate a small number of colors
+    const cScale = []
+    const nrColors = 30
+    const cmin = 0
+    const cmax = 1
+    const dc = (cmax - cmin) / (nrColors - 1)
     const colorScale = d3.scaleSequential()
-        .domain([0, nrColors])
+        .domain([cmin, cmax])
         .interpolator(d3[colMap.get(colSel).name])
-    // collect points
-    const points = []
-    const cstep = nrColors / (nrColors - 1)
     let c = 0
     for (let i = 0; i < nrColors; i++) {
         const color = d3.color(colorScale(c))
-            points.push({
-                x: c / nrColors,
-                r: color.r / 255,
-                g: color.g / 255,
-                b: color.b / 255
-            })
-            c += cstep
+        cScale.push ({r: color.r, g: color.g, b: color.b})
+        c += dc
     }
-    function colPath(sel, points, color, c, duration) {
-        // Path
-        const gPath = sel.append('g')
-        gPath
-            .attr('class', 'path-container')
-        const cPath = gPath.append('path')
-            .datum(points)
-            .attr('class', color + '-path')
-            .attr('stroke', color)
-            .attr('stroke-width', 1.5)
-            .attr('fill', 'none')
-            .attr('d', d3.line()
-                .curve(d3.curveBasis)
-                .x(function (d) {
-                    return xScale(d.x)
-                })
-                .y(function (d) {
-                    return yScale(255 * d[c])
-                }))
-            .transition().duration(duration)
-            .delay((d, i) => i * 5)
-            .attrTween('stroke-dasharray', function () {
-                const len = this.getTotalLength();
-                return function (t) {
-                    return (d3.interpolateString("0," + len, len + ",0"))(t)
-                }
-            })
-        return gPath
+    const nrP = 100
+    const points = []
+    const umin = 0
+    const umax = 1
+    const du = (umax - umin) / (nrP - 1)
+    let u = 0
+    for (let i = 0; i < nrP; i++) {
+        const rgbColor = iterpolatedcolor(cScale, u, umin, umax)
+        points.push({
+            x: u,
+            r: rgbColor.r / 255,
+            g: rgbColor.g / 255,
+            b: rgbColor.b / 255
+        })
+        u += du
     }
-    const duration = 1000
-    colPath(selection, points, 'red', 'r', duration)
-    colPath(selection, points, 'green', 'g', duration)
-    colPath(selection, points, 'blue', 'b', duration)
-    return selection
+    return points
+}   
+
+const cText = `
+// interpolate a rgb-color
+function iterpolatedcolor(colors, u, umin, umax) {
+    if (u >= umax) return colors[colors.length - 1]
+    if (u <= umin) return colors[0]
+    const alpha = (u - umin) / (umax - umin)
+    const nrColors = colors.length
+    const x = (nrColors - 1) * alpha
+    const i0 = Math.floor(x) // i0 >= due to line 9
+    const i1 = i0 + 1 // i1 < nrColors due to line 8
+    const dt = x - i0
+    const r = (1 - dt) * colors[i0].r + dt * colors[i1].r
+    const g = (1 - dt) * colors[i0].g + dt * colors[i1].g
+    const b = (1 - dt) * colors[i0].b + dt * colors[i1].b
+    return {r, g, b}
 }
 `
 const hlPre = d3.select('#hl-code').append('pre')

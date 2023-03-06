@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Convert from RGB to HEX Color Formats</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.infovis-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div#dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1em;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: auto;
+                gap: 1px;
+                background-color: white;
+                padding: 4px; 
+                margin: 2px; 
+                margin-left: 55px;
+                width: 600px;
+                border: 1px solid teal
+            }
+            div.cell {
+                margin: 1px;
+            }
+            span.code {
+                font-family: monospace;
+                color:  #635F5D;
+                font-size: 16px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "colors": "../common/colors.js",
+                    "draw"  : "../common/draw.js",
+                    "cars"  : "../data/cars.json"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="infovis-lecture">
+            <h1>Convert from RGB to HEX Color Formats</h1>
+            <p>
+                Web colors are commonly represented using a hex-triplet. A hex-color is specified 
+                using a string of the form <span class="code">#rrggbb</span>, where <span class="code">rr</span> 
+                is the hexadecimal representation of the red component of the color given in the interval 
+                <span class="code">[0,255]</span>, and the same for the green <span class="code">gg</span> and 
+                the blue <span class="code">bb</span> components. For example, the color magenta is given by 
+                <span class="code">#ff00ff</span>. In this application a method is implemented to convert a rgb 
+                to a hex-triplet web color.
+            </p>
+            <p>
+                It is possible to choose different color scales. By moving the mouse over the color scale
+                one can see the corresponding hex-code and rgb values of the colors.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="transfer-functions" class="grid">
+                </div>
+            <script type="module" src="./rgb2hex.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>
