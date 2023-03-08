@@ -1,7 +1,7 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 import { colorsUno, colorsDos } from 'colors'
 import { dropdown } from "gui"
-import { bfs } from 'networks'
+import { bfs, dfs } from 'networks'
 import test01 from "test01" assert { type: "json" }
 import lesmiserables from "lesmiserables" assert { type: "json" }
 
@@ -31,8 +31,11 @@ const clearNetwork = (network) => {
 const colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c',
                     '#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#D2691E','#b15928']
 let bfsSel = "test01"
+let algSel = 'dfs'
+let traversal = dfs
+
 const bfsId = "bfs-traversla-div"
-const gridObj = d3.select("#bfs-traversal")
+const gridObj = d3.select("#dfs-traversal")
 const guiDiv = gridObj.append("div").attr("class", "cell").attr("id", bfsId)
 
 const bfsKeys = ["test01", "lesmiserable"]
@@ -48,6 +51,17 @@ const guiConfig = {
     keys: bfsMap.keys(),
     handler: bfsHandler
 }
+dropdown(guiConfig)
+
+const algKeys = ["dfs", "bfs"]
+const algDefs = [{ name: "DFS" }, { name: "BFS" }]
+const algMap = new Map()
+for (let i = 0; i < algKeys.length; i++) {
+    algMap.set(algKeys[i], algDefs[i])
+}
+guiConfig.text = "  select an algorithm: "
+guiConfig.selection = algSel
+guiConfig.keys = algMap.keys()
 dropdown(guiConfig)
 
 // canvas
@@ -247,7 +261,15 @@ function drawLesmiserables(lesmiserables, drawConfig) {
                 mouseOut(divTooltip)
             })
             .on('click', function(event, d) {
-                onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAccessor, event, d)
+                onClick(
+                    nodes, 
+                    edges, 
+                    neighbors, 
+                    colorScale, 
+                    sourceAccessor, 
+                    targetAccessor, 
+                    traversal, 
+                    event, d)
             })
             .call(drag(simulation))
     simulation.on("tick", () => {
@@ -376,7 +398,15 @@ function drawTest01(network, drawConfig) {
             mouseOut(divTooltip)
         })
         .on('click', function(event, d) {
-            onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAccessor, event, d)
+            onClick(
+                nodes, 
+                edges, 
+                neighbors, 
+                colorScale, 
+                sourceAccessor, 
+                targetAccessor, 
+                traversal, 
+                event, d)
         })
 }
 
@@ -403,13 +433,20 @@ function mouseOut(divTooltip) {
 
 function bfsHandler(text, event) {
     clearTimeouts()
-    bfsSel = event
-    if (event === 'lesmiserable') drawLesmiserables(lesmiserables, drawConfig)
-    if (event === 'test01') drawTest01(test01, drawConfig)
+    if (event === 'test01' || event === 'lesmiserables') {
+        bfsSel = event
+        if (event === 'lesmiserable') drawLesmiserables(lesmiserables, drawConfig)
+        if (event === 'test01') drawTest01(test01, drawConfig)
+    } else {
+        algSel = event
+        if (event === 'bfs') traversal = bfs
+        else traversal = dfs
+    }
 }
 
-function onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAccessor, event, d) {
-    bfs(nodes, neighbors, d.id)
+function onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAccessor, traversal, event, d) {
+    //dfs(nodes, neighbors, d.id)
+    traversal(nodes, neighbors, d.id)
     clearTimeouts()
     event.stopPropagation()
     const maxDistance = d3.max(nodes, n => n.d)
@@ -463,30 +500,32 @@ function onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAcce
 
 
 const cText = `
-// Breadth-first search with backtracing
-function bfs(nodes, neighbors, index) {
-    nodes.forEach((n) => {
+// DFS: depth-first search with backtracking
+function dfs(nodes, neighbors, index) {
+    nodes.forEach(n => {
         n.v = false
-        n.d = Number.MAX_VALUE
+        n.d = Infinity
         n.p = -2
+        n.type = 'undefined'
     })
     nodes[index].d = 0
-    nodes[index].v = true
     nodes[index].p = -1
-    const q = [index] // queue
+    const q = [index]// queue
     while (q.length > 0) {
-        const s = q.shift()
+        const s = q.pop()
         const d = nodes[s].d
-        neighbors[s].forEach((e) => {
-            const n = nodes[e]
-            if (n.v === false) {
-                n.v = true
-                n.p = s
-                n.d = d + 1
-                q.push(n.index)
-            }
-        })
-    } // step()
+        if (nodes[s].v === false) {
+            nodes[s].v = true
+            neighbors[s].forEach(n => {
+                if (!nodes[n].v) {
+                    nodes[n].p = s
+                    nodes[n].d = d + 1
+                    q.push(n)
+                }
+            })
+        }
+    } // while
+    nodes[index].p = -1 // this is the root node
 }
 `
 const hlPre = d3.select('#hl-code').append('pre')
