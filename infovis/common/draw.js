@@ -116,9 +116,6 @@ export const fetchCSV = async (url) => {
     return await response.text()
 }
 
-
-
-
 export function conScale(selection, scaleId, scale, map, width, height, tooltipConfig) {
     const {
         mouseOver,
@@ -294,32 +291,6 @@ export function transferFunctions (selection, props, colors) {
     } else {
         points = colorCurves({colSel, colMap})
     }
-    /*
-    const nrColors = 100
-    const cmin = 0
-    const cmax = 1
-    const dc = (cmax - cmin) / (nrColors - 1)
-    const colorScale = d3.scaleSequential()
-        .domain([cmin, cmax])
-        .interpolator(d3[colMap.get(colSel).name])
-    // collect colors
-    let points = null
-    if (arguments.length === 3) {
-        points = colors
-    } else {
-        points = []
-        let c = cmin
-        for (let i = 0; i < nrColors; i++) {
-            const color = d3.color(colorScale(c))
-            points.push({
-                x: c,
-                r: color.r / 255,
-                g: color.g / 255,
-                b: color.b / 255
-            })
-            c += dc
-        }
-    } */
     function colPath(sel, points, color, c, duration) {
         // Path
         const gPath = sel.append('g')
@@ -371,7 +342,7 @@ function colorCurves(props) {
     let c = cmin
     for (let i = 0; i < nrColors; i++) {
         const rgbC = d3.color(colorScale(c))
-        const hexC = rgb2hex(color)
+        const hexC = rgb2hex(rgbC)
         const rgbColor = hex2rgb(hexC)
         points.push({
             x: c,
@@ -383,3 +354,20 @@ function colorCurves(props) {
     }
     return points
 }   
+
+export function hex2rgb(hexString) {
+    const rs = hexString.substring(1, 3)
+    const gs = hexString.substring(3, 5)
+    const bs = hexString.substring(5, 7)
+    return { r: Number('0x' + rs), g: Number('0x' + gs), b: Number('0x' + bs) }
+}
+export function rgb2hex(color) {
+    const r = color.r
+    const g = color.g
+    const b = color.b
+    const hex = '#'+
+      r.toString(16).padStart(2,'0')+
+      g.toString(16).padStart(2,'0')+
+      b.toString(16).padStart(2,'0')
+    return hex
+}

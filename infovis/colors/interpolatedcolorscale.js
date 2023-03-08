@@ -16,7 +16,7 @@ let divTooltip = d3.select("body")
 // canvas
 let colSel = 'BrBG'
 const colId = 'color-scale'
-const gridObj = d3.select('#transfer-functions')
+const gridObj = d3.select('#interpolated-color-scale')
 const guiDiv = gridObj.append('div')
         .attr('class', 'cell')
         .attr('id', colId)
