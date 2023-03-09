@@ -29,8 +29,8 @@ export function keyGen(k1, k2) {
         return (BigInt(k2) << 32n) | BigInt(k1)
     }
 }
-/*
-export function keyGen(k1, k2) {
+// Cantor pairing function
+export function keyCantor(k1, k2) {
     if (k1 > k2) {
       return (k1+k2)*(k1+k2+1)/2 + k2
     }
@@ -38,7 +38,7 @@ export function keyGen(k1, k2) {
       return (k1+k2)*(k1+k2+1)/2 + k1
     }
 }
-*/
+
 export function isObject(obj) {
     return obj && typeof obj === 'object' && obj.constructor === Object
 }

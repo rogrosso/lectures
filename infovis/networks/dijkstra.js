@@ -1,9 +1,10 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { randColorsHex } from 'colors'
+import { colorsUno, colorsDos, randColorsHex } from 'colors'
 import { dropdown } from "gui"
-import { bfs, dfs, setNetwork } from 'networks'
+import { random_seed } from "random"
+import { dijkstra, bfs, setNetwork } from 'networks'
 import test01 from "test01" assert { type: "json" }
-import lesmiserables from "lesmiserables" assert { type: "json" }
+import test02 from "test02" assert { type: "json" }
 
 let divTooltip = d3
     .select("body")
@@ -31,37 +32,38 @@ const clearNetwork = (network) => {
 const colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c',
                     '#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#D2691E','#b15928']
 let dataSel = "test01"
-let algSel = 'dfs'
-let traversal = dfs
+let algSel = "dijkstra"
+let traversal = dijkstra
 let network = test01
 
-const bfsId = "dfs-traversla-div"
-const gridObj = d3.select("#dfs-traversal")
-const guiDiv = gridObj.append("div").attr("class", "cell").attr("id", bfsId)
+const dijkId = "dijkstra-traversal-div"
+const gridObj = d3.select("#dijkstra-traversal")
+const guiDiv = gridObj.append("div").attr("class", "cell").attr("id", dijkId)
 
-const dataKeys = ["test01", "lesmiserables"]
-const dataDefs = [{ name: "Test 01" }, { name: "Les Miserables" }]
+const dataKeys = ["test01", "test02"]
+const dataDefs = [{ name: "Test 01" }, { name: "Test 02" }]
 const dataMap = new Map()
 for (let i = 0; i < dataKeys.length; i++) {
     dataMap.set(dataKeys[i], dataDefs[i])
 }
+
 const guiConfig = {
     divObj: guiDiv,
     text: "select a network: ",
     selection: dataSel,
     keys: dataMap.keys(),
-    handler: dfsHandler
+    handler: dijHandler
 }
 dropdown(guiConfig)
 guiDiv.append('span').text(" | ")
-const algKeys = ["dfs", "bfs"]
-const algDefs = [{ name: "DFS" }, { name: "BFS" }]
+const algKeys = ["dijkstra", "bfs"]
+const algDefs = [{ name: "Dijkstra" }, { name: "Breadth-first search" }]
 const algMap = new Map()
 for (let i = 0; i < algKeys.length; i++) {
     algMap.set(algKeys[i], algDefs[i])
 }
-guiConfig.text = "  select an algorithm: "
-guiConfig.selection = algSel
+guiConfig.text = "select an algorithm: ",
+guiConfig.selection =  algSel,
 guiConfig.keys = algMap.keys()
 dropdown(guiConfig)
 
@@ -69,7 +71,7 @@ dropdown(guiConfig)
 const canvas = gridObj
     .append("div")
     .attr("class", "cell")
-    .attr("id", "bfs-canvas")
+    .attr("id", "dijkstra-canvas")
     .style("border", "solid")
     .style("border-width", "0.5px")
     .style("border-color", "red")
@@ -79,7 +81,7 @@ const height = 500
 const margin = { top: 5, bottom: 5, left: 5, right: 5 }
 const svg = canvas
     .append("svg")
-    .attr("class", "bfs-svg")
+    .attr("class", "dijkstra-svg")
     .attr("width", width)
     .attr("height", height)
 const rectG = svg.append('g')
@@ -92,16 +94,29 @@ rectG.append('rect')
     .attr('fill', '#FFFFFF')//'white')
     .on('click', (event, d) => {
         event.stopPropagation()
-        dfsHandler('clear', dataSel)
+        dijHandler('clear', dataSel)
     })
 const netwG = svg.append('g')
     .attr('class', 'network-group')
 
 
-// process data
-lesmiserables['edges'] = lesmiserables['links']
-setNetwork(lesmiserables)
+// check for weighted edges
+function checkWeights({ edges }) {
+    const rand = random_seed(11)
+    const factor = 10
+    for (let e of edges) {
+        const s = e.source
+        const t = e.target
+        if (!e.hasOwnProperty('weight')) e.weight = Math.floor(1 + rand() * factor)
+        else {
+            if (typeof e.weight === 'string') e.weight = +e.weight
+        }
+    }
+}
+checkWeights(test01)
+checkWeights(test02)
 setNetwork(test01)
+setNetwork(test02)
 
 const drawConfig = {
     selection: netwG,
@@ -109,7 +124,7 @@ const drawConfig = {
     height: height,
     margin: margin
 }
-drawTest01(test01, drawConfig)
+draw(test01, drawConfig)
 
 function clearNodes(nodes) {
     for (let n of nodes) {
@@ -123,152 +138,20 @@ function clearNodes(nodes) {
     }
 }
 
-function drawLesmiserables(lesmiserables, drawConfig) {
-    const { 
-        selection,
-        width,
-        height,
-        margin 
-    } = drawConfig
-    selection.selectAll('*').remove()
-    const g = selection.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`)
-    const iw = width - margin.left - margin.right
-    const ih = height - margin.top - margin.bottom
-    const center = {x: margin.left + iw/2, y: margin.top + ih/2}
-    const {nodes, links, edges, neighbors} = lesmiserables
-    clearNodes(nodes)
-    const sourceAccessor = l => l.source.id
-    const targetAccessor = l => l.target.id
-    //return
-    const gSet = new Set()
-    nodes.forEach( n => {
-        gSet.add(n.group)
+function wrapText(text) {
+    text.each(() => {
+      const textPath = text.text(null).append("textPath")
+        .attr('xlink:href', d => '#' + '_' + d.id)
+        .style('text-anchor', 'middle')
+        .attr('startOffset', '45%')
+        .attr('font-family', `'Lucida Sans Unicode', 'Lucida Grande', 'sans-serif'`)
+        .attr('font-size', 12)
+        .attr('font-weight', 'bold')
+        .attr('opacity', d => 1)
+        .text(d => d3.format(",d")(d.weight))
     })
-    const lineGenerator = d3.line().curve(d3.curveBasis)
-    const colorScale = d3.scaleOrdinal()
-        .domain(Array.from(gSet).sort())
-        .range(colors)
-    // text scaling
-    const minRad = 4
-    const maxRad = 19
-    const nScale = d3.scaleLinear()
-        .domain([d3.min(nodes, d => d.c), d3.max(nodes, d => d.c)])
-        .range([minRad, maxRad])
-    const dScale = d3.scaleLinear()
-        .domain([d3.min(nodes, d => d.degree), d3.max(nodes, d => d.degree)])
-        .range([minRad, maxRad])
-    // layout
-    const simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links))
-        .force('charge', d3.forceManyBody().strength(-55))
-        .force('center', d3.forceCenter(center.x,center.y).strength(0.1))
-        .force('x', d3.forceX().x(center.x)) //.strength( 0.01 )
-        .force('y', d3.forceY().y(center.y + 1))// .strength( 0.01 )
-        .force('collision', d3.forceCollide().radius( function(d) { return 1.15 * nScale(d.c) }))
-        .alpha(0.2)
-        .alphaDecay(0.0001)
-        .alphaMin(0.00001)
-    const beta = 0.2
-    const link = g.append("g")
-        .attr('fill', 'none')
-        .attr("stroke-opacity", 0.6)
-        .selectAll("path")
-        .data(links)
-        .join("path")
-            .attr("stroke-width", d => Math.log(d.value+3) ) //Math.sqrt(d.value))
-            .attr('stroke', d => {
-                const g = d.source.c > d.target.c ? d.source.group : d.target.group
-                return colorScale(g)
-            })
-            .attr('d', d => {
-                const d0 = [d.source.x, d.source.y]
-                const d2 = [d.target.x, d.target.y]
-                const x = (d0[0] + d2[0]) / 2
-                const y = (d0[1] + d2[1]) / 2
-                const vx = (d2[0] - d0[0]) / 2
-                const vy = (d2[1] - d0[1]) / 2
-                const d1 = [x - beta * (vy), y + beta * vx]
-                return lineGenerator([d0, d1, d2])
-            })
-    const node = g.append('g')
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 1.5)
-        .selectAll("circle")
-        .data(nodes)
-        .join("circle")
-            .attr('class', 'eigenvector-node')
-            .attr('r', d => nScale(d.c))
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y)
-            .attr("fill", d => colorScale(d.group))
-            .on('mouseover', function (event, d) {
-                mouseOver(divTooltip)
-            })
-            .on('mousemove', function (event, d) {
-                const pos = d3.pointer(event)
-                    mouseMove(divTooltip, d.name, {
-                        x: event.x,
-                        y: event.y
-                    })
-            })
-            .on('mouseout', function (event, d) {
-                mouseOut(divTooltip)
-            })
-            .on('click', function(event, d) {
-                onClick(
-                    nodes, 
-                    edges, 
-                    neighbors, 
-                    colorScale, 
-                    sourceAccessor, 
-                    targetAccessor, 
-                    traversal, 
-                    event, d)
-            })
-            .call(drag(simulation))
-    simulation.on("tick", () => {
-        link
-            .attr('d', d => {
-                const d0 = [d.source.x, d.source.y]
-                const d2 = [d.target.x, d.target.y]
-                const x = (d0[0] + d2[0]) / 2
-                const y = (d0[1] + d2[1]) / 2
-                const vx = (d2[0] - d0[0]) / 2
-                const vy = (d2[1] - d0[1]) / 2
-                const d1 = [x - beta * (vy), y + beta * vx]
-                return lineGenerator([d0, d1, d2])
-            })
-        node
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y);
-    })
-    function drag (simulation) {
-        function dragstarted(event) {
-            if (!event.active) simulation.alphaTarget(0.3).restart()
-            event.subject.fx = event.subject.x
-            event.subject.fy = event.subject.y
-        }
-
-        function dragged(event) {
-            event.subject.fx = event.x
-            event.subject.fy = event.y
-        }
-
-        function dragended(event) {
-            if (!event.active) simulation.alphaTarget(0)
-            event.subject.fx = null
-            event.subject.fy = null
-        }
-
-        return d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended)
-    } // drag()
-
 }
-
-function drawTest01(network, drawConfig) {
+function draw(network, drawConfig) {
     const {
         selection,
         width,
@@ -295,23 +178,23 @@ function drawTest01(network, drawConfig) {
         .range(colors)
     // set circle radius proportional to centrality
     const minRad = 4
-    const maxRad = 19
+    const maxRad = 8
     const nScale = d3.scaleLinear()
         .domain([d3.min(nodes, d => d.c), d3.max(nodes, d => d.c)])
         .range([minRad, maxRad])
-    const l = d3.min(nodes, d => Math.min(d.x, d.y))
-    const r = d3.max(nodes, d => Math.max(d.x, d.y))
     const offset = 20
-    const scale = d3.scaleLinear()
-        .domain([l, r])
+    const xscale = d3.scaleLinear()
+        .domain([d3.min(nodes, d => d.x), d3.max(nodes, d => d.x)])
         .range([offset, iw-offset])
-
+    const yscale = d3.scaleLinear()
+        .domain([d3.min(nodes, d => d.y), d3.max(nodes, d => d.y)])
+        .range([ih-offset, offset])
     const lineGenerator = d3.line().curve(d3.curveBasis)
     const alpha = 0.5 // for quadratic Bezier of curved edges
     const beta = 0.1
     const controlPoints = d => {
-        const d0 = [scale(nodes[d.source].x), scale(nodes[d.source].y)]
-        const d2 = [scale(nodes[d.target].x), scale(nodes[d.target].y)]
+        const d0 = [xscale(nodes[d.source].x), yscale(nodes[d.source].y)]
+        const d2 = [xscale(nodes[d.target].x), yscale(nodes[d.target].y)]
         const x = (d0[0] + d2[0]) / 2
         const y = (d0[1] + d2[1]) / 2
         const vx = -(d0[1] - d2[1])
@@ -324,6 +207,7 @@ function drawTest01(network, drawConfig) {
         .data(edges, d => d.id)
         .join('path')
             .attr('d', d => lineGenerator(controlPoints(d)))
+            .attr('id', (d, i) => '_' + d.id)
             .attr('stroke', pathColor)
             .attr('stroke-width', 1.5)
             .attr('fill', 'none')
@@ -332,8 +216,8 @@ function drawTest01(network, drawConfig) {
     const nGroup = g.selectAll('circle')
         .data(nodes,  d => d.id)
         .join('circle')
-        .attr('cx', d => scale(d.x))
-        .attr('cy', d => scale(d.y))
+        .attr('cx', d => xscale(d.x))
+        .attr('cy', d => yscale(d.y))
         .attr('r', d => nScale(d.c))
         .attr('fill', d => colorScale(d.group))
         .attr('stroke', d => strokeColor)
@@ -352,16 +236,13 @@ function drawTest01(network, drawConfig) {
             mouseOut(divTooltip)
         })
         .on('click', function(event, d) {
-            onClick(
-                nodes, 
-                edges, 
-                neighbors, 
-                colorScale, 
-                sourceAccessor, 
-                targetAccessor, 
-                traversal, 
-                event, d)
+            onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAccessor, traversal, event, d)
         })
+    const tGroup = g.selectAll('.path-weight')
+        .data(edges, d => d.id)
+        .join('text')
+        .attr('class', 'path-weight')
+        .call(wrapText)
 }
 
 
@@ -385,40 +266,36 @@ function mouseOut(divTooltip) {
     .style("display", 'none')
 }
 
-function dfsHandler(text, event) {
+function dijHandler(text, event) {
     clearTimeouts()
     switch(event) {
         case 'test01':
             dataSel = event
+            network = test01
             break
-        case 'lesmiserables': 
+        case 'test02': 
             dataSel = event
+            network = test02
             break
-        case 'bfs':
-            algSel = 'bfs'
-            break
-        case 'dfs':
-            algSel = 'dfs'
         default:
-            dataSel = 'test01'
-            algSel = 'dfs'
+            {
+                algSel = event
+                if( event === 'dijkstra') traversal = dijkstra
+                else traversal = bfs
+            }
     }
-    if( event === 'bfs') traversal = bfs
-    else if (event === 'dfs') traversal = dfs
-    if (dataSel === 'test01') drawTest01(test01, drawConfig)
-    else if (dataSel === 'lesmiserables') drawLesmiserables(lesmiserables, drawConfig)
+    draw(network, drawConfig)
 }
 
-function onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAccessor, traversal, event, d) {
-    //dfs(nodes, neighbors, d.id)
-    traversal(nodes, neighbors, d.id)
+function onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAccessor, searchAlg, event, d) {
+    searchAlg(nodes, neighbors, d.id)
     clearTimeouts()
     event.stopPropagation()
     const s_ = new Set()
     for (let n of nodes) s_.add(n.d)
     const distRange = Array.from(s_)
     distRange.sort ((a,b) => a-b)
-    const colGen = randColorsHex(3)
+    const colGen = randColorsHex(17)
     const colors = []
     for (let i = 0; i < distRange.length; i++) colors.push(colGen())
     const colScale = d3.scaleOrdinal()
@@ -481,38 +358,36 @@ function onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAcce
         } else {
             return
         }
-    }    
+    }
     recursiveColoring()
 }
 
+
 const cText = `
-// DFS: depth-first search with backtracking
-function dfs(nodes, neighbors, index) {
+// Dijkstra: Single-source shortest path with backtracing
+function dijkstra(nodes, neighbors, index) {
+    const pQ = binaryHeapFactory( n => n.d )
     nodes.forEach(n => {
-        n.v = false
-        n.d = Infinity
-        n.p = -2
-        n.type = 'undefined'
+      n.d = Infinity
+      n.p = -2
     })
     nodes[index].d = 0
     nodes[index].p = -1
-    const q = [index]// queue
-    while (q.length > 0) {
-        const s = q.pop()
-        const d = nodes[s].d
-        if (nodes[s].v === false) {
-            nodes[s].v = true
-            neighbors[s].forEach(n => {
-                if (!nodes[n].v) {
-                    nodes[n].p = s
-                    nodes[n].d = d + 1
-                    q.push(n)
-                }
-            })
+    nodes.forEach(n => pQ.push(n))
+    while (!pQ.empty()) {
+      const s = pQ.pop()
+      const d = s.d
+      neighbors[s.index].forEach(e => {
+        const n = nodes[e.index]
+        if (d + e.weight < n.d) {
+            // update this element
+            n.p = s.index
+            n.d = d + e.weight
+            pQ.update(n)
         }
-    } // while
-    nodes[index].p = -1 // this is the root node
-}
+      })
+    }
+} 
 `
 const hlPre = d3.select('#hl-code').append('pre')
 const hlCod = hlPre.append('code')

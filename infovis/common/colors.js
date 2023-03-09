@@ -131,10 +131,25 @@ export function randColors(...s) {
     if (s.length > 0) seed = s[0]
     const rand = random_seed(seed)
     return function () {
-        const cStr = Math.floor(rand() * 16777215).toString(16)
-        const r = parseInt("0x" + cStr.substring(0, 2))
-        const g = parseInt("0x" + cStr.substring(2, 4))
-        const b = parseInt("0x" + cStr.substring(4, 2))
+        const r = Math.round(rand() * 255)
+        const g = Math.round(rand() * 255)
+        const b = Math.round(rand() * 255)
         return [r,g,b]
+    }
+}
+export function randColorsHex(...s) {
+    let seed = 1234
+    if (s.length > 0) seed = s[0]
+    const rand = random_seed(seed)
+    return function () {
+        const r = Math.round(rand() * 255)
+        const g = Math.round(rand() * 255)
+        const b = Math.round(rand() * 255)
+        const hex = '#' +
+            r.toString(16).padStart(2,'0')+
+            g.toString(16).padStart(2,'0')+
+            b.toString(16).padStart(2,'0')
+        
+        return hex
     }
 }

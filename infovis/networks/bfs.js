@@ -1,7 +1,7 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { colorsUno, colorsDos } from 'colors'
+import { randColorsHex } from 'colors'
 import { dropdown } from "gui"
-import { bfs } from 'networks'
+import { bfs, setNetwork } from 'networks'
 import test01 from "test01" assert { type: "json" }
 import lesmiserables from "lesmiserables" assert { type: "json" }
 
@@ -83,53 +83,7 @@ const netwG = svg.append('g')
     .attr('class', 'network-group')
 
 
-// process data.
-// 1. check, that each link is only once
-function keyGen(k1, k2) {
-    if (k1 > k2) {
-      return (k1+k2)*(k1+k2+1)/2 + k2
-    }
-    else {
-      return (k1+k2)*(k1+k2+1)/2 + k1
-    }
-}
-function setNetwork(network) {
-    const {nodes, edges } = network
-    // check, that undirected edges are unique
-    const m_ = new Map()
-    for (let e of edges) {
-        if (typeof e.source === 'string') e.source = +e.source
-        if (typeof e.target === 'string') e.target = +e.target
-        const key = keyGen(e.source, e.target)
-        const s = e.source 
-        const t = e.target
-        m_.set(key, e)
-        e.id = key
-    }
-    if (m_.size !== edges.length) {
-        console.log('die Kake ist am dampfen')
-    }
-    // compute node neighbors
-    network.neighbors = new Array(nodes.length).fill(null).map( e => [])
-    const {neighbors} = network
-    for (let e of edges) {
-        const s = e.source
-        const t = e.target
-        neighbors[s].push(t)
-        neighbors[t].push(s)
-    }
-    // compute degree centrality, add id 
-    for (let i = 0; i < nodes.length; i++) {
-        nodes[i].id = i
-        nodes[i].index = nodes[i].id
-        nodes[i].c = neighbors[i].length
-        if (typeof nodes[i].x === 'string') nodes[i].x = +nodes[i].x
-        if (!nodes[i].hasOwnProperty('group')) nodes[i].group = 1
-        if (!nodes[i].hasOwnProperty('name')) nodes[i].name = 'node ' + nodes[i].id
-    }
-
-}
-
+// process data
 lesmiserables['edges'] = lesmiserables['links']
 setNetwork(lesmiserables)
 setNetwork(test01)
@@ -412,53 +366,75 @@ function onClick(nodes, edges, neighbors, colorScale, sourceAccessor, targetAcce
     bfs(nodes, neighbors, d.id)
     clearTimeouts()
     event.stopPropagation()
-    const maxDistance = d3.max(nodes, n => n.d)
-    const bfsScale = d3.scaleOrdinal()
-        .domain([0,10])
-        //.range(colorsUno)
-        .range(colorsDos)
-        //.range(d3.schemePaired)
-    let distance = -1
+    const s_ = new Set()
+    for (let n of nodes) s_.add(n.d)
+    const distRange = Array.from(s_)
+    distRange.sort ((a,b) => a-b)
+    const colGen = randColorsHex(17)
+    const colors = []
+    for (let i = 0; i < distRange.length; i++) colors.push(colGen())
+    const colScale = d3.scaleOrdinal()
+        .domain(distRange)
+        .range(colors)
+    let distIndex = 0
+    const nrDistances = distRange.length
     const recursiveColoring = () => {
-        if(distance <= maxDistance) {
-            d3.selectAll('path').data(edges)
-                .join('path')
-                    .attr('stroke', d => {
-                        if (distance > 0) {
-                            const n0 = nodes[sourceAccessor(d)]
-                            const n1 = nodes[targetAccessor(d)]
-                            const dist = Math.max(n0.d,n1.d)
-                            if (dist <= distance) return bfsScale(dist-1)
-
-                        }
-                    })
-                    .attr('stroke-opacity', d => {
-                        if (distance === 0) return 0
+        d3.selectAll('path').data(edges)
+            .join('path')
+                .attr('stroke', d => {
+                    const n0 = nodes[sourceAccessor(d)]
+                    const n1 = nodes[targetAccessor(d)]
+                    const dist = Math.max(n0.d,n1.d)
+                    if (dist <= distRange[distIndex]) {
+                        return colScale(dist)
+                    }
+                })
+                .attr('stroke-width', 2)
+                .attr('stroke-opacity', d => {
+                    const n0 = nodes[sourceAccessor(d)]
+                    const n1 = nodes[targetAccessor(d)]
+                    //if ((n0.id === 36 || n0.id === 52) && (n1.id === 36 || n1.id === 52))
+                    //    debugger
+                    if (n0.p === n1.id || n1.p === n0.id) {
+                        const dist = Math.max(n0.d,n1.d)
+                        if (dist > distRange[distIndex]) return 0
                         else {
-                            const n0 = nodes[sourceAccessor(d)]
-                            const n1 = nodes[targetAccessor(d)]
-                            if (n0.p === n1.id || n1.p === n0.id) {
-                                const dist = Math.max(n0.d,n1.d)
-                                if (dist > distance) return 0
-                                else {
-                                    return 1
-                                }
-                            } else {
-                                return 0
-                            }
+                            return 1
                         }
-                    })
-            d3.selectAll('circle').data(nodes)
-                .join('circle')
-                    .attr('fill', d => {
-                        if (d.d <= distance) return bfsScale(d.d)
-                        else return colorScale(d.group)
-                    })
-            timeOuts.push(setTimeout(recursiveColoring, 500))
-            distance++
+                    } else {
+                        return 0
+                    }
+                })
+        d3.selectAll('circle').data(nodes)
+            .join('circle')
+                .attr('fill', d => {
+                    if (d.d <= distRange[distIndex]) return colScale(d.d)
+                    else return colorScale(d.group)
+                })
+        d3.selectAll('.path-weight')
+            .data(edges, d => d.id)
+            .join('text')
+                .attr('class', 'path-weight')
+                .attr('opacity', d => {
+                    if (distIndex >= nrDistances) return 1
+                    const n0 = nodes[sourceAccessor(d)]
+                    const n1 = nodes[targetAccessor(d)]
+                    if (n0.p === n1.id || n1.p === n0.id) {
+                        const dist = Math.max(n0.d,n1.d)
+                        if (dist > distRange[distIndex]) return 0
+                        else return 1
+                    } else {
+                        return 0
+                    }
+                })
+        distIndex++
+        if (distIndex < nrDistances) {
+            timeOuts.push(setTimeout(recursiveColoring, 300))
+        } else {
+            return
         }
     }
-    if (distance <= maxDistance) recursiveColoring()
+    recursiveColoring()
 }
 
 

@@ -5,7 +5,7 @@
         <meta name="description" content="Information Visualization"/>
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Depth-First Seacrh</title>
+        <title>Dijkstra Single-Source Shortest Path</title>
         <style>
             body {
                 font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
@@ -39,9 +39,10 @@
                     "colors"   : "../common/colors.js",
                     "draw"     : "../common/draw.js",
                     "gui"      : "../common/gui.js",
+                    "random"   : "../../common/random.js",
                     "networks" : "./networks.js",
-                    "test01"  : "../data/test01.json",
-                    "lesmiserables" : "../data/lesmiserables.json"
+                    "test01"   : "../data/test01.json",
+                    "test02"   : "../data/test02.json"
                 }
             }
         </script>
@@ -64,42 +65,62 @@
     <!-- Axes with d3 -->
     <body>
         <div class="infovis-lecture">
-            <h1>Depth-First Search</h1>
+            <h1>Dijkstra Single-Source Shortest Path</h1>
             When visualizing networks, different graph traversal algorithms are needed. The implementation of
-            the depth-first search algorithm is intended to review techniques, that any student in 
-            computer science already know.
+            the Dijkstra algorithm is intended to review techniques, that any student in computer science 
+            should already know.
             <h2>Description</h2>
+            <p>
+                The Dijkstra algorithm solves the single-source shortest path problem, if the weights are 
+                positive. The implementation requires a priority queue.
+            </p>
+            <h3>Main Idea</h3>
             <ul>
-                <li>finds connected components</li>
-                <li>computes a spanning tree</li>
                 <li>
-                    does not find the shortest path in general for an unweighted graph
+                    propagate along the shortest paths, i.e. follows the path to the node with the shortest 
+                    distance to the source node
                 </li>
                 <li>
-                    by keeping track of predecessors, the path to source node can be reconstructed by backtracking
+                    once a node was visited, i.e. popped out of the priority queue, its distance to the source 
+                    node is known and will not be changed anymore
                 </li>
                 <li>
-                    Idea: processes the current node and continues with its successors as far as possible
+                    a path is followed if there is no other path with a shorter distance to the source node
+                </li>
+                <li>
+                    once a node is reached, the computed distance is the shortest distance to the source node
                 </li>
             </ul>
-            <h2>Characteristics</h2>
+            <h3>Remarks</h3>
             <ul>
-                <li>the iterative implementation uses a stack (LIFO)</li>
-                <li>delays checking if vertex has been already visited until the vertex is popped from the stack</li>
-                <li>time complexity:  \(\mathcal{O}(|V|+|E|)\)</li>
+                <li>
+                    the distance update step is called relaxation
+                </li>
+                <li>
+                    once a node is popped out of the queue, its distance will not be changed by the algorithm 
+                    anymore. This is why Dijkstra is a greedy algorithm: it chooses the best option at each step
+                </li>
+                <li>
+                    the Dijkstra algorithm finds the shortest path, i.e. it solves the optimization problem of 
+                    single-source shortest path
+                </li>
+                <li>
+                    an implementation based on a Fibonacci heap (for the priority queue) has time complexity
+                    \(\mathcal{O}(m + n \log n)\), where \(n = |V(G)|\), and \(m = |E(G)|\)
+                </li>
             </ul>
             <h3>Note:</h3>
             <p>
-                Select and click a node to start traversal. Click the background to reset. Depth is measured in number 
-                of edges (edge weight is 1) and visualized using colors. The computed spanning tree is visualized.
-                Nodes of the same color are at the same distance to the selected source node. This implementation
-                allows to compare the result with the breadth-first search algorithm.
+                Select and click a node to start a traversal. Click the background to reset. Depth is measured 
+                in using the weights of the edges and visualized using colors. Nodes of the same color are at 
+                the same distance to the selected source node. You can select a breadth-first traversal to
+                compare the results. The numbers at the edges are the corresponding weights.
             </p>
             <hr>
             <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
-                <div id="dfs-traversal" class="grid">
+                <div id="dijkstra-traversal" class="grid">
                 </div>
-            <script type="module" src="./dfs.js"></script>
+            <script type="module" src="./dijkstra.js"></script>
             </div>
             <hr>
             <h3>The JavaScript Code</h3>
