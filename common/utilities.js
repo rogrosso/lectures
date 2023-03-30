@@ -8,8 +8,14 @@ export function cross(v1, v2) {
         z: (v1.x * v2.y - v1.y * v2.x)
     }
 }
+export function norm(v) {
+    return Math.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2)
+}
+export function norm2(v) {
+    return v.x ** 2 + v.y ** 2 + v.z ** 2
+}
 export function normalize(v) {
-    const s = Math.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2)
+    const s = norm(v) //Math.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2)
     v.x /= s
     v.y /= s
     v.z /= s 

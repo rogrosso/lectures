@@ -41,7 +41,7 @@ export function binaryHeapFactory(scoreFunction) {
         peek() {
             return content[0].value
         },
-        element(i) {
+        node(i) {
             return content[i].value
         },
         pop() {

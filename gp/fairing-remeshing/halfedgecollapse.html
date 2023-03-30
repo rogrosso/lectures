@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Halfedge Collapse</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gp-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div#dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1em;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: auto;
+                gap: 1px;
+                background-color: white;
+                padding: 4px; 
+                margin: 2px; 
+                margin-left: 55px;
+                width: 600px;
+                border: 1px solid teal
+            }
+            div.cell {
+                margin: 1px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three" : "https://cdn.jsdelivr.net/npm/three/+esm",
+                    "OrbitControls" : "https://cdn.jsdelivr.net/npm/three-controls@1.0.1/+esm",
+                    "lil-gui" : "https://cdn.jsdelivr.net/npm/lil-gui@0.18.1/+esm",
+                    //"three": "https://unpkg.com/three@0.136.0/build/three.module.js",
+                    //"OrbitControls": "https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js",
+                    //"GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
+                    "halfedge": "../../common/halfedge.js",
+                    "binaryHeap" : "../../common/binaryHeap.js"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gp-lecture">
+            <h1>Halfedge Collapse</h1>
+            <h2>Incremental Mesh Reduction</h2>
+            <p>The fundamental algorithm for incremental mesh reduction has the following general form:</p>
+            <ul>
+                <li>Select one of the Euler operators to remove vertices</li>
+                <li>
+                    Algorithm
+                    <ul>
+                        <li>for each vertex, compute the error that its removal would produce</li>
+                        <li>collect all errors in a priority queue, smallest error first</li>
+                        <li>
+                            Mail loop:
+                            <ul>
+                                <li>remove first element from the queue</li>
+                                <li>recompute errors and update priority queue</li>
+                                <li>
+                                    stop if a given number of elements were removed or the smallest error
+                                    is above a given threshold
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <h2>Euler Operators</h2>
+            <p>
+                An Euler operator modify the mesh topology locally by preserving the Euler-Poincaré characteristic
+                of the mesh.
+            </p>
+            <p>
+                For incremental mesh reduction the following Euler operators are commonly used
+            </p>
+            <ul>
+                <li>vertex removal followed by hole filling without vertex insertion</li>
+                <li>edge collapse</li>
+                <li>halfedge collapse</li>
+            </ul>
+            <h2>Halfedge Collapse</h2>
+            <p>
+                A halfedge collapse consist is collapsing one halfedge, which results in removing the origin
+                vertex. Intuitively, a halfedge collapse consist in merging the origin vertex of the halfedge
+                with the vertex to which the halfedge points.
+            </p>
+            <h2>Error Quadrics</h2>
+            <p>
+                The error being produced by removing a vertex is computed using error quadrics. The quadric error
+                of a point is the sum of its squared distance to a set of planes.
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="halfedge_collapse"></div>
+                <script type="module" src="./halfedgecollapse.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

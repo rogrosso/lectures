@@ -41,42 +41,32 @@
             <p style="padding-bottom: 0px;">Roberto Grosso</p>
             <p style="margin: 0px; padding-top: 0px;">Project start: Feb. 2023</p>
             <p>
-                This repository contains the HTML and Javascript code implementing algorithms discussed in 
-                some of the lectures that I give at the University. They are in the area of geometry processing and 
-                information visualization. This way, the code and some background information about the 
-                algorithms can be freely accessed not only from inside the University. 
+                This repository contains the HTML and Javascript code implementing algorithms discussed in some of the lectures 
+                in geometry processing and information visualization. This way, the code and some background information 
+                about the algorithms can be freely accessed also from outside the University.
             </p>
             <p>
-                In order to see, what is implemented, you can use this website to navigate through the 
-                different topics and algorithms. The code can cloned from the 
-                <a href="https://github.com/rogrosso/lectures">GitHub site</a>.
+                This website presents the results of the implemented code, which can be cloned from the 
+                <a href="https://github.com/rogrosso/lectures">GitHub site</a>. <strong>Note:</strong> this website does 
+                not work on tablets, iOS, iPadOS, or Firefox. Firefox does not support asserted imports jet.  
             </p>
             <p>
-                You will find a lot of duplicated code. I hope this will become better in the future. The web 
-                applications are interactive. I am using <strong>D3</strong> for 2D graphics and <strong>three.js</strong> 
-                for surfaces. I strongly recommend to interact with the visualizations by selecting and dragging 
-                points or by zooming and rotating the 3D geometry. Some of the applications also include a kind 
-                of user interface. The code is at this moment certainly buggy. The code was not implemented for 
-                industrial usage. 
+                There is a lot of duplicated code, but it is being re-engineered. Thus it will become better in the future. 
+                The web applications are interactive and based on <strong>D3</strong> for 2D graphics and 
+                <strong>three.js</strong> for surfaces. It is strongly recommended to interact with the visualizations by 
+                selecting and dragging points or by zooming and rotating the 3D geometry. Some of the applications also 
+                include a user interface. The code is, at this moment, indeed buggy. The code was not implemented for 
+                industrial usage.  
             </p>
             <hr>
             <p>Example: Catmull-Clark Subdivision Surface</p>
             <div id="threejs_canvas" data-width="450" data-height="320"></div>
             <script type="module" src="./gm/subdivision-surfaces/catmullClark.js"></script>
             <hr>
-            <h3>Remark</h3>
-            <p>
-                It is recommended to start with the file <em>index.html</em> in the root/main folder in order 
-                to easily navigate through all the applications implemented for the different lectures. In order 
-                to run the code, a <em>live-server</em> is required. I personally use Visual Studio Code and 
-                the <em>live-server</em> plugin. I have been having problems with the CDNs, in particular 
-                <em>unpkg</em> with D3. If a web application does not work, please, just edit the html file and 
-                comment in other CDN.
-            </p>
             <h2>Content</h2>
             <p>
-                The code is organized intro three folders containing the algorithms implemented for three
-                lectures. The lectures are the following.
+                The code is organized into three folders containing the algorithms implemented for three lectures. The lectures 
+                are the following.
             </p>
             <strong>Folder gm</strong>: <a href="./gm/index.html"><strong>Geometric Modeling</strong></a></h2>
             <p>
@@ -95,10 +85,9 @@
             </p>
             <h2>Disclaimer</h2>
             <p>
-                Not all the functions used in this project were implemented within the project. For example,
-                JavaScript does not have a priority queue. In such cases, we copy an implementation from the 
-                Internet, modified and adapt it. We mention the credits in the JavaScript file. We hope, we 
-                do everything right.
+                Some of the functions used in this project were implemented within the project. For example, JavaScript 
+                does not have a priority queue. In such cases, we copy an implementation from the Internet and modify 
+                and adapt it. We mention the credits in the JavaScript file. We hope we have done everything right.
             </p>
         </div>
     </body>
