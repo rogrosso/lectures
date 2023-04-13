@@ -1,9 +1,14 @@
 # lectures
-This repository include interactive web applications (HTML and Javascript) to demonstrate the methods discussed in the lectures I am holding at the Friedrich-Alexander-Universität (FAU). I will start with one of the lectures in the course *geometric modeling*. Lectures for other courses will follow in future commits. 
+This repository contains the HTML and Javascript code implementing algorithms discussed in some of the lectures 
+in geometry processing and information visualization. This way, the code and some background information 
+about the algorithms can be freely accessed also from outside the University.
 
-There are a lot of duplicated code. I hope this will become better with future commits, as far I have time to redesign the code. The web applications are interactive. I am using *D3* for 2D graphics and *three.js* for surfaces. Therefore, feel free to use the mouse and menus to interact with the visualization.
-
-It is recommended to start with the file *index.html* in the root/main folder in order to easily navigate through all the applications implemented for the different lectures. In order to run the code, a *live-server* is required. I personally use Visual Studio Code and live-server plugin. 
+There is a lot of duplicated code, but it is being re-engineered. Thus it will become better in the future. 
+The web applications are interactive and based on <strong>D3</strong> for 2D graphics and 
+<strong>three.js</strong> for surfaces. It is strongly recommended to interact with the visualizations by 
+selecting and dragging points or by zooming and rotating the 3D geometry. Some of the applications also 
+include a user interface. The code is, at this moment, indeed buggy. The code was not implemented for 
+industrial usage.  
 
 ## Folder common
 This folder contains functions that that are required by some of the implementations in the different topics. One example are functions for solving simple linear systems or computing the inverse of a matrix.
@@ -18,4 +23,10 @@ This folder contains the web applications implemented for the lectures correspon
 This folder contains the web applications implemented for the lectures corresponding to the course in *Information Visualization*.
 
 ## Remark
-I have been having problems with the CDNs, in particular *unpkg* with *D3*. If a web application does not work, please, just edit the *html* file and comment in a different CDN.
+I have had problems with the CDNs, particularly *unpkg* with *D3*. If a web application does not work, please edit the *html* or
+ *JavaScript* file and comment in a different CDN.
+
+## Disclaimer
+Some of the functions used in this project were implemented within the project. For example, JavaScript 
+does not have a priority queue. In such cases, we copy an implementation from the Internet and modify 
+and adapt it. We mention the credits in the JavaScript file. We hope we have done everything right.
