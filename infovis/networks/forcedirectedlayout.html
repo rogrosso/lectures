@@ -86,6 +86,28 @@
                     </li>
                 </ul>
             </p>
+            <p>
+                The layout is computed by iteration using a simulating annealing strategy.
+            </p>
+            <p><pre>
+    iterate M-times 
+    foreach v in V do
+        disp(v)=0; // vector containing displacement for v
+        foreach u in V and u != v do
+            d = v.pos − u.pos; // vector pointing from u to v
+            disp(v) = disp(v) + (d/norm(d)) * fr(norm(d))  // fr is repulsive force
+    foreach e in E do
+        d = v.pos - u.pos; // e = {v,u}
+        disp(v) = disp(v) - (d/norm(d)) * fa(norm(d))
+        disp(u) = disp(u) + (d/norm(d)) * fa(norm(d))
+    foreach v in V do
+        /* limit max displacement to frame; use temperature t to scale */
+        v.pos = v.pos + (disp(v)/norm(disp(v)) * min(t,norm(disp(v))
+        /* check that node is in window, otherwise clip */
+        v.pos.x = min(W/2, max(−W/2, v.pos.x))
+        v.pos.y = min(L/2, max(−L/2, v.pos.y))
+        t = cool(t) ; /* reduce temperature for next iteration */
+            </pre></p>
             <h2>Fruchterman-Reinglod, 1990</h2>
             <p>
                 The forces acting on a node are:
