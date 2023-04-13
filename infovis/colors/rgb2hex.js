@@ -1,17 +1,7 @@
-import { axes, conScale, transferFunctions } from "draw"
+import { axes, conScale, transferFunctions, genDivTooltip } from "draw"
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 
-let divTooltip = d3.select("body")
-    .append('div')
-    .attr('class', 'categorical_tooltip')
-    .attr('id', 'catcolortooltip')
-    .style("opacity", 0.7)
-    .style('display', 'none')
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
-    .style("padding", "5px")
+const divTooltip = genDivTooltip()
 
 // canvas
 let colSel = 'BrBG'

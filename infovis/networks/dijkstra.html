@@ -66,23 +66,23 @@
     <body>
         <div class="infovis-lecture">
             <h1>Dijkstra Single-Source Shortest Path</h1>
-            When visualizing networks, different graph traversal algorithms are needed. The implementation of
-            the Dijkstra algorithm is intended to review techniques, that any student in computer science 
-            should already know.
+            When visualizing networks, different graph traversal algorithms are needed. Implementing the 
+            Dijkstra algorithm is intended to review techniques that any computer science student 
+            already knows.
             <h2>Description</h2>
             <p>
-                The Dijkstra algorithm solves the single-source shortest path problem, if the weights are 
-                positive. The implementation requires a priority queue.
+                If the weights are positive, the Dijkstra algorithm solves the single-source shortest path problem. 
+                The implementation requires a priority queue.
             </p>
             <h3>Main Idea</h3>
             <ul>
                 <li>
-                    propagate along the shortest paths, i.e. follows the path to the node with the shortest 
-                    distance to the source node
+                    propagate along the shortest paths, i.e., follows the path to the node with the shortest distance 
+                    to the source node
                 </li>
                 <li>
-                    once a node was visited, i.e. popped out of the priority queue, its distance to the source 
-                    node is known and will not be changed anymore
+                    once a node was visited, i.e., popped out of the priority queue, its distance to the source node is 
+                    known and will not be changed anymore
                 </li>
                 <li>
                     a path is followed if there is no other path with a shorter distance to the source node
@@ -97,24 +97,24 @@
                     the distance update step is called relaxation
                 </li>
                 <li>
-                    once a node is popped out of the queue, its distance will not be changed by the algorithm 
-                    anymore. This is why Dijkstra is a greedy algorithm: it chooses the best option at each step
+                    Once a node is popped out of the queue, the algorithm will no longer change its distance. Therefore, 
+                    Dijkstra is a greedy algorithm: it chooses the best option at each step.
                 </li>
                 <li>
-                    the Dijkstra algorithm finds the shortest path, i.e. it solves the optimization problem of 
-                    single-source shortest path
+                    The Dijkstra algorithm finds the shortest path, i.e., it solves the optimization problem of the single-source 
+                    shortest path.
                 </li>
                 <li>
-                    an implementation based on a Fibonacci heap (for the priority queue) has time complexity
-                    \(\mathcal{O}(m + n \log n)\), where \(n = |V(G)|\), and \(m = |E(G)|\)
+                    An implementation based on a Fibonacci heap for the priority queue has time complexity 
+                    \(\mathcal{O}(m + n \log n)\), where \(n = |V(G)|\), and \(m = |E(G)|\).
                 </li>
             </ul>
             <h3>Note:</h3>
             <p>
-                Select and click a node to start a traversal. Click the background to reset. Depth is measured 
-                in using the weights of the edges and visualized using colors. Nodes of the same color are at 
-                the same distance to the selected source node. You can select a breadth-first traversal to
-                compare the results. The numbers at the edges are the corresponding weights.
+                Select and click a node to start a traversal. Click the background to reset. Depth is measured using the 
+                weights of the edges and visualized using colors. Nodes of the same color are at the same distance from 
+                the selected source node. You can select a breadth-first traversal to compare the results. The numbers 
+                at the edges are the corresponding weights.
             </p>
             <hr>
             <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">

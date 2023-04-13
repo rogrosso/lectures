@@ -1,17 +1,7 @@
-import { axes, conScale, transferFunctions } from "draw"
+import { axes, conScale, transferFunctions, genDivTooltip } from "draw"
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 
-let divTooltip = d3.select("body")
-    .append('div')
-    .attr('class', 'categorical_tooltip')
-    .attr('id', 'catcolortooltip')
-    .style("opacity", 0.7)
-    .style('display', 'none')
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
-    .style("padding", "5px")
+let divTooltip =  genDivTooltip() 
 
 // canvas
 let colSel = 'BrBG'
@@ -165,23 +155,17 @@ function dropdown({
 }
 
 function mouseOver(divTooltip) {
-    divTooltip
-        .style('position', 'absolute')
-        .style('display', 'inline-block')
+    divTooltip.style('display', 'inline-block')
 }
 function mouseMove(divTooltip, hexCol, rgbCol, pos) {
-    const {
-        x,
-        y
-    } = pos
-        divTooltip
-            .html('color: ' + hexCol + ', ' + rgbCol)
-            .style('left', `${x + 10}px`)
-            .style('top', `${y}px`)
+    const { x, y } = pos
+    divTooltip
+        .html('color: ' + hexCol + ', ' + rgbCol)
+        .style('left', `${x + 10}px`)
+        .style('top', `${y}px`)
 }
 function mouseOut(divTooltip) {
-    divTooltip
-    .style("display", 'none')
+    divTooltip.style("display", 'none')
 }
 
 function hex2rgb(hexString) {

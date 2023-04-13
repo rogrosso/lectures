@@ -187,8 +187,8 @@ export function conScale(selection, scaleId, scale, map, width, height, tooltipC
                     const rgbColor = colorScale(cScale(pos[0]))
                     const hexColor = d3.color(rgbColor).formatHex()
                         mouseMove(divTooltip, hexColor, rgbColor, {
-                            x: event.x,
-                            y: event.y
+                            x: event.pageX,
+                            y: event.pageY
                         })
                 })
                 .on('mouseout', function (event, d) {
@@ -245,8 +245,8 @@ export function catScale(selection, scale, map, width, height, tooltipConfig) {
                     .on('mousemove', function (event, d) {
                         const rgbColor = d3.color(d)
                             mouseMove(divTooltip, d, rgbColor, {
-                                x: event.x,
-                                y: event.y
+                                x: event.pageX,
+                                y: event.pageY
                             })
                     })
                     .on('mouseout', function (event, d) {
@@ -370,4 +370,18 @@ export function rgb2hex(color) {
       g.toString(16).padStart(2,'0')+
       b.toString(16).padStart(2,'0')
     return hex
+}
+export function genDivTooltip() {
+    return d3.select("body")
+            .append('div')
+            .attr('class', 'categorical_tooltip')
+            .attr('id', 'catcolortooltip')
+            .style("opacity", 0.7)
+            .style('display', 'none')
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+            .style('position', 'absolute')
 }

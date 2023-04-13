@@ -3,7 +3,7 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 
 const width = 650
 const height = 400
-const margin = { top:30, bottom: 25, left: 30, right: 20}
+const margin = { top:30, bottom: 25, left: 85, right: 20}
 const innerWidth = width - margin.left - margin.right
 const innerHeight = height - margin.top - margin.bottom
 
@@ -18,6 +18,7 @@ let divTooltip = d3.select("body")
     .style("border-width", "2px")
     .style("border-radius", "5px")
     .style("padding", "5px")
+    .style('position', 'absolute')
 
 const svg = d3.selectAll("#d3js_canvas")
     .append('svg')
@@ -184,8 +185,8 @@ function draw({
                 mouseMove(
                     d[key] + ': ' + d3.format(',')(d[value]),
                     {
-                        x: event.x,
-                        y: event.y
+                        x: event.pageX,
+                        y: event.pageY
                     }
                 )
             })
@@ -203,7 +204,6 @@ function draw({
 }
 function mouseOver() {
     divTooltip
-        .style('position', 'absolute')
         .style('display', 'inline-block')
 }
 function mouseMove(text, pos) {

@@ -1,22 +1,13 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 import { randColorsHex } from 'colors'
+import { genDivTooltip } from 'draw'
 import { dropdown } from "gui"
 import { bfs, dfs, setNetwork } from 'networks'
 import test01 from "test01" assert { type: "json" }
 import lesmiserables from "lesmiserables" assert { type: "json" }
 
-let divTooltip = d3
-    .select("body")
-    .append("div")
-    .attr("class", "bfs_tooltip")
-    .attr("id", "bsftooltip")
-    .style("opacity", 0.7)
-    .style("display", "none")
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
-    .style("padding", "5px")
+const divTooltip = genDivTooltip()
+
 let value = null
 const textOffset = 1
 const timeOuts = []
@@ -207,8 +198,8 @@ function drawLesmiserables(lesmiserables, drawConfig) {
             .on('mousemove', function (event, d) {
                 const pos = d3.pointer(event)
                     mouseMove(divTooltip, d.name, {
-                        x: event.x,
-                        y: event.y
+                        x: event.pageX,
+                        y: event.pageY
                     })
             })
             .on('mouseout', function (event, d) {
@@ -344,8 +335,8 @@ function drawTest01(network, drawConfig) {
         .on('mousemove', function (event, d) {
             const pos = d3.pointer(event)
                 mouseMove(divTooltip, d.name, {
-                    x: event.x,
-                    y: event.y
+                    x: event.pageX,
+                    y: event.pageY
                 })
         })
         .on('mouseout', function (event, d) {
@@ -365,23 +356,18 @@ function drawTest01(network, drawConfig) {
 }
 
 
-function mouseOver(divTooltip) {
-    divTooltip
-        .style('position', 'absolute')
-        .style('display', 'inline-block')
+function mouseOver(tooltip) {
+    tooltip.style('display', 'inline-block')
 }
-function mouseMove(divTooltip, name, pos) {
-    const {
-        x,
-        y
-    } = pos
-        divTooltip
-            .html(name)
-            .style('left', `${x + 10}px`)
-            .style('top', `${y}px`)
+function mouseMove(tooltip, name, pos) {
+    const { x, y } = pos
+    tooltip
+        .html(name)
+        .style('left', `${x + 10}px`)
+        .style('top', `${y}px`)
 }
-function mouseOut(divTooltip) {
-    divTooltip
+function mouseOut(tooltip) {
+    tooltip
     .style("display", 'none')
 }
 

@@ -1,19 +1,9 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 import { dropdown } from 'gui'
+import { genDivTooltip } from 'draw'
 import lesmiserables from "lesmiserables" assert { type: "json" }
 
-let divTooltip = d3
-    .select("body")
-    .append("div")
-    .attr("class", "bfs_tooltip")
-    .attr("id", "bsftooltip")
-    .style("opacity", 0.7)
-    .style("display", "none")
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
-    .style("padding", "5px")
+const divTooltip = genDivTooltip()
 
 const canvas = d3.select("#circular-layout")
 // menue
@@ -36,6 +26,8 @@ dropdown(guiConfig)
 const width = 500
 const height = 500
 const padding = 30
+const offsetX = 5
+const offsetY = 5
 const margin = { top: 5, bottom: 5, left: 5, right: 5 }
 const iW = width - margin.left - margin.right
 const iH = height - margin.top - margin.bottom
@@ -277,23 +269,20 @@ function controlPoints(netw, width, height) {
 }
 function mouseOver(divTooltip, event, d) {
     divTooltip
-        .style('position', 'absolute')
         .style('display', 'inline-block')
-    const x = event.pageX
-    const y = event.pageY
-    const name = d.name
+    const x = event.pageX +  offsetX
+    const y = event.pageY - offsetY
     divTooltip
-        .html(name)
-        .style('left', `${x + 10}px`)
+        .html(d.name)
+        .style('left', `${x}px`)
         .style('top', `${y}px`)
 }
 function mouseMove(divTooltip, event, d) {
-    const x = event.pageX
-    const y = event.pageY
-    const name = d.name
+    const x = event.pageX + offsetX
+    const y = event.pageY - offsetY
     divTooltip
-        .html(name)
-        .style('left', `${x + 10}px`)
+        .html(d.name)
+        .style('left', `${x}px`)
         .style('top', `${y}px`)
 }
 function mouseLeave(divTooltip, event, d) {

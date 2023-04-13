@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Network Force Directed Layout</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.infovis-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div#dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1em;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: auto;
+                gap: 1px;
+                background-color: white;
+                padding: 4px; 
+                margin: 2px; 
+                margin-left: 100px;
+                width: 500px;
+                border: 1px solid teal
+            }
+            div.cell {
+                margin: 1px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "random"   : "../../common/random.js",
+                    "utilities": "../../common/utilities.js",
+                    "colors"   : "../common/colors.js",
+                    "draw"     : "../common/draw.js",
+                    "gui"      : "../common/gui.js",
+                    "networks" : "./networks.js",
+                    "lesmiserables" : "../data/lesmiserables.json"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="infovis-lecture">
+            <h1>Force Directed Layout</h1>
+            <p>
+                <ul>
+                    <li>
+                        Compute layout for simple (no loops, no multiedges) undirected networks 
+                        (makes directed edges undirected).
+                    </li>
+                    <li>
+                        Uses structural information from the network.
+                    </li>
+                    <li>
+                        Layouts tend to be aesthetically pleasant, symmetric, and usually crossing-free for planar graphs.
+                    </li>
+                    <li>
+                        Community structure might become visible.
+                    </li>
+                    <li>
+                        Attracting force between nodes connected with an edge and repulsive force between all pairs of nodes
+                    </li>
+                </ul>
+            </p>
+            <h2>Fruchterman-Reinglod, 1990</h2>
+            <p>
+                The forces acting on a node are:
+                \[
+                \mathbf{f}_a = \frac{d^2}{k} \hat{\mathbf{r}} \qquad
+                \mathbf{f}_r = \frac{-k^2}{d} \hat{\mathbf{r}}
+                \]
+                with distance \(d\) between the nodes, and choose \(k\) to optimize distance between nodes in the 
+                drawing area:
+                \[
+                k = C \sqrt{\frac{\text{area}}{\text{nr. of vertices}}}
+                \]
+            </p>
+            <h2>ForceAtlas2, M. Jacomy, S. Heymann, T. Venturini, and M. Basitan, 2011</h2>
+            <p>
+                Assumption: real-world graph follows a power-law distribution of degrees, i.e., many leave nodes surrounding 
+                a few highly connected nodes. This results in cluttering around these nodes. Improve visualization by making 
+                repulsive force dependent on the node's degree
+            </p>
+            <p>
+                Repulsion force between two nodes \(n_1\) and \(n_2\) (repulsion by degree):
+                \[
+                \mathbf{f}_r = k_r \frac{(deg(n_1)+1)(deg(n_2)+1)}{d(n_1,n_2)}
+                \]
+            </p>
+            <p>
+                The attracting force between two nodes \(n_1\) and \(n_2\) is
+                \[
+                \mathbf{f}_a(n_1,n_2) = d(n_1,n_2)
+                \]
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="force-directed-layout" class="grid" style="text-align: center;">
+                </div>
+            <script type="module" src="./forcedirectedlayout.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

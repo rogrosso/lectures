@@ -65,33 +65,32 @@
     <body>
         <div class="infovis-lecture">
             <h1>Breath-First Search</h1>
-            When visualizing networks, different graph traversal algorithms are needed. The implementation of
-            the breadth-first search algorithm is intended to review techniques, that any student in 
-            computer science already know.
+            When visualizing networks, different graph traversal algorithms are needed. Implementing the breadth-first 
+            search algorithm is intended to review techniques that any computer science student already knows.
             <h2>Description</h2>
             <ul>
                 <li>finds connected components</li>
                 <li>computes a spanning tree</li>
                 <li>
-                    can be used to compute the shortest path between a source node  and all other nodes in 
-                    unweighted graphs (path length measured by number of edges or hops)
+                    can be used to compute the shortest path between a source node and all other nodes in unweighted graphs 
+                    (path length measured by the number of edges or hops)
                 </li>
                 <li>
-                    by keeping track of predecessors, the path to source node can be reconstructed by backtracking
+                    By keeping track of predecessors, the path to the source node can be reconstructed by backtracking
                 </li>
             </ul>
             <h2>Characteristics</h2>
             <ul>
                 <li>the iterative implementation uses a queue (FIFO)</li>
-                <li>it checks if a vertex has been already visited before enqueueing the vertex</li>
+                <li>it checks if a vertex has already been visited before enqueueing the vertex</li>
                 <li>Idea: processes the current node and then all its neighbors first</li>
-                <li>time complexity:  \(\mathcal{O}(|V|+|E|)\)</li>
+                <li>time complexity: \(\mathcal{O}(|V|+|E|)\)</li>
             </ul>
             <h3>Note:</h3>
             <p>
-                Select and click a node to start traversal. Click the background to reset. Depth is measured in number 
-                of edges (edge weight is 1) and visualized using colors. The computed spanning tree is visualized.
-                Nodes of the same color are at the same distance to the selected source node.
+                Select and click a node to start traversal. Click the background to reset. Depth is measured in the 
+                number of edges (edge weight is 1) and visualized using colors. The computed spanning tree is visualized. 
+                Nodes of the same color are at the same distance from the selected source node.
             </p>
             <hr>
             <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">

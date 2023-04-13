@@ -13,3 +13,11 @@ export function random_seed(s) {
         return result
     }
 }
+
+export function easyRandom(s) {
+    let seed = s 
+    return function() {
+      seed = (seed * 16807) % 2147483647
+      return (seed - 1) / 2147483647
+    }
+}
