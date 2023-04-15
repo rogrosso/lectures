@@ -299,19 +299,16 @@ let attractingForce = attractingForceF
 let repulsiveForce = repulsiveForceF
 function forceHandler(text, value) {
     if (value === 'Fruchterman-Reingold') {
-        alpha = alphaF
         attractingForce = attractingForceF
         repulsiveForce = repulsiveForceF
         K = Kf
         Kg = KgF
     } else if(value === 'ForceAtlas2') {
-        alpha = alphaA
         attractingForce = attractingForceA
         repulsiveForce = repulsiveForceA
         K = Ka
         Kg = KgA
     }
-    alpha.reset(1)
 }
 // animaiton
 const disp = nodes.map( n => {
@@ -320,7 +317,7 @@ const disp = nodes.map( n => {
 animate()
 function animate() {
     requestAnimationFrame(animate)
-    step(K, Kc, Kg, cR, nodes, edges, bbox, disp) //, alpha.next())
+    step(K, Kc, Kg, cR, nodes, edges, bbox, disp) 
     redraw(nodeG, linkG)
 }
 function redraw(nodeG, linkG) {
