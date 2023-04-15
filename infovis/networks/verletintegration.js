@@ -1,8 +1,8 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 import { dropdown } from 'gui'
 import { genDivTooltip } from 'draw'
-import { keyCantor } from 'utilities'
 import { easyRandom } from 'random'
+import { keyCantor } from 'utilities'
 import {
     jiggle,
     collisionForce,
@@ -10,23 +10,35 @@ import {
     attractingForceF,
     attractingForceA,
     repulsiveForceF,
-    repulsiveForceA,
-    controlFunction
+    repulsiveForceA
 } from 'networks'
 import lesmiserables from "lesmiserables" assert { type: "json" }
 
 const divTooltip = genDivTooltip()
-// control numerical integration
-const alphaMin = 0.3
-const initialAlpha = 2
-const restartAlphaF = 0.5
-const restartAlphaA = 0.5
-let restartAlpha = restartAlphaF
-const velDumpF = 1/100
-const velDumpA = 1/160
-const alphaF = controlFunction(alphaMin, initialAlpha, velDumpF)
-const alphaA = controlFunction(alphaMin, initialAlpha, velDumpA)
-let alpha = alphaF
+
+function fixPositions(nodes, bbox) {
+    // shift center of network to center of bbox
+    const pos = {x: 0, y: 0}
+    nodes.forEach( n => {
+        pos.x += n.x 
+        pos.y += n.y 
+    })
+    pos.x /= nodes.length
+    pos.y /= nodes.length
+    pos.x = (bbox.xmax + bbox.xmin)/ 2 - pos.x
+    pos.y = (bbox.ymax + bbox.ymin)/ 2 - pos.y
+    nodes.forEach( n => {
+        n.x += pos.x
+        n.y += pos.y
+    })
+    nodes.forEach( n => {
+        if (n.x < bbox.xmin) n.x = bbox.xmin;
+        if (n.x > bbox.xmax) n.x = bbox.xmax;
+        if (n.y < bbox.ymin) n.y = bbox.ymin;
+        if (n.y > bbox.ymax) n.y = bbox.ymax;
+    })
+}
+
 function initDisplacements(disp) {
     for (let d of disp) {
         d.x = 0
@@ -34,7 +46,7 @@ function initDisplacements(disp) {
         d.d = 0
     }
 }
-function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
+function conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
     initDisplacements(disp)
     // compute displacements from repelling forces
     const nrNodes = nodes.length
@@ -57,56 +69,75 @@ function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
     nodes.forEach( (n,i) => {
         gravitationalForce(Kg, n, bbox, disp)
     })
-    // update nodes position
-    nodes.forEach(function (n, i) {
-        const dx = disp[n.id].x
-        const dy = disp[n.id].y
-        if (!isFinite(dx) || !isFinite(dy)) {
-            console.log('not finite')
-            return
-        }
-        if (isNaN(dx) || isNaN(dy)) {
-            console.log('is NaN')
-            return
-        }
-        const d = Math.sqrt(dx * dx + dy * dy)
-        n.x += dx / d * (Math.min(alpha, d)) + 0.001 * jiggle()
-        n.y += dy / d * (Math.min(alpha, d)) + 0.001 * jiggle()
-    })
-    
-    // shift center of network to center of bbox
-    const pos = {x: 0, y: 0}
-    nodes.forEach( n => {
-        pos.x += n.x 
-        pos.y += n.y 
-    })
-    pos.x /= nodes.length
-    pos.y /= nodes.length
-    pos.x = (bbox.xmax + bbox.xmin)/ 2 - pos.x
-    pos.y = (bbox.ymax + bbox.ymin)/ 2 - pos.y
-    nodes.forEach( n => {
-        n.x += pos.x
-        n.y += pos.y
-    })
-    // check bounding box
-    nodes.forEach( n => {
-        if (n.x < bbox.xmin) n.x = bbox.xmin;
-        if (n.x > bbox.xmax) n.x = bbox.xmax;
-        if (n.y < bbox.ymin) n.y = bbox.ymin;
-        if (n.y > bbox.ymax) n.y = bbox.ymax;
-    })
 }
+function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) { 
+    // compute conservative forces
+    conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+    // update position, velocity and acceleration
+    const w = 3
+    const h = 0.008
+    for (let n of nodes) {
+        // position Verlet
+        const xprev = n.xprev
+        const yprev = n.yprev
+        n.xprev = n.x
+        n.yprev = n.y
+        const fx = disp[n.id].x - w * n.vx + 0.001 * jiggle() // add some noise
+        const fy = disp[n.id].y - w * n.vy + 0.001 * jiggle() // add some noise
+        const dx = (n.x - xprev) + fx * h * h
+        const dy = (n.y - yprev) + fy * h * h
+        n.x = n.x + dx 
+        n.y = n.y + dy 
+        n.vx = (n.x - n.xprev) / h
+        n.vy = (n.y - n.yprev) / h
+    }    
+    // 
+    fixPositions(nodes, bbox)
+}
+
+function velocityVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) { 
+    // compute conservative forces
+    conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+    // update position, velocity and acceleration
+    const w = 3
+    const h = 0.005
+    for (let n of nodes) {
+        // keep position for position-Verlet
+        n.xprev = n.x 
+        n.yprev = n.y
+        // update position
+        const dx = n.vx * h + 1/2 * (n.fx - w * n.vx) * h**2 + 0.001 * jiggle() // add some noise
+        const dy = n.vy * h + 1/2 * (n.fy - w * n.vy) * h**2 + 0.001 * jiggle() // add some noise
+        n.x = n.x + dx
+        n.y = n.y + dy 
+        // conservative force
+        const fx = disp[n.id].x
+        const fy = disp[n.id].y
+        // update velocity
+        const vx = (n.vx * (1 - w*h/2) + 1/2 * (fx + n.fx) * h) / (1 + w*h/2)
+        const vy = (n.vy * (1 - w*h/2) + 1/2 * (fy + n.fy) * h) / (1 + w*h/2)
+        // keep data for next time step
+        n.vx = vx
+        n.vy = vy
+        n.fx = fx
+        n.fy = fy
+    }
+    // 
+    fixPositions(nodes, bbox)
+}
+let step = positionVerlet
 
 // ============================================================================
 // drawing
 const width = 500
 const height = 500
-const canvas = d3.select("#force-directed-layout")
+const menuCanvas = d3.select("#verlet-integration-layout")
+const svgCanvas = d3.select("#verlet-integration-svg")
 // gui
 const pKeys = ["Fruchterman-Reingold", "ForceAtlas2"]
 let pSel = 'Fruchterman-Reingold'
-const pId = 'layout-menue'
-const pDiv = canvas.append('div')
+const pId = 'layout-menu'
+const pDiv = menuCanvas.append('div')
         .attr('class', 'cell')
         .attr('id', pId)
 const guiConfig = {
@@ -117,6 +148,23 @@ const guiConfig = {
     handler: forceHandler
 }
 dropdown(guiConfig)
+const mKeys = ["position Verlet", "velocity Verlet"]
+let mSel = "position Verlet"
+const mId = "method-menue"
+const mDiv = menuCanvas.append('div')
+        .attr('class', 'cell')
+        .attr('id', mId)
+guiConfig.divObj = mDiv
+guiConfig.text = 'method: '
+guiConfig.selection = mSel
+guiConfig.keys = mKeys
+guiConfig.handler = methodHandler
+dropdown(guiConfig)
+function methodHandler(text, value) {
+    if (value === 'position Verlet') step = positionVerlet
+    else if (value === 'velocity Verlet') step = velocityVerlet
+}
+
 // D3
 const minNodeRadius = 4
 const maxNodeRadius = 16
@@ -129,9 +177,9 @@ const offsetY = 7
 const margin = { top: 5, bottom: 5, left: 5, right: 5 }
 const iW = width - margin.left - margin.right
 const iH = height - margin.top - margin.bottom
-const svg = canvas
+const svg = svgCanvas
     .append("svg")
-    .attr("class", "bfs-svg")
+    .attr("class", "svg")
     .attr("width", width)
     .attr("height", height)
 svg.append("rect")
@@ -144,7 +192,7 @@ const netwG = svg
     .attr("class", "force-directed-layout-group")
     .attr("transform", `translate(${width / 2}, ${height / 2})`)
 
-const {nodes, edges, bbox } = initNetwork(lesmiserables, iW, iH) // draw(lesmiserables, iW, iH)
+const {nodes, edges, bbox } = initNetwork(lesmiserables, iW, iH) 
 const sortedNodes = []
 nodes.forEach (n => sortedNodes.push(n))
 sortedNodes.sort( (n1,n2) => { return n1.c - n2.c })
@@ -226,7 +274,6 @@ function dragged(event, d) {
         .html(d.name)
         .style('left', `${x}px`)
         .style('top', `${y}px`)
-    alpha.reset(restartAlpha)
     event.subject.x = event.x
     event.subject.y = event.y
 }
@@ -242,10 +289,10 @@ function dragend(event, d) {
 const C = 0.45 // 0.52 // 0.4537 // 3 // 0.399
 const Kf = C * Math.sqrt( width * height / nodes.length) // Fruchterman-Reindold
 const Ka = 3.8 // ForceAtlas2
-const KgF = 0.5
-const KgA = 0.5 //0.0001
+const KgF = 30 // 0.5
+const KgA = 10 // 0.01
 let Kg = KgF
-const Kc = 1500
+const Kc = 1500 // 1500
 const cR = 2 // collision radius control
 let K = Kf
 let attractingForce = attractingForceF
@@ -253,20 +300,18 @@ let repulsiveForce = repulsiveForceF
 function forceHandler(text, value) {
     if (value === 'Fruchterman-Reingold') {
         alpha = alphaF
-        restartAlpha = restartAlphaF
         attractingForce = attractingForceF
         repulsiveForce = repulsiveForceF
         K = Kf
         Kg = KgF
     } else if(value === 'ForceAtlas2') {
         alpha = alphaA
-        restartAlpha = restartAlphaA
         attractingForce = attractingForceA
         repulsiveForce = repulsiveForceA
         K = Ka
         Kg = KgA
     }
-    alpha.reset(restartAlpha)
+    alpha.reset(1)
 }
 // animaiton
 const disp = nodes.map( n => {
@@ -275,8 +320,7 @@ const disp = nodes.map( n => {
 animate()
 function animate() {
     requestAnimationFrame(animate)
-    step(K, Kc, Kg, cR, nodes, edges, bbox, disp, alpha.next()) 
-    
+    step(K, Kc, Kg, cR, nodes, edges, bbox, disp) //, alpha.next())
     redraw(nodeG, linkG)
 }
 function redraw(nodeG, linkG) {
@@ -304,6 +348,12 @@ function initNetwork(data, width, height) {
         n.id = index
         n.x = 0
         n.y = 0
+        n.xprev = 0
+        n.yprev = 0
+        n.vx = 0
+        n.vy = 0
+        n.fx = 0
+        n.fy = 0
         n.r = 0
         n.c =  0
         n.degree = 0
@@ -356,51 +406,7 @@ function initNetwork(data, width, height) {
 }
 
 const cText = `
-// Attracting force Fruchterman-Reingold
-function attractingForceF(K, nodes, e, disp) { 
-    const d = distance(nodes[e.source], nodes[e.target])
-    const fa = d.d * d.d / K
-    disp[e.source].x += fa * d.x
-    disp[e.source].y += fa * d.y
-    disp[e.target].x -= fa * d.x
-    disp[e.target].y -= fa * d.y
-}
-// Repulsive force Fruchterman-Reingold
-function repulsiveForceF(K, nodes, i, j, disp) {
-    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
-    const fr = K * K / d.d
-    disp[i].x -= fr * d.x
-    disp[i].y -= fr * d.y
-    disp[j].x += fr * d.x
-    disp[j].y += fr * d.y
-}
-// Attracting force ForceAtlas2
-function attractingForceA(K, nodes, e, disp) {
-    const d = distance(nodes[e.source], nodes[e.target]) // vector pointing from n1 to n2, and Euclidean distance
-    const fa = d.d
-    disp[e.source].x += fa * d.x
-    disp[e.source].y += fa * d.y
-    disp[e.target].x -= fa * d.x
-    disp[e.target].y -= fa * d.y
-}
-// Repulsive force ForceAtlas2
-function repulsiveForceA(K, nodes, i, j, disp) {
-    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
-    const fr = K * (nodes[i].degree + 1) * (nodes[j].degree + 1) / d.d
-    disp[i].x -= fr * d.x
-    disp[i].y -= fr * d.y
-    disp[j].x += fr * d.x
-    disp[j].y += fr * d.y
-}
-function initDisplacements(disp) {
-    for (let d of disp) {
-        d.x = 0
-        d.y = 0
-        d.d = 0
-    }
-}
-// one single simulation step
-function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
+function conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
     initDisplacements(disp)
     // compute displacements from repelling forces
     const nrNodes = nodes.length
@@ -423,43 +429,61 @@ function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
     nodes.forEach( (n,i) => {
         gravitationalForce(Kg, n, bbox, disp)
     })
-    // update nodes position
-    nodes.forEach(function (n, i) {
-        const dx = disp[n.id].x
-        const dy = disp[n.id].y
-        if (!isFinite(dx) || !isFinite(dy)) {
-            console.log('not finite')
-            return
-        }
-        if (isNaN(dx) || isNaN(dy)) {
-            console.log('is NaN')
-            return
-        }
-        const d = Math.sqrt(dx * dx + dy * dy)
-        n.x += dx / d * (Math.min(alpha, d)) + 0.001 * jiggle()
-        n.y += dy / d * (Math.min(alpha, d)) + 0.001 * jiggle()
-    })
-    // shift center of network to center of bbox
-    const pos = {x: 0, y: 0}
-    nodes.forEach( n => {
-        pos.x += n.x 
-        pos.y += n.y 
-    })
-    pos.x /= nodes.length
-    pos.y /= nodes.length
-    pos.x = (bbox.xmax + bbox.xmin)/ 2 - pos.x
-    pos.y = (bbox.ymax + bbox.ymin)/ 2 - pos.y
-    nodes.forEach( n => {
-        n.x += pos.x
-        n.y += pos.y
-    })
-    // check bounding box
-    nodes.forEach( n => {
-        if (n.x < bbox.xmin) n.x = bbox.xmin;
-        if (n.x > bbox.xmax) n.x = bbox.xmax;
-        if (n.y < bbox.ymin) n.y = bbox.ymin;
-        if (n.y > bbox.ymax) n.y = bbox.ymax;
-    })
+}
+function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) { 
+    // compute conservative forces
+    conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+    // update position, velocity and acceleration
+    const w = 3
+    const h = 0.008
+    for (let n of nodes) {
+        // position Verlet
+        const xprev = n.xprev
+        const yprev = n.yprev
+        n.xprev = n.x
+        n.yprev = n.y
+        const fx = disp[n.id].x - w * n.vx + 0.001 * jiggle() // add some noise
+        const fy = disp[n.id].y - w * n.vy + 0.001 * jiggle() // add some noise
+        const dx = (n.x - xprev) + fx * h * h
+        const dy = (n.y - yprev) + fy * h * h
+        n.x = n.x + dx 
+        n.y = n.y + dy 
+        n.vx = (n.x - n.xprev) / h
+        n.vy = (n.y - n.yprev) / h
+    }    
+    // 
+    fixPositions(nodes, bbox)
+}
+
+function velocityVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) { 
+    // compute conservative forces
+    conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+    // update position, velocity and acceleration
+    const w = 3
+    const h = 0.005
+    for (let n of nodes) {
+        // keep position for position-Verlet
+        n.xprev = n.x 
+        n.yprev = n.y
+        // update position
+        const dx = n.vx * h + 1/2 * (n.fx - w * n.vx) * h**2 + 0.001 * jiggle() // add some noise
+        const dy = n.vy * h + 1/2 * (n.fy - w * n.vy) * h**2 + 0.001 * jiggle() // add some noise
+        n.x = n.x + dx
+        n.y = n.y + dy 
+        // conservative force
+        const fx = disp[n.id].x
+        const fy = disp[n.id].y
+        // update velocity
+        const vx = (n.vx * (1 - w*h/2) + 1/2 * (fx + n.fx) * h) / (1 + w*h/2)
+        const vy = (n.vy * (1 - w*h/2) + 1/2 * (fy + n.fy) * h) / (1 + w*h/2)
+        // keep data for next time step
+        n.vx = vx
+        n.vy = vy
+        n.fx = fx
+        n.fy = fy
+    }
+    // 
+    fixPositions(nodes, bbox)
 }
 `
 const hlPre = d3.select('#hl-code').append('pre')

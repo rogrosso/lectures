@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Velocity Verlet</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.infovis-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div#dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1em;
+            }
+            .grid-container {
+                display: grid;
+                grid-template-columns: 300px 200px;
+                gap: 0px;
+                background-color: whitesmoke;
+                margin-left:0px;
+                width: 500px;
+                padding-left: 0px;
+                border: 1px solid teal;
+                text-align: center;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            div.cell {
+                margin: 1px;
+            }
+            li {
+                margin-top: 3px;
+                margin-bottom: 3px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "random"   : "../../common/random.js",
+                    "utilities": "../../common/utilities.js",
+                    "colors"   : "../common/colors.js",
+                    "draw"     : "../common/draw.js",
+                    "gui"      : "../common/gui.js",
+                    "networks" : "./networks.js",
+                    "lesmiserables" : "../data/lesmiserables.json"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="infovis-lecture">
+            <h1>Verlet Integration</h1>
+            <p>
+                Verlet integration is a symplectic technique used to solve ordinary differential equations for dynamic 
+                systems with conservative forces. That is, they are derived from a scalar potential. Two different 
+                algorithms are considered: Störmer-Verlet, also called position-Verlet, and velocity-Verlet.
+            </p>
+            <p>
+                The methods solve ordinary differential equations of second order of the form
+                \[
+                \mathbf{\ddot{x}}(t) = \mathbf{a}(\mathbf{x}(t))
+                \]
+                where \(\mathbf{x}(t)\) is the position and \(\mathbf{a}(\mathbf{x}(t))\) is the acceleration, which only
+                depends on the position. 
+            </p>
+            <h2>Position-Verlet</h2>
+            <p>
+                The update step by the numerical integration is 
+                \[
+                \mathbf{x}_{n+1} = 
+                \mathbf{x}_n + (\mathbf{x}_n - \mathbf{x}_{n-1}) + \mathbf{a}(\mathbf{x}_n) h^2
+                \]
+                where \(h\) is the step size.  
+            </p>
+            <p>
+                The update step of the velocity is 
+                \[
+                \mathbf{v}_{n+1} = \frac{\mathbf{x}_{n+1} - \mathbf{x}_n}{h}
+                \]
+            <p>
+                The mass of the particles in the dynamic system is set to \(m_i = 1\) for all particles. In order to 
+                slow oscillation and reach an equilibrium state we include a damping term, a drag force linearly 
+                dependent on the velocity. The mass of the particles in the dynamic system is set to \(m_i = 1\) 
+                for all particles. The acceleration has the form
+                \[
+                    \mathbf{a}_n = \mathbf{f}_n - \zeta \mathbf{v}_n \, , \quad \zeta \geq 0
+                \]
+                where \(\zeta\) is coefficient to dump oscillations.
+            </p>
+            <h2>Velocity-Verlet</h2>
+            <p>
+                The update step is given by 
+                <ul>
+                    <li>
+                        compute position: 
+                        \(
+                            \mathbf{x}_{n+1} = 
+                            \mathbf{x}_n + \mathbf{v}_n  h + \frac{1}{2} (\mathbf{f}_n - \zeta \mathbf{v}_n) h^2
+                        \)
+                    </li>
+                    <li>
+                        compute conservative forces \(\mathbf{f}_{n+1}\)
+                    </li>
+                    <li>
+                        update velocity: 
+                        \(
+                            \mathbf{v}_{n+1} = 
+                            \frac{1}{1+ \frac{1}{2}\zeta  h} 
+                            \left[ (1-\frac{1}{2} \zeta h ) \mathbf{v}_n 
+                            + \frac{1}{2} (\mathbf{a}_n + \mathbf{f}_{n+1}) h \right]
+                        \)
+                    </li>
+                </ul>
+            </p>
+            <h3>Remark</h3>
+            <p>
+                Nodes are circles of a given size, and collision forces are included in the conservative force terms 
+                to avoid node overlap. These forces are zero if the nodes keep a given distance and tend to infinity 
+                when the distance between the centers of the nodes tends to zero.
+            </p>
+            <hr style="margin-top: 10px; margin-bottom: 10px;">
+            <div style="
+                border: 1px solid #CC9999; 
+                padding: 15px; 
+                text-align: center; 
+                margin-left: auto; 
+                margin-right: auto">
+                <div id="verlet-integration-layout" class="grid-container"></div>
+                <div id="verlet-integration-svg" class="verlet-integration" style="text-align: center;"></div>
+                <script type="module" src="./verletintegration.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

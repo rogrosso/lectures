@@ -1,5 +1,6 @@
 import { binaryHeapFactory } from '../../common/binaryHeap.js'
 import { keyCantor as keyGen } from '../../common/utilities.js'
+import { easyRandom } from '../../common/random.js'
 
 // Prepare network for processing, i.e. complete data structure
 export function setNetwork(network) {
@@ -143,3 +144,98 @@ export function dijkstra(nodes, neighbors, index) {
       })
     }
 } // dijkstra()
+
+
+export function collisionForce(k, beta, nodes, i, j, disp) {
+    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j]
+    const s = beta * (nodes[i].r + nodes[j].r)
+    const l = d.d - s 
+    if (l < 0 && d.d > 0.001) {
+        const fr = k * Math.abs(l / (l + s))
+        disp[i].x -= fr * d.x
+        disp[i].y -= fr * d.y
+        disp[j].x += fr * d.x
+        disp[j].y += fr * d.y
+    } 
+}
+export function gravitationalForce(kg, n, bbox, disp) {
+    const x = (bbox.xmax+bbox.xmin) / 2 - n.x
+    const y = (bbox.ymax+bbox.ymin) / 2 - n.y
+    const s = Math.sqrt(x**2 + y**2)
+    const r = n.r
+    const dx = x / s
+    const dy = y / s
+    const g = kg / r
+    disp[n.id].x += g * dx
+    disp[n.id].y += g * dy
+}
+export function attractingForceF(K, nodes, e, disp) {
+    const d = distance(nodes[e.source], nodes[e.target])
+    const fa = d.d * d.d / K
+    disp[e.source].x += fa * d.x
+    disp[e.source].y += fa * d.y
+    disp[e.target].x -= fa * d.x
+    disp[e.target].y -= fa * d.y
+}
+export function repulsiveForceF(K, nodes, i, j, disp) {
+    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
+    const fr = K * K / d.d
+    disp[i].x -= fr * d.x
+    disp[i].y -= fr * d.y
+    disp[j].x += fr * d.x
+    disp[j].y += fr * d.y
+}
+export function attractingForceA(K, nodes, e, disp) {
+    const d = distance(nodes[e.source], nodes[e.target]) // vector pointing from n1 to n2, and Euclidean distance
+    const fa = d.d
+    disp[e.source].x += fa * d.x
+    disp[e.source].y += fa * d.y
+    disp[e.target].x -= fa * d.x
+    disp[e.target].y -= fa * d.y
+}
+export function repulsiveForceA(K, nodes, i, j, disp) {
+    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
+    const fr = K * (nodes[i].degree + 1) * (nodes[j].degree + 1) / d.d
+    disp[i].x -= fr * d.x
+    disp[i].y -= fr * d.y
+    disp[j].x += fr * d.x
+    disp[j].y += fr * d.y
+}
+const randJiggle = easyRandom(13)
+export function jiggle() { return (randJiggle() - 0.5) * 1e-4 }
+export function distance(n1,n2) {
+    let dx = n2.x - n1.x
+    let dy = n2.y - n1.y
+    let l = Math.sqrt(dx * dx + dy * dy)
+    if (l === 0) {
+        dx = jiggle()
+        dy = jiggle()
+        l = Math.sqrt(dx * dx + dy * dy)
+    }
+    return { x: dx / l, y: dy / l, d: l }
+}
+export function controlFunction(mAlpha, iAlpha, vDump) {
+    const minAlpha = mAlpha
+    const initialAlpha = iAlpha
+    const velDump = vDump
+    let iter = 0
+    let alpha = iAlpha
+    function next() {
+        if (iter < Number.MAX_SAFE_INTEGER) iter++
+        if (alpha < minAlpha) return minAlpha
+        //else return minAlpha * (1 + initialAlpha / ( minAlpha + Math.log( 1 + velDump * iter )))
+        else return minAlpha * (1 + initialAlpha /  minAlpha * Math.exp( -velDump * iter ))
+    }
+    function reset(val) {
+        if (arguments.length > 0) {
+            const a = -1/velDump * Math.log( minAlpha / initialAlpha * (val/minAlpha - 1))
+            if (a < 1) iter = 0
+            else iter = Math.floor(a)
+        }
+        else iter = 0
+    }
+    return {
+        next,
+        reset
+    }   
+}
