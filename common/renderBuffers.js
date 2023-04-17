@@ -65,6 +65,7 @@ export function normalizeMesh(m) {
         Math.abs(zMax)
     )
     uniformScale(m,1/s)
+    return m
 }
 
 // compute vertex, normals, faces, wireframe and bbox

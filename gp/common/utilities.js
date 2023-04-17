@@ -94,3 +94,11 @@ export function readObj(text) {
         faces
     }
 }
+
+export function readTextFile(text) {
+    if (text.substring(0,3).toUpperCase() === 'OFF') {
+        return readOFF(text)
+    } else {
+        return readObj(text)
+    }
+}
