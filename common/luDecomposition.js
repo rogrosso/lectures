@@ -1,7 +1,7 @@
 /**
  * LU decomposition via Gauss Elimination
  * The implementation is based on the text book 
- * Hans Rudolf Schwarz I Norbert Köckler 
+ * Hans Rudolf Schwarz and Norbert Köckler 
  * Numerische Mathematik 
  * 7., überarbeitete Auflage, 2009
  */
