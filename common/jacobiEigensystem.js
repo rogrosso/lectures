@@ -1,17 +1,14 @@
 
 /**
- * Jacobi eigenvalue algorithm
- * Computes the eigenvalues for a symmetric matrix
+ * Jacobi eigenvalue algorithm: Computes the eigenvalues for a symmetric matrix
  * The implementation is based on the algorithm given in 
  * chapter 5, section 5.2 of the text book 
- * Hans Rudolf Schwarz and Norbert Köckler 
- * Numerische Mathematik 
- * 7., überarbeitete Auflage, 2009
+ * "Numerische Mathematik" by Hans Rudolf Schwarz and Norbert Köckler, 7., überarbeitete Auflage, 2009
  * We use the formulas 5.12 and 5.13 for the rotations. The function returns 
- * the eigenvalues and eigenvectors sorted from smallest to largest eigenvalue in
- * an orthogonal matrix, such that V^t * A * V = diag(l_1, ..., l_n)
- * @param {Array} A - symmetric matrix
- * @returns {Object} {l, V} - eigenvalues and eigenvectors sorted from smallest to largest
+ * the eigenvalues and eigenvectors sorted from smallest to largest eigenvalue of
+ * an orthogonal matrix, such that V^t * A * V = diag(l_1, ..., l_n). The matrix V
+ * contains the eigenvectors as columns. The eigenvalues can be sorted from smallest to largest.
+ * @returns {Object} eigenvalues and eigenvectors object
  */
 export default function jacobiEigenvalueFactory() {
     let A_ = undefined
@@ -22,6 +19,10 @@ export default function jacobiEigenvalueFactory() {
     let eps = 1e-12
     let maxIter = 1000 // maximum number of iterations
     let flag = true // true if the eigenvalues are sorted
+    /**
+     * Find pair of indices p and q such that |A[p][q]| is maximal
+     * @returns {Object} object with indices p and q
+     */
     const findIndexPair = () => {
         let p = 1
         let q = 0
@@ -35,6 +36,9 @@ export default function jacobiEigenvalueFactory() {
         }
         return {p, q}
     }
+    /**
+     * Sorts the eigenvalues and eigenvectors
+     */
     const sortEigenvalues = () => {
         l_ = new Array(n).fill(0)
         V_ = new Array(n).fill(null).map(e => new Array(n).fill(0))
@@ -52,7 +56,11 @@ export default function jacobiEigenvalueFactory() {
             }
         }
     }
-
+    /**
+     * Computes the eigenvalues and eigenvectors of a symmetric matrix
+     * The methods uses the Jacobi algorithm based on Given rotations
+     * @returns {Object} eigenvalues and eigenvectors object
+     */
     function solve() {
         for (let iter = 0; iter < maxIter; iter++) {
             const {p, q} = findIndexPair()

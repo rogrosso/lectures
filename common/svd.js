@@ -1,29 +1,23 @@
 /**
- * SVD algorithm.
- * Computes the singular value decomposition for a matrix C. Two methods are implemented. 
- * The classical Jacobi algorithm and the algorithm of Golub-Reinsch. We use Householder 
- * transformations to reduce the matrix. The implentation
- * is based on the algorithms described in the text books:
- * Hans Rudolf Schwarz I Norbert Köckler 
- * Numerische Mathematik 
- * 7., überarbeitete Auflage, 2009
- * and
- * Josef Stoer Roland Bulirsch
- * Numerisceh Mathematik 2
- * Fünfte, korrigierte Auflage, 2005
+ * Singular Value Decomposition
+ * It computes the singular value decomposition of a matrix C. Two methods are implemented.
+ * The classical Jacobi algorithm and the algorithm of Golub-Reinsch. We use Householder
+ * transformations to reduce the matrix. The implementation is based on the algorithms
+ * described in the text books:
+ * 1. "Numerische Mathematik" by Hans Rudolf Schwarz and Norbert Köckler, 7th edition, 2009
+ * 2. "Numerische Mathematik 2" by Josef Stoer and Roland Bulirsch, 5th edition, 2005
+ * Notes:
+ * 1. The algorithm is not optimized for speed or memory usage.
+ * 2. The implementation of the Golub-Reinsch algorithm is slower than the Jacobi algorithm.
+ * 3. The Jacobi algorithm is provably good enough for most of the applications. 
+ * 4. The funciton svd() implements the Golub-Reinsch algorithm.
+ * 5. The function svdJacobi() implements the Jacobi algorithm. 
  * @param {Array} C - matrix to be decomposed.
  * @returns {Object} - {t, U, V} where U and V are orthogonal matrices and t is
  * is a vector with the singular values, such that C = U * diag(t) * V^t
  */
 import jacobiEigenvalueFactory from "./jacobiEigenvalue.js"
 export default function grSVDFactory(A) {
-    //let N = 0
-    //let n = 0
-    //let A_ = undefined // symmetric matrix, nxn
-    //let C_ = undefined // A = C * C^T, NxN
-    //let U_ = undefined // U orthogonal matrix NxN
-    //let V_ = undefined // V orthogonal matrix nxn
-    //let t_ = undefined // singular values
     function accumulateU(U, u) {
         const N = U.length
         const U_ = new Array(N).fill(null).map( (e, i) => [...U[i]])
@@ -200,12 +194,22 @@ export default function grSVDFactory(A) {
         return {U, V}
     }
     return {
+        /**
+         * Implements the Golub-Kahan SVD algorithm.
+         * @param {Array} C 
+         * @returns {Object} {t, U, V}
+         */
         svd(C) {
             const {J, U: U1_, V: V1_ } = householder(C)
             const {t, U: U2_, V: V2_} = this.fastSvd(J)
             const {U, V} = orthogonalMatrices(U1_, U2_, V1_, V2_)
             return {t, U, V}
         },
+        /**
+         * Implements the classical Jacobi SVD algorithm.
+         * @param {Array} C
+         * @returns {Object} {t, U, V}
+         */
         fastSvd(C) {
             const A_ = symmetricMatrix(C)
             const jacobi = jacobiEigenvalueFactory()

@@ -1,15 +1,22 @@
 /**
  * QR Decomposition using Householder reflections
  * The implementation is based on the text book (chapter 6)
- * Hans Rudolf Schwarz I Norbert Köckler 
- * Numerische Mathematik 
- * 7., überarbeitete Auflage, 2009
+ * "Numerische Mathematik" by Hans Rudolf Schwarz I Norbert Köckler, 7., überarbeitete Auflage, 2009
+ * Notes:
+ * 1. decompose a matrix A into a product A = QR, where Q is orthogonal and R is upper triangular
+ * 2. solve linear systems
+ * 3. is commonly used to solve the least squares problem
+ * @returns {Object} QR decomposition object
  */
 export default function qrDecompositionFactory() {
     let N = 0
     let n = 0
     let U_ = undefined
     let t_ = undefined
+    /**
+     * Householder reflections to compute the QR decomposition
+     * @returns true if successful, false otherwise
+     */
     function householder() {
         for (let l = 0; l < n; l++) {
             let gamma = 0
@@ -33,7 +40,11 @@ export default function qrDecompositionFactory() {
             }
         }
         return true
-    } // householder()
+    }
+    /**
+     * QR decomposition: compute Q and R
+     * @returns {Object} {Q, R}
+     */
     function qr_() {
         let Q0 = new Array(N).fill(0).map((e, i) => new Array(N).fill(0))
         let Q1 = new Array(N).fill(0).map((e, i) => new Array(N).fill(0))
@@ -61,6 +72,12 @@ export default function qrDecompositionFactory() {
         }
         return {Q: Q0, R}
     }
+    /**
+     * Solve linear systems
+     * @param {Array} d right hand side
+     * @param {Array} x solution
+     * @returns true if successful, false otherwise
+     */
     function solve_(d, x) {
         for (let l = 0; l < n; l++) {
             let s = 0
@@ -96,8 +113,11 @@ export default function qrDecompositionFactory() {
         solve(d) {
             const x = new Array(n).fill(0)
             const d_ = Array.from(d)
-            solve_(d_, x)
-            return x
+            if (solve_(d_, x)) {
+                return x
+            } else {
+                return undefined
+            }
         }
     }
 } // qrDecompositionFactory()

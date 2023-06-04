@@ -1,9 +1,10 @@
 /**
  * LU decomposition via Gauss Elimination
- * The implementation is based on the text book 
- * Hans Rudolf Schwarz and Norbert Köckler 
- * Numerische Mathematik 
- * 7., überarbeitete Auflage, 2009
+ * The implementation is based on the text book:
+ * "Numerische Mathematik" by Hans Rudolf Schwarz and Norbert Köckler, 7., überarbeitete Auflage, 2009
+ * Note: LU decomposition is used instead of Gauss Elimination to solve multiple linear systems with 
+ * the same coefficient matrix but different righ-hand sides.
+ * @returns {Object} LU-decompotion {lu, solve} object
  */
 export default function luDecompositionFactory() {
     let n = 0      // matrix size
@@ -11,6 +12,11 @@ export default function luDecompositionFactory() {
     let R = undefined
     let P = undefined
     const swapRows = (A, i, j) => [A[i], A[j]] = [A[j], A[i]]
+    /**
+     * 
+     * @param {Array} R the matrix to be decomposed
+     * @returns true if the matrix is invertible, false otherwise
+     */
     function lu_(R) {
         for (let c = 0; c < n; c++) { // loop over the columns
             pIndex = c
@@ -32,6 +38,12 @@ export default function luDecompositionFactory() {
         }
         return true
     } // LU decomposition
+    /**
+     * 
+     * @param {Array} b right hand side
+     * @param {Array} x the solution of the linear system
+     * @returns 
+     */
     function solve_(b, x) {
         for (let i = 0; i < n; i++) {
             x[i] = b[P[i]]
