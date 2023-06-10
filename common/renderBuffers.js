@@ -68,7 +68,15 @@ export function normalizeMesh(m) {
     return m
 }
 
-// compute vertex, normals, faces, wireframe and bbox
+/**
+ * Compute vertex, normals, faces, wireframe and bounding box buffers
+ * for THREE.js rendering
+ * @param {Object} m, mesh
+ * @param {Boolean} nFlag, normal flag
+ * @param {Boolean} wFlag, wireframe flag
+ * @param {Boolean} bFlag, bounding box flag
+ * @returns {Object} buffers, {vBuff, nBuff, iBuff, wBuff, bBuff
+ */
 export function renderBuffers(m, nFlag, wFlag, bFlag) {
     const vBuff = []
     const nBuff = []
@@ -93,8 +101,10 @@ export function renderBuffers(m, nFlag, wFlag, bFlag) {
     }
     if (wFlag) {
         for (let e of m.edges) {
-            const {x: x0, y: y0, z: z0} = m.v(m.h(e.h0).origin)
-            const {x: x1, y: y1, z: z1} = m.v(m.h(m.h(e.h0).next).origin)
+            //const {x: x0, y: y0, z: z0} = m.v(m.h(e.h0).origin)
+            //const {x: x1, y: y1, z: z1} = m.v(m.h(m.h(e.h0).next).origin)
+            const {x: x0, y: y0, z: z0} = m.v(e.v0)
+            const {x: x1, y: y1, z: z1} = m.v(e.v1)
             wBuff.push(x0, y0, z0 )
             wBuff.push(x1, y1, z1 )
         }

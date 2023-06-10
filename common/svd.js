@@ -16,7 +16,7 @@
  * @returns {Object} - {t, U, V} where U and V are orthogonal matrices and t is
  * is a vector with the singular values, such that C = U * diag(t) * V^t
  */
-import jacobiEigenvalueFactory from "./jacobiEigenvalue.js"
+import jacobiEigenvalueFactory from "./jacobiEigensystem.js"
 export default function grSVDFactory(A) {
     function accumulateU(U, u) {
         const N = U.length

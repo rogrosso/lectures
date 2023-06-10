@@ -6,7 +6,7 @@ import { readOFF, readObj } from "../common/utilities.js"
 import { dot, cross, norm, norm2, normalize, normal } from "../../common/utilities.js"
 //import { renderBuffers } from "../../common/renderBuffers.js"
 import halfedgeFactory from "halfedge"
-import { binaryHeapFactory } from "binaryHeap"
+import binaryHeapFactory  from "binaryHeap"
 
 // main
 const bunnyUrl = "../data/bunny_noBnd.off"
