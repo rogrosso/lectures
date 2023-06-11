@@ -72,7 +72,7 @@
                 </li>
             </ol>
             <p>This algorithm aligns the source point cloud with the target point cloud.</p>
-            <h2>Computation of rotation \(R\) and translation \(t\)</h2>
+            <h3>Computation of rotation \(R\) and translation \(t\)</h3>
             <ol>
                 <li>
                     Compute the center of mass of the target and source point clouds
@@ -106,11 +106,13 @@
                     \]
                 </li>
             </ol>
-            <h2>Point couds alignment</h2>
+            <h3>Alignment of the point clouds</h3>
             <p>Transform source point cloud</p>
             \[
             q_i \leftarrow R q_i + t
             \]
+            <h3>Note:</h3>
+            <p>In order to visualize the IPC alignment we slow down the animation to 5 fps</p>
             <hr>
             <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
                 <div id="threejs_canvas"></div>

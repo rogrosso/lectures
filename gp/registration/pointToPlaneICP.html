@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometry Processing"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Point-to-Plane ICP</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.gp-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div#dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1em;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: auto;
+                gap: 1px;
+                background-color: white;
+                padding: 4px; 
+                margin: 2px; 
+                margin-left: 55px;
+                width: 600px;
+                border: 1px solid teal
+            }
+            div.cell {
+                margin: 1px;
+            }
+            .accordion {
+                background-color: #eee;
+                color: #444;
+                box-shadow: 5px 5px 3px #888888;
+                cursor: pointer;
+                padding: 4px;
+                padding-left: 30px;
+                width: 100%;
+                text-align: left;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                outline: none;
+                transition: 0.4s;
+            }
+            .active, .accordion:hover {
+                background-color: #ccc;
+            }
+            .panel {
+                font-size: 16px;
+                padding: 0 18px;
+                max-height: 0;
+                background-color: white;
+                overflow: hidden; 
+                transition: max-height 0.2s ease-out;
+            }
+            button.accordion.active, button.accordion:hover {
+                background-color: #ccc;
+            }
+            button.accordion.active:after {
+                content: "\2212";
+            }
+            button.accordion:after {
+                content: '\002B';
+                color: #777;
+                font-size: 24px;
+                font-weight: bold;
+                float: right;
+                margin-left: 5px;
+                margin-top: 10px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three" : "https://cdn.jsdelivr.net/npm/three/+esm",
+                    "OrbitControls" : "https://cdn.jsdelivr.net/npm/three-controls@1.0.1/+esm",
+                    "lil-gui" : "https://cdn.jsdelivr.net/npm/lil-gui@0.18.1/+esm"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="gp-lecture">
+            <h1>Point-to-Plane ICP</h1>
+            <p><strong>Note:</strong> open the accordion bellow for a detailed explanation of the point-to-plane algorithm</p>
+            <button class="accordion">
+                <h3 style="float:left">A detailed explanation of the Point-to-Plane ICP algorithm</h3>
+            </button>
+            <div class="panel">
+            <p>
+                To compute the distance between corresponding points, use the point-to-plane distance:
+                The minimization problem is:</p>
+                \[
+                \text{min}_{R,t} \sum_i | (R \cdot q_i + t - p_i) \cdot n_i |^2
+                \]
+            <p>
+                where \(p_i, q_i\) are corresponding closest points and \(n_i\) normal at \(p_i\). The point \(p_i\) 
+                is in the target or fixed point cloud. The point \(q_i\) is in the source or moving point cloud.
+            </p>
+            <p>
+                Under the assumption of small rotations, we can approximate the rotation matrix \(R(\alpha, \beta, \gamma)\),
+                 that is the product of three rotations around the \(x\)-, \(y\)- and \(z\)-axis, 
+                by the first order Taylor expansion around the identity matrix \(I\):
+            </p>
+            \[
+            R(\alpha, \beta, \gamma) = R_z(\gamma) R_y(\beta) R_x(\alpha) \approx I + \left( \begin{array}{c c c} 0 & - \gamma & \beta\\ \gamma & 0 & -\alpha\\ -\beta & \alpha & 0 \end{array}\right)
+            \]
+            <p>
+                where we first rotate \(\alpha\) around the \(x\)-axis, then \(\beta\) around the y-axis and \(\gamma\) around the z-axis. 
+                We note that with this approximation, the search for the optimal rotation and translation reduces to a quadratic 
+                minimization problem in the three rotation angles and the three coordinates of the translation: 
+                \((\alpha, \beta, \gamma, t_x, t_y, t_z)\).
+            </p>
+            <p>
+                A general unconstrained quadratic minimization problem has the form, 
+                see <a href="https://web.stanford.edu/~boyd/cvxbook/">Convex Optimization, Boyd and Vandenberghe</a>:
+                \[
+                    \text{minimize}\, \frac{1}{2} x^T P x + q^T x + r
+                \]
+            </p>
+            <p>
+                The solution to this problem can be obtained by solving the linear system
+                \[
+                P x + q = 0
+                \]
+            </p>
+            <p>
+                We, therefore, reduce the point-to-plane minimization to an unconstrained quadratic minimization problem, for which 
+                the solution can be computed by solving a linear system. We first note that
+                \[
+                |q \cdot n|^2 = q^T\cdot n \cdot n^T \cdot q
+                \]
+            </p>
+            <p>
+                Note that it is the dot product between vectors on the left and, on the right, the matrix product. We introduce some notation.
+                \[
+                \Theta = \begin{pmatrix} \alpha \\ \beta \\ \gamma \\ t_x \\ t_y \\ t_z \end{pmatrix}, \quad
+                W_i =
+                \begin{pmatrix}
+                0 & q_{i,z} & -q_{i,y} & 1 & 0 & 0\\
+                -q_{i,z} & 0 & q_{i,x} & 0 & 1 & 0\\
+                q_{i,y} & -q_{i,x} & 0 & 0 & 0 & 1\\
+                \end{pmatrix}
+                \]
+            </p>
+            <p>
+                Therefore, we rewrite the distance as
+                \[
+                R q_i + t - p_i \approx W_i \, \Theta + (q_i - p_i)
+                \]
+            </p>
+            <p>
+                Also note that the cross product can be given as a matrix multiplication as follows. First introduce 
+                the \(3\times 3\) matrix
+                \[
+                \Omega = \begin{pmatrix} 0& q_z& -q_y\\ -q_z&0&q_x\\ q_y&-q_x& 0\end{pmatrix}
+                \]
+            </p>
+            <p>
+                and obtain
+                \[ 
+                \Omega^T \, n = ( n^T \Omega )^T = q \times n
+                \]
+            </p>
+            <p>
+                it follows:
+                \[
+                W_i^T n_i = \begin{pmatrix}c_{i,x} \\ c_{i,y} \\ c_{i,z} \\ n_{i,x} \\ n_{i,y} \\ n_{i,z}\end{pmatrix} = C_i
+                \]
+            </p>
+            <p>where \(c_i = q_i \times n_i\).</p>
+            <p>
+                Putting all this together we obtain
+                \[
+                \begin{align}
+                |(R q_i + t - p)\cdot n_i|^2 &\approx  \Theta^T W_i^T n_i n_i^T W_i \Theta + 2 (q_i - p_i)^T n_i n_i^T W_i \Theta + (q_i-p_i)^T n_i n_i^T (q_i - p_i) \\
+                  &\approx \Theta^T C_i \, C_i^T \Theta + 2 (q_i - p_i)^T n_i C_i^T \Theta + + (q_i-p_i)^T n_i n_i^T (q_i - p_i) 
+                \end{align}
+                \]
+            </p>
+            <p>
+                The point-to-plane minimization problem can be formulated as follows/p>
+                \[
+                \min_{R,t} \sum_i | (R \cdot q_i + t - p_i) \cdot n_i |^2  \longrightarrow \text{min}_{(\alpha, \beta, \gamma, t_x, t_y, t_z)} F(\alpha, \beta, \gamma, t_x, t_y, t_z)
+                \]
+            </p>
+            <p>
+                where
+                \[
+                F(\alpha, \beta, \gamma, t_x, t_y, t_z) = \Theta^T \left(\sum_i C_i C_i^T \right) \Theta + 2 \left(\sum_i (q_i - p_i)^T n_i C_i^T\right) \Theta  + \sum_i (q_i-p_i)^T n_i n_i^T (q_i - p_i)
+                \]
+            </p>
+            <p>In matrix notation we have
+                \[
+                \begin{align}
+                F(\alpha, \beta, \gamma, t_x, t_y, t_z) &= \Theta^T \left(\sum_i C_i C_i^T \right) \Theta + 2 \left(\sum_i (q_i - p_i)^T n_i C_i^T\right) \Theta  + \sum_i (q_i-p_i)^T n_i n_i^T (q_i - p_i)\\
+                &= \Theta^T K \Theta + 2 b^T \Theta + c\\
+                \end{align}
+                \]
+            </p>
+            <p>
+                with
+                \[
+                \begin{align}
+                K &= \sum_i C_i \, C_i^T \\
+                b &= \sum_i \left( (q_i - p_i)^T n_i \, C_i^T \right)^T\\
+                \end{align}
+                \]
+            </p>
+            <p>or in a much more complex and cumbersome notation without matrix multiplication</p>
+            <p>
+                \[
+                \begin{align}
+                K &= \sum_i \begin{pmatrix}
+                {c_{i,x}}^2 & c_{i,x}\,c_{i,y} & c_{i,x}\,c_{i,z} & c_{i,x}\,n_{i,x} & c_{i,x}\,n_{i,y} & c_{i,x}\,n_{i,z}\\
+                c_{i,x}\,c_{i,y} & {c_{i,y}}^2 & c_{i,y}\,c_{i,z} & c_{i,y}\,n_{i,x} & c_{i,y}\,n_{i,y} & c_{i,y}\,n_{i,z}\\
+                c_{i,x}\,c_{i,z} & c_{i,y}\,c_{i,z} & {c_{i,z}}^2 & c_{i,z}\,n_{i,x} & c_{i,z}\,n_{i,y} & c_{i,z}\,n_{i,z}\\
+                c_{i,x}\,n_{i,x} & c_{i,y}\,n_{i,x} & c_{i,z}\,n_{i,x} & {n_{i,x}}^2 & n_{i,x}\,n_{i,y} & n_{i,x}\,n_{i,z}\\
+                c_{i,x}\,n_{i,y} & c_{i,y}\,n_{i,y} & c_{i,z}\,n_{i,y} & n_{i,x}\,n_{i,y} & {n_{i,y}}^2 & n_{i,y}\,n_{i,z}\\
+                c_{i,x}\,n_{i,z} & c_{i,y}\,n_{i,z} & c_{i,z}\,n_{i,z} & n_{i,x}\,n_{i,z} & n_{i,y}\,n_{i,z} & {n_{i,z}}^2
+                \end{pmatrix}\\[2ex]
+                b &= \sum_i \begin{pmatrix}
+                c_{i,x}  (q_i - p_i)\cdot n_i\\
+                c_{i,y}  (q_i - p_i)\cdot n_i\\
+                c_{i,z}  (q_i - p_i)\cdot n_i\\
+                n_{i,x}  (q_i - p_i)\cdot n_i\\
+                n_{i,y}  (q_i - p_i)\cdot n_i\\
+                n_{i,z}  (q_i - p_i)\cdot n_i
+                \end{pmatrix}\\[2ex]
+                c &= \sum_i |(q_i-p_i)\cdot n_i|^2
+                \end{align}
+                \]
+            </p>
+            <p>
+            The minimization problem takes the form
+            \[
+            \nabla F = 0 \, \Leftrightarrow \, K \Theta = -b
+            \]
+            </p>
+            <p><strong>Remark</strong></p>
+            <p>
+                To transform the \(q_i\) points of the moving mesh using the de-linearized rotation, i.e. at the iteration \(k+1\) the points in the moving mesh are given by
+                \[
+                q^{(k+1)}_i = R q^{(k)}_i + t
+                \]
+                where the rotation matrix is
+                \[
+                R(\alpha, \beta,\gamma) = R_z(\gamma) R_y(\beta) R_x(\alpha)
+                \]
+            </p>
+            <h3>Final remarks</h3>
+            <p>
+                Rotation matrix using Euler angles and the Tait-Bryan representation, see
+                <a href=""https://en.wikipedia.org/w/index.php?title=Euler_angles&oldid=1018876763">Wikipedia: Euler angles</a>:
+                \[
+                \begin{align}
+                R & = R_z(\theta_3)R_y(\theta_2)R_x(\theta_1)\\[10pt]
+                & = \begin{pmatrix}
+                \cos\theta_3 & -\sin\theta_3 & 0\\
+                \sin\theta_3 & \cos\theta_3 & 0\\
+                0 & 0 & 1\\
+                \end{pmatrix}
+                \begin{pmatrix}
+                \cos\theta_2 & 0 & \sin\theta_2\\
+                0 & 1 & 0\\
+                -\sin\theta_2 & 0 & \cos\theta_2 \\
+                \end{pmatrix}
+                \begin{pmatrix}
+                1 & 0 & 0\\
+                0 & \cos\theta_1 & -\sin\theta_1 \\
+                0 & \sin\theta_1 & \cos\theta_1\\
+                \end{pmatrix}\\[10pt]
+                & = \begin{pmatrix}
+                \cos\theta_3\cos\theta_2 & \cos\theta_3 \sin\theta_2\sin\theta_1 - \sin\theta_3\cos\theta_1 & \cos\theta_3 \sin\theta_2\cos\theta_1 + \sin\theta_3\sin\theta_1\\
+                \sin\theta_3\cos\theta_2 & \sin\theta_3 \sin\theta_2\sin\theta_1 + \cos\theta_3\cos\theta_1 & \sin\theta_3 \sin\theta_2\cos\theta_1 - \cos\theta_3\sin\theta_1\\
+                -\sin\theta_2 & \cos\theta_2 \sin\theta_1 & \cos\theta_2 \cos\theta_1\\
+                \end{pmatrix}
+                \end{align}
+                \]
+            </p>
+            <p>
+                The <strong>small angle approximation is obtained as follows</strong>
+                Replace in the matrix above the following terms
+                \[
+                \cos \theta_i \approx 1,\quad \sin\theta_i \approx \theta_i,\quad \theta_i \cdot \theta_j \approx 0, \quad \theta_i \cdot \theta_j \cdot \theta_k \approx 0
+                \]
+                The linearized rotation matrix (discard all term quadratic in the angles):
+                \[
+                R(\theta_1, \theta_2, \theta_3) = I +  \begin{pmatrix} 0 & - \theta_3 & \theta_2\\ \theta_3 & 0 & -\theta_1\\ -\theta_2 & \theta_1 & 0 \end{pmatrix}
+                \]
+            </p>
+            </div>
+            <h2>The Point-to-Plane ICP algorithm</h2>
+            <p>
+                <strong>1)</strong> Compute the matrix and the right hand side of the linear system:
+                \[
+                \begin{align}
+                c_i & = \mathbf{q}_i \times \mathbf{n}_i \\
+                C_i & = \begin{pmatrix}c_{i,x} \\ c_{i,y} \\ c_{i,z} \\ n_{i,x} \\ n_{i,y} \\ n_{i,z}\end{pmatrix} \\
+                K&= \sum_i C_i C^T_i\\
+                b&= \sum_i ((\mathbf{q}_i - \mathbf{p}_i)^T\mathbf{n_i})\, C_i
+                \end{align}
+                \]
+            </p>
+            <hr>
+            <p>
+                <strong>2)</strong> Solve the linear system
+                \[
+                K \cdot \Omega = b, \quad \text{where} \quad \Omega = \begin{pmatrix} \alpha\\ \beta\\ \gamma \\ t_x \\ t_y \\ t_z \end{pmatrix}
+                \]
+                where \(\mathbf{t}\) is the translation vector and \(\alpha, \, \beta, \, \gamma\) are the rotation angles. 
+            </p>
+            <hr>
+            <p>
+                <strong>3)</strong> Compute the rotation matrix
+                \[
+                \begin{align}
+                R & = R_z(\gamma)R_y(\beta)R_x(\alpha)\\[10pt]
+                & = \begin{pmatrix}
+                \cos\gamma& -\sin\gamma & 0\\
+                \sin\gamma& \cos\gamma& 0\\
+                0 & 0 & 1\\
+                \end{pmatrix}
+                \begin{pmatrix}
+                \cos\beta& 0 & \sin\beta\\
+                0 & 1 & 0\\
+                -\sin\beta& 0 & \cos\beta\\
+                \end{pmatrix}
+                \begin{pmatrix}
+                1 & 0 & 0\\
+                0 & \cos\alpha& -\sin\alpha\\
+                0 & \sin\alpha& \cos\alpha\\
+                \end{pmatrix}\\[10pt]
+                \end{align}
+                \]
+                <hr>
+            </p>
+            <p>
+                <strong>4)</strong>Transform source point cloud
+                \[
+                \mathbf{q}_i \leftarrow R\cdot \mathbf{q}_i + \mathbf{t}
+                \]
+            </p>
+            <hr>
+            <h3>Note:</h3>
+            <p>In order to visualize the IPC alignment we slow down the animation to 3 fps</p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="threejs_canvas"></div>
+                <script type="module" src="./pointToPlaneICP.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+
+        <script>
+            const acc = document.getElementsByClassName("accordion")
+            for (let i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active")
+                    var panel = this.nextElementSibling
+                    //if (panel.style.display === "block") {
+                      //  panel.style.display = "none"
+                    //} else {
+                      //  panel.style.display = "block"
+                   // }
+                   if (panel.style.maxHeight) {
+                        panel.style.maxHeight = null
+                    } else {
+                        panel.style.maxHeight = panel.scrollHeight + "px"
+                    }
+                })
+            }
+        </script>
+    </body>
+</html>

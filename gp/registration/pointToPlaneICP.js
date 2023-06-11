@@ -5,8 +5,7 @@ import { renderBuffers } from "../../common/renderBuffers.js"
 import indexedFaceSetFactory from "../../common/indexedFaceSet.js"
 import kdTreeFactory from "../../common/kdTree.js"
 import matrixFactory from "../../common/matrix.js"
-import svdFactory from "../../common/svd.js"
-
+import gaussEliminationFactory from "../../common/gaussElimination.js"
 
 const url1 = "../data/bunny_part1.off"
 const url2 = "../data/bunny_part2.off"
@@ -22,11 +21,11 @@ async function drawAll(url1, url2) {
     icp(source, target)
 }
 
-const maxIterations = 60
+const maxIterations = 10
 /**
- * Point-to-point ICP
+ * Point-to-plane ICP
  * @param {Object} source, source mesh
- * @param {Object} target, target mesh 
+ * @param {*} target, target mesh
  */
 function icp(source, target) {
     const { vertices: sVertices, faces: sFaces } = source
@@ -34,8 +33,8 @@ function icp(source, target) {
     const sMesh = indexedFaceSetFactory(sVertices, sFaces)
     const tMesh = indexedFaceSetFactory(tVertices, tFaces)
     sMesh.findBoundaryVertices()
-    tMesh.findBoundaryVertices()
     sMesh.computeVertexNormals()
+    tMesh.findBoundaryVertices()
     tMesh.computeVertexNormals()
     const kdt = buildKdTree(target)
     render(sMesh, tMesh, kdt)
@@ -52,10 +51,10 @@ function buildKdTree(target) {
             index: v.index,
             x: v.x,
             y: v.y,
-            z: v.z
+            z: v.z,
         })
     }
-    return kdTreeFactory(points) 
+    return kdTreeFactory(points)
 }
 /**
  * Find the closest point in the target point cloud
@@ -65,24 +64,27 @@ function buildKdTree(target) {
  * @returns pairs, array of corresponding points
  */
 function findCorrespondences(kdt, source, target) {
-    const threshold = 0.7
+    const threshold = 0.3
     const pairs = []
-    for (let i = 0; i < source.v_length; i++) {
-        const pS = source.v(i)
-        const nn = kdt.nearest(pS)
-        if (nn !== null) {
-            const nS = source.n(pS.index)
-            const pT = nn.point
-            const nT = target.n(pT.index)
-            const s = nT.x * nS.x + nT.y * nS.y + nT.z * nS.z
-            if (s > threshold || (pS.bnd && nn.distance < 0.005)) {
-                const p = { distance: nn.distance, p: pT, q: pS }
-                pairs.push(p)
+    for (let pS of source.vertices) {
+        //i = 0; i < source.v_length.length; i++) {
+        if (!pS.bnd) {
+            const nn = kdt.nearest(pS)
+            if (nn !== null) {
+                const nS = source.n(pS.index) // sNormals[i]
+                const pT = nn.point
+                const nT = target.n(pT.index)
+                const s = nT.x * nS.x + nT.y * nS.y + nT.z * nS.z
+                if (s > threshold) {
+                    const p = { distance: nn.distance, p: pT, q: pS, n: nT }
+                    pairs.push(p)
+                }
             }
         }
     }
+    // sort
     pairs.sort((a, b) => a.distance - b.distance)
-    return pairs.slice(0, 2150)
+    return pairs.slice(0, 2000)
 }
 /**
  * Estimate rigid transformation to transform source point cloud to target point cloud
@@ -90,99 +92,112 @@ function findCorrespondences(kdt, source, target) {
  * @returns object with rotation matrix, barycenters of source and target point clouds
  */
 function estimateRigidTransformation(pairs) {
-    const muSource = [0, 0, 0]
-    const muTarget = [0, 0, 0]
-    const m_ = new Set() // unique set of target points
-    for (let { p } of pairs) {
-        m_.add(p)
-    }
-    let szT = 0
-    for (let e of m_) {
-        muTarget[0] += e.x
-        muTarget[1] += e.y
-        muTarget[2] += e.z
-        szT++
-    }
-    let szS = 0
-    for (let { q } of pairs) {
-        muSource[0] += q.x
-        muSource[1] += q.y
-        muSource[2] += q.z
-        szS++
-    }
-    muSource[0] /= szS
-    muSource[1] /= szS
-    muSource[2] /= szS
-    muTarget[0] /= szT
-    muTarget[1] /= szT
-    muTarget[2] /= szT
-    const sp = []
-    const tp = []
-    pairs.forEach((e) => {
-        const { p, q } = e
-        sp.push([q.x - muSource[0], q.y - muSource[1], q.z - muSource[2]])
-        tp.push([p.x - muTarget[0], p.y - muTarget[1], p.z - muTarget[2]])
-    })
-
-    const m = new Array(3).fill(0).map((row) => new Array(3).fill(0))
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            for (let k = 0; k < sp.length; k++) {
-                m[i][j] += tp[k][i] * sp[k][j]
+    const g = gaussEliminationFactory()
+    const C = new Array(6).fill(0)
+    const K = new Array(6).fill(0).map((row) => new Array(6).fill(0))
+    const F = new Array(6).fill(0)
+    //pairs.forEach( e => {
+    for (let { p, q, n } of pairs) {
+        const np = n.x * (q.x - p.x) + n.y * (q.y - p.y) + n.z * (q.z - p.z)
+        C[0] = q.y * n.z - q.z * n.y
+        C[1] = q.z * n.x - q.x * n.z
+        C[2] = q.x * n.y - q.y * n.x
+        C[3] = n.x
+        C[4] = n.y
+        C[5] = n.z
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 6; j++) {
+                K[i][j] += C[i] * C[j]
             }
         }
+        F[0] -= np * C[0]
+        F[1] -= np * C[1]
+        F[2] -= np * C[2]
+        F[3] -= np * C[3]
+        F[4] -= np * C[4]
+        F[5] -= np * C[5]
     }
-    const svd = svdFactory()
-    const r = svd.fastSvd(m)
-    const { U, V } = r
-    const rot = new Array(3).fill(0).map((row) => new Array(3).fill(0))
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            for (let k = 0; k < 3; k++) {
-                rot[i][j] += U[i][k] * V[j][k]
-            }
-        }
-    }
-    return {
-        R: rot,
-        ms: muSource,
-        mt: muTarget
-    }
+    const Omega = g.solve(K, F)
+    return Omega
 }
 /**
  * Transform source point cloud
  * @param {Object} source, source point cloud
  * @param {Object} rbt, rigid body transformation
  */
-function transform(source, rbt) {
-    const { R, ms, mt } = rbt
-    const t = [
-        mt[0] - R[0][0] * ms[0] - R[0][1] * ms[1] - R[0][2] * ms[2],
-        mt[1] - R[1][0] * ms[0] - R[1][1] * ms[1] - R[1][2] * ms[2],
-        mt[2] - R[2][0] * ms[0] - R[2][1] * ms[1] - R[2][2] * ms[2]
-    ]
-    for (let v of source.vertices) {
-        const x = R[0][0] * v.x + R[0][1] * v.y + R[0][2] * v.z + t[0]
-        const y = R[1][0] * v.x + R[1][1] * v.y + R[1][2] * v.z + t[1]
-        const z = R[2][0] * v.x + R[2][1] * v.y + R[2][2] * v.z + t[2]
-        v.x = x
-        v.y = y
-        v.z = z
+function transform(source, Omega) {
+    const { vertices } = source
+    // translation vector
+    const t = [Omega[3], Omega[4], Omega[5]]
+    // construct rotation matrix
+    const Rx = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    const Ry = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    const Rz = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    const cos0 = Math.cos(Omega[0])
+    const sin0 = Math.sin(Omega[0])
+    const cos1 = Math.cos(Omega[1])
+    const sin1 = Math.sin(Omega[1])
+    const cos2 = Math.cos(Omega[2])
+    const sin2 = Math.sin(Omega[2])
+
+    Rx[0][0] = 1
+    Rx[1][1] = cos0
+    Rx[1][2] = -sin0
+    Rx[2][1] = sin0
+    Rx[2][2] = cos0
+
+    Ry[0][0] = cos1
+    Ry[0][2] = sin1
+    Ry[1][1] = 1
+    Ry[2][0] = -sin1
+    Ry[2][2] = cos1
+
+    Rz[0][0] = cos2
+    Rz[0][1] = -sin2
+    Rz[1][0] = sin2
+    Rz[1][1] = cos2
+    Rz[2][2] = 1
+
+    const Ryx = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            for (let k = 0; k < 3; k++) {
+                Ryx[i][j] += Ry[i][k] * Rx[k][j]
+            }
+        }
+    }
+    const R = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            for (let k = 0; k < 3; k++) {
+                R[i][j] += Rz[i][k] * Ryx[k][j]
+            }
+        }
+    }
+    //const { R, t } = rbt
+
+    for (let p of source.vertices) {
+        const x = R[0][0] * p.x + R[0][1] * p.y + R[0][2] * p.z
+        const y = R[1][0] * p.x + R[1][1] * p.y + R[1][2] * p.z
+        const z = R[2][0] * p.x + R[2][1] * p.y + R[2][2] * p.z
+        p.x = x + t[0]
+        p.y = y + t[1]
+        p.z = z + t[2]
     }
 }
 /**
- * One iteration of ICP
+ * Align source point cloud to target point cloud
  * @param {Object} source, source point cloud
  * @param {Object} target, target point cloud
  * @param {Object} kdt, kd-tree of target point cloud
+ * @returns void
  */
 function align(source, target, kdt) {
     const pairs = findCorrespondences(kdt, source, target)
-    const rbt = estimateRigidTransformation(pairs)
-    transform(source, rbt)
-    source.computeVertexNormals()
+    const Omega = estimateRigidTransformation(pairs)
+    transform(source, Omega)
+    source.computeVertexNormals(source)
 }
-
 
 // render
 function render(source, target, kdt) {
@@ -207,6 +222,7 @@ function render(source, target, kdt) {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     canvas.appendChild(renderer.domElement)
+    window.addEventListener("resize", onWindowResize)
 
     // controls: camera
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -215,25 +231,11 @@ function render(source, target, kdt) {
     controls.target.set(0.0037, 0.1, 0.039)
     controls.update()
 
-    const defaultColor = new THREE.Color(0x787878) //new THREE.Color(0x049ef4) // new THREE.Color(0x787878)
-    const mMaterial = new THREE.MeshPhongMaterial({
-        color: defaultColor,
-        vertexColors: true,
-        flatShading: true,
-        side: THREE.DoubleSide,
-        //side: THREE.FrontSide,
-        specular: 0xa4a4a4,
-        shininess: 5,
-        reflectivity: 1,
-        polygonOffset: true,
-        polygonOffsetFactor: 1, // positive value pushes polygon further away
-        polygonOffsetUnits: 1
-    })
-    const wMaterial = new THREE.MeshBasicMaterial({
-        color: defaultColor.clone().multiplyScalar(0.3),
-        wireframe: true,
-        visible: true
-    })
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight)
+    }
     const buff1 = renderBuffers(target, true, false, false)
     const buff2 = renderBuffers(source, true, false, false)
     // color buffers 
@@ -262,7 +264,25 @@ function render(source, target, kdt) {
             cBuff2.push(r, g, b)
         }
     }
-
+    const defaultColor = new THREE.Color(0x787878) //new THREE.Color(0x049ef4) // new THREE.Color(0x787878)
+    const mMaterial = new THREE.MeshPhongMaterial({
+        color: defaultColor,
+        vertexColors: true,
+        flatShading: false,
+        side: THREE.DoubleSide,
+        //side: THREE.FrontSide,
+        specular: 0xa4a4a4,
+        shininess: 5,
+        reflectivity: 1,
+        polygonOffset: true,
+        polygonOffsetFactor: 1, // positive value pushes polygon further away
+        polygonOffsetUnits: 1,
+    })
+    const wMaterial = new THREE.MeshBasicMaterial({
+        color: defaultColor.clone().multiplyScalar(0.3),
+        wireframe: true,
+        visible: true,
+    })
     const targetGeometry = new THREE.BufferGeometry()
     targetGeometry.setIndex(buff1.iBuff)
     targetGeometry.setAttribute(
@@ -279,6 +299,8 @@ function render(source, target, kdt) {
     )
     const tMesh = new THREE.Mesh(targetGeometry, mMaterial)
     const tWire = new THREE.Mesh(targetGeometry, wMaterial)
+    scene.add(tMesh)
+    scene.add(tWire)
     const sourceGeometry = new THREE.BufferGeometry()
     sourceGeometry.setIndex(buff2.iBuff)
     sourceGeometry.setAttribute(
@@ -295,14 +317,18 @@ function render(source, target, kdt) {
     )
     const sMesh = new THREE.Mesh(sourceGeometry, mMaterial)
     const sWire = new THREE.Mesh(sourceGeometry, wMaterial)
-    scene.add(tMesh)
-    scene.add(tWire)
     scene.add(sMesh)
     scene.add(sWire)
 
-    let nrIter = 0
+    sourceGeometry.attributes.position.needsUpdate = true
+    sourceGeometry.attributes.normal.needsUpdate = true
+    const sPosition = sourceGeometry.attributes.position.array
+    const sNormal = sourceGeometry.attributes.normal.array
+
     function alignmentStep(source, target, kdt) {
+        const t0 = performance.now()
         align(source, target, kdt)
+        
         sourceGeometry.attributes.position.needsUpdate = true
         sourceGeometry.attributes.normal.needsUpdate = true
         const sPosition = sourceGeometry.attributes.position.array
@@ -317,9 +343,13 @@ function render(source, target, kdt) {
             sNormal[3 * i + 1] = n.y
             sNormal[3 * i + 2] = n.z
         }
+        const t1 = performance.now()
+        console.log(`iteration took ${t1 - t0} ms`)
         return 1
     }
+    
 
+    let nrIter = 0
     function step() {
         return new Promise((resolve, reject) => {
             //console.log(`in promise`)
@@ -333,16 +363,15 @@ function render(source, target, kdt) {
     }
     async function doWork() {
         try {
+            //console.log(`nrIter: ${nrIter}`)
             const s = await step()
             nrIter += s
+            //console.log(`nrIter: ${nrIter}`)
         } catch (error) {
             console.log(error)
         }
     }
-    function render() {
-        renderer.render(scene, camera)
-    }
-    const fps = 5
+    const fps = 3
     let interval = 1000 / fps
     let previousTime = performance.now()
     function animate(currentTime) {
@@ -356,15 +385,19 @@ function render(source, target, kdt) {
             doWork()
         }
     }
+
+    function render() {
+        renderer.render(scene, camera)
+    }
     animate()
 }
 
 const cText = `
-const maxIterations = 60
+const maxIterations = 10
 /**
- * Point-to-point ICP
+ * Point-to-plane ICP
  * @param {Object} source, source mesh
- * @param {Object} target, target mesh 
+ * @param {*} target, target mesh
  */
 function icp(source, target) {
     const { vertices: sVertices, faces: sFaces } = source
@@ -372,8 +405,8 @@ function icp(source, target) {
     const sMesh = indexedFaceSetFactory(sVertices, sFaces)
     const tMesh = indexedFaceSetFactory(tVertices, tFaces)
     sMesh.findBoundaryVertices()
-    tMesh.findBoundaryVertices()
     sMesh.computeVertexNormals()
+    tMesh.findBoundaryVertices()
     tMesh.computeVertexNormals()
     const kdt = buildKdTree(target)
     render(sMesh, tMesh, kdt)
@@ -390,10 +423,10 @@ function buildKdTree(target) {
             index: v.index,
             x: v.x,
             y: v.y,
-            z: v.z
+            z: v.z,
         })
     }
-    return kdTreeFactory(points) 
+    return kdTreeFactory(points)
 }
 /**
  * Find the closest point in the target point cloud
@@ -403,24 +436,27 @@ function buildKdTree(target) {
  * @returns pairs, array of corresponding points
  */
 function findCorrespondences(kdt, source, target) {
-    const threshold = 0.7
+    const threshold = 0.3
     const pairs = []
-    for (let i = 0; i < source.v_length; i++) {
-        const pS = source.v(i)
-        const nn = kdt.nearest(pS)
-        if (nn !== null) {
-            const nS = source.n(pS.index)
-            const pT = nn.point
-            const nT = target.n(pT.index)
-            const s = nT.x * nS.x + nT.y * nS.y + nT.z * nS.z
-            if (s > threshold || (pS.bnd && nn.distance < 0.005)) {
-                const p = { distance: nn.distance, p: pT, q: pS }
-                pairs.push(p)
+    for (let pS of source.vertices) {
+        //i = 0; i < source.v_length.length; i++) {
+        if (!pS.bnd) {
+            const nn = kdt.nearest(pS)
+            if (nn !== null) {
+                const nS = source.n(pS.index) // sNormals[i]
+                const pT = nn.point
+                const nT = target.n(pT.index)
+                const s = nT.x * nS.x + nT.y * nS.y + nT.z * nS.z
+                if (s > threshold) {
+                    const p = { distance: nn.distance, p: pT, q: pS, n: nT }
+                    pairs.push(p)
+                }
             }
         }
     }
+    // sort
     pairs.sort((a, b) => a.distance - b.distance)
-    return pairs.slice(0, 2150)
+    return pairs.slice(0, 2000)
 }
 /**
  * Estimate rigid transformation to transform source point cloud to target point cloud
@@ -428,97 +464,111 @@ function findCorrespondences(kdt, source, target) {
  * @returns object with rotation matrix, barycenters of source and target point clouds
  */
 function estimateRigidTransformation(pairs) {
-    const muSource = [0, 0, 0]
-    const muTarget = [0, 0, 0]
-    const m_ = new Set() // unique set of target points
-    for (let { p } of pairs) {
-        m_.add(p)
-    }
-    let szT = 0
-    for (let e of m_) {
-        muTarget[0] += e.x
-        muTarget[1] += e.y
-        muTarget[2] += e.z
-        szT++
-    }
-    let szS = 0
-    for (let { q } of pairs) {
-        muSource[0] += q.x
-        muSource[1] += q.y
-        muSource[2] += q.z
-        szS++
-    }
-    muSource[0] /= szS
-    muSource[1] /= szS
-    muSource[2] /= szS
-    muTarget[0] /= szT
-    muTarget[1] /= szT
-    muTarget[2] /= szT
-    const sp = []
-    const tp = []
-    pairs.forEach((e) => {
-        const { p, q } = e
-        sp.push([q.x - muSource[0], q.y - muSource[1], q.z - muSource[2]])
-        tp.push([p.x - muTarget[0], p.y - muTarget[1], p.z - muTarget[2]])
-    })
-
-    const m = new Array(3).fill(0).map((row) => new Array(3).fill(0))
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            for (let k = 0; k < sp.length; k++) {
-                m[i][j] += tp[k][i] * sp[k][j]
+    const g = gaussEliminationFactory()
+    const C = new Array(6).fill(0)
+    const K = new Array(6).fill(0).map((row) => new Array(6).fill(0))
+    const F = new Array(6).fill(0)
+    //pairs.forEach( e => {
+    for (let { p, q, n } of pairs) {
+        const np = n.x * (q.x - p.x) + n.y * (q.y - p.y) + n.z * (q.z - p.z)
+        C[0] = q.y * n.z - q.z * n.y
+        C[1] = q.z * n.x - q.x * n.z
+        C[2] = q.x * n.y - q.y * n.x
+        C[3] = n.x
+        C[4] = n.y
+        C[5] = n.z
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 6; j++) {
+                K[i][j] += C[i] * C[j]
             }
         }
+        F[0] -= np * C[0]
+        F[1] -= np * C[1]
+        F[2] -= np * C[2]
+        F[3] -= np * C[3]
+        F[4] -= np * C[4]
+        F[5] -= np * C[5]
     }
-    const svd = svdFactory()
-    const r = svd.fastSvd(m)
-    const { U, V } = r
-    const rot = new Array(3).fill(0).map((row) => new Array(3).fill(0))
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            for (let k = 0; k < 3; k++) {
-                rot[i][j] += U[i][k] * V[j][k]
-            }
-        }
-    }
-    return {
-        R: rot,
-        ms: muSource,
-        mt: muTarget
-    }
+    const Omega = g.solve(K, F)
+    return Omega
 }
 /**
  * Transform source point cloud
  * @param {Object} source, source point cloud
  * @param {Object} rbt, rigid body transformation
  */
-function transform(source, rbt) {
-    const { R, ms, mt } = rbt
-    const t = [
-        mt[0] - R[0][0] * ms[0] - R[0][1] * ms[1] - R[0][2] * ms[2],
-        mt[1] - R[1][0] * ms[0] - R[1][1] * ms[1] - R[1][2] * ms[2],
-        mt[2] - R[2][0] * ms[0] - R[2][1] * ms[1] - R[2][2] * ms[2]
-    ]
-    for (let v of source.vertices) {
-        const x = R[0][0] * v.x + R[0][1] * v.y + R[0][2] * v.z + t[0]
-        const y = R[1][0] * v.x + R[1][1] * v.y + R[1][2] * v.z + t[1]
-        const z = R[2][0] * v.x + R[2][1] * v.y + R[2][2] * v.z + t[2]
-        v.x = x
-        v.y = y
-        v.z = z
+function transform(source, Omega) {
+    const { vertices } = source
+    // translation vector
+    const t = [Omega[3], Omega[4], Omega[5]]
+    // construct rotation matrix
+    const Rx = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    const Ry = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    const Rz = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    const cos0 = Math.cos(Omega[0])
+    const sin0 = Math.sin(Omega[0])
+    const cos1 = Math.cos(Omega[1])
+    const sin1 = Math.sin(Omega[1])
+    const cos2 = Math.cos(Omega[2])
+    const sin2 = Math.sin(Omega[2])
+
+    Rx[0][0] = 1
+    Rx[1][1] = cos0
+    Rx[1][2] = -sin0
+    Rx[2][1] = sin0
+    Rx[2][2] = cos0
+
+    Ry[0][0] = cos1
+    Ry[0][2] = sin1
+    Ry[1][1] = 1
+    Ry[2][0] = -sin1
+    Ry[2][2] = cos1
+
+    Rz[0][0] = cos2
+    Rz[0][1] = -sin2
+    Rz[1][0] = sin2
+    Rz[1][1] = cos2
+    Rz[2][2] = 1
+
+    const Ryx = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            for (let k = 0; k < 3; k++) {
+                Ryx[i][j] += Ry[i][k] * Rx[k][j]
+            }
+        }
+    }
+    const R = new Array(3).fill(0).map((row) => new Array(3).fill(0))
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            for (let k = 0; k < 3; k++) {
+                R[i][j] += Rz[i][k] * Ryx[k][j]
+            }
+        }
+    }
+    //const { R, t } = rbt
+
+    for (let p of source.vertices) {
+        const x = R[0][0] * p.x + R[0][1] * p.y + R[0][2] * p.z
+        const y = R[1][0] * p.x + R[1][1] * p.y + R[1][2] * p.z
+        const z = R[2][0] * p.x + R[2][1] * p.y + R[2][2] * p.z
+        p.x = x + t[0]
+        p.y = y + t[1]
+        p.z = z + t[2]
     }
 }
 /**
- * One iteration of ICP
+ * Align source point cloud to target point cloud
  * @param {Object} source, source point cloud
  * @param {Object} target, target point cloud
  * @param {Object} kdt, kd-tree of target point cloud
+ * @returns void
  */
 function align(source, target, kdt) {
     const pairs = findCorrespondences(kdt, source, target)
-    const rbt = estimateRigidTransformation(pairs)
-    transform(source, rbt)
-    source.computeVertexNormals()
+    const Omega = estimateRigidTransformation(pairs)
+    transform(source, Omega)
+    source.computeVertexNormals(source)
 }
 `
 const hlDiv = document.getElementById('hl-code')
