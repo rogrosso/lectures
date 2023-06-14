@@ -26,10 +26,11 @@
                     "GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
                     "colors": "./common/colors.js",
                     "halfedge": "./common/halfedge.js",
-                    "quadToroidalTetra": "./gm/data/quadToroidalTetra.json",
-                    "quadCube": "./gm/data/quadCube.json",
-                    "quadCube_with_bnd": "./gm/data/quadCube_with_bnd.json",
-                    "quadPawn": "./gm/data/quadPawn.json"
+                    "data/": "./gm/data/" //,
+                    //"quadToroidalTetra": "./gm/data/quadToroidalTetra.json",
+                    //"quadCube": "./gm/data/quadCube.json",
+                    //"quadCube_with_bnd": "./gm/data/quadCube_with_bnd.json",
+                    //"quadPawn": "./gm/data/quadPawn.json"
                 }
             }
         </script>
@@ -61,7 +62,14 @@
             <hr>
             <p>Example: Catmull-Clark Subdivision Surface</p>
             <div id="threejs_canvas" data-width="450" data-height="320"></div>
-            <script type="module" src="./gm/subdivision-surfaces/catmullClark.js"></script>
+            <script type="module">
+                import { drawAll } from "./gm/subdivision-surfaces/catmullClark.js";
+                const url1 = "./gm/data/quadToroidalTetra.json"
+                const url2 = "./gm/data/quadCube.json"
+                const url3 = "./gm/data/quadCube_with_bnd.json"
+                const url4 = "./gm/data/quadPawn.json"
+                drawAll(url1, url2, url3, url4)
+            </script>
             <hr>
             <h2>Content</h2>
             <p>

@@ -87,7 +87,14 @@
             </p>
             <div style="border: 1px solid #CC9999; padding: 15px; display: inline-block">
                 <div id="threejs_canvas"></div>
-                <script type="module" src="./catmullClark.js"></script>
+                <script type="module">
+                    import { drawAll } from "./catmullClark.js"
+                    const url1 = "../data/quadToroidalTetra.json"
+                    const url2 = "../data/quadCube.json"
+                    const url3 = "../data/quadCube_with_bnd.json"
+                    const url4 = "../data/quadPawn.json"
+                    drawAll(url1, url2, url3, url4)
+                </script>
             </div>
             <h3>The JavaScript Code</h3>
             <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>

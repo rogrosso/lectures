@@ -31,7 +31,7 @@ const sclG = sclSVG.append('g')
 
 const trfWidth = width
 const trfHeight = 250
-const trfMargin = { top: 15, bottom: 30, left: 30, right: 10}
+const trfMargin = { top: 15, bottom: 30, left: 35, right: 10}
 const trfW = trfWidth - trfMargin.left - trfMargin.right
 const trfH = trfHeight - trfMargin.top - trfMargin.bottom
 const trfDiv = gridObj.append('div')
@@ -118,7 +118,16 @@ const axisConfig = {
 axes(axisConfig)
 // draw transfer functions
 transferFunctions(trfG, { colSel: colSel, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale })
-
+// save svg
+const saveSVGButton = gridObj.append('div')
+    .attr('class', 'cell')
+    .attr('id', colId)
+    .append('button')
+    .text('save svg')
+    .on('click', function() {
+        saveSVG(trfSVG.node(), 'transfer-functions.svg')
+        saveSVG(sclSVG.node(), 'color-scale.svg')
+    })
 function colHandler(text, value) {
     console.log(value)
     transferFunctions(trfG, { colSel: value, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale })
@@ -238,3 +247,18 @@ const hlCod = hlPre.append('code')
     .attr('class', 'language-javascript')
     .attr('style', 'border: 1px solid #C1BAA9')
     .text(cText)
+
+// save svg
+function saveSVG(e, eName) {
+    e.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    const svgData = e.outerHTML;
+    const preface = '<?xml version="1.0" standalone="no"?>\r\n';
+    const svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = eName;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}

@@ -1,4 +1,4 @@
-import { binaryHeapFactory } from '../../common/binaryHeap.js'
+import binaryHeapFactory from '../../common/binaryHeap.js'
 import { keyCantor as keyGen } from '../../common/utilities.js'
 import { easyRandom } from '../../common/random.js'
 
