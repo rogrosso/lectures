@@ -371,11 +371,13 @@ export function rgb2hex(color) {
       b.toString(16).padStart(2,'0')
     return hex
 }
-export function genDivTooltip() {
+export function genDivTooltip(className, id) {
+    if (!className) className = 'tooltip-div'
+    if (!id) id = 'tooltip-div'
     return d3.select("body")
             .append('div')
-            .attr('class', 'categorical_tooltip')
-            .attr('id', 'catcolortooltip')
+            .attr('class', className)
+            .attr('id', id)
             .style("opacity", 0.7)
             .style('display', 'none')
             .style("background-color", "white")

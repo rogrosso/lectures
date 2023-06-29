@@ -97,7 +97,7 @@ async function drawAll(url) {
             n.vy = (n.y - n.yprev) / h
         }
         //
-        fixPositions(nodes, bbox)
+        //fixPositions(nodes, bbox)
     }
 
     function velocityVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
@@ -138,7 +138,7 @@ async function drawAll(url) {
             n.fy = fy
         }
         //
-        fixPositions(nodes, bbox)
+        //fixPositions(nodes, bbox)
     }
     let step = positionVerlet
 
@@ -344,6 +344,7 @@ async function drawAll(url) {
     function animate() {
         requestAnimationFrame(animate)
         step(K, Kc, Kg, cR, nodes, edges, bbox, disp)
+        fixPositions(nodes, bbox)
         redraw(nodeG, linkG)
     }
     function redraw(nodeG, linkG) {

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Walker's Algorithm for Tree Drawing</title>
+        <style>
+            body {
+                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+            }
+            div.infovis-lecture {
+                margin-left: 3em;
+                width: 750px;
+            }
+            div#dropdown-menu {
+                font-family: sans-serif;
+                font-size: 1em;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: auto;
+                gap: 1px;
+                background-color: white;
+                padding: 4px; 
+                margin: 2px; 
+                margin-left: 55px;
+                width: 600px;
+                border: 1px solid teal
+            }
+            div.cell {
+                margin: 1px;
+            }
+        </style>
+        <script type="importmap">
+            {
+                "imports": {
+                    "colors"   : "../common/colors.js",
+                    "draw"     : "../common/draw.js",
+                    "gui"      : "../common/gui.js",
+                    "networks" : "./networks.js"
+                    // import assert not supported by all browsers
+                    //"test01"  : "../data/test01.json",
+                    //"lesmiserables" : "../data/lesmiserables.json"
+                }
+            }
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script
+            type="text/javascript"
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+        ></script>
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
+        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <!-- Axes with d3 -->
+    <body>
+        <div class="infovis-lecture">
+            <h1>Walker's Algorithm for Tree Drawing</h1>
+            <h2>Draw Aesthetically Pleasant Trees</h2>
+            <h3>Aesthetic Properties</h3>
+            <ul>
+                <li>Nodes at the same level should be drawn on the same horizontal line.</li>
+                <li>The order of the children is reflected in the drawing.</li>
+                <li>Drawings are symmetric, i.e., the drawing of a reflection of the tree is the reflected drawing of the tree.</li>
+                <li>A parent node should be centered over their children's nodes.</li>
+                <li>
+                    Subtrees look the same, independent of their position. That is, subtrees should be drawn the same no
+                    matter where they are within the tree, i.e., move subtrees rigidly.
+                </li>
+            </ul>
+            <h2>Walker's Algorithm</h3>
+            <h3>Background</h3>
+            <ul>
+                <li>The root is at the top of the drawing.</li>
+                <li>Tree drawing consists of computing the x- and y-coordinates of the nodes.</li>
+                <li>The y-coordinate is determined by the level of the node.</li>
+                <li>
+                    Subtrees are handled as rigid units, i.e., moving the root of the subtree moves 
+                    all its descendants.
+                </li>
+                <li>The x-coordinates of the nodes are computed recursively from the leaves of the tree.</li>
+                <li>
+                    Two variables are maintained for each node: a preliminary x-coordinate and a modifier
+                    field to move the node descendants.
+                </li>
+            </ul>
+            <h3>Properties</h3>
+            <ul>
+                <li>two-pass algorithm:
+                    <ul>
+                        <li>post-order-traversal to compute preliminary x-coordinate and modifier fields</li>
+                        <li>pre-order-traversal to compute the final node's x-coordinate</li>
+                    </ul>
+                </li>
+                <li>a minimal sibling separation distance separates sibling nodes</li>
+                <li>subtrees are separated by at least a minimal predefined subtree separation</li>
+                <li>to move a subtree, modifier fields are computed</li>
+                <li>a subtree is moved by an amount given by the sum of the modifier fields of all its ascendant up to the root node</li>
+                <li>to keep the tree drawing as narrow as possible, place right subtrees as close as possible to the left sibling subtrees</li>
+                <li>for this purpose, maintain the left contour of the right subtree and the right contour of the left subtree</li>
+                <li>compare left and right contours and push the right subtree to avoid overlaps</li>
+            </ul>   
+            <h3>Algorithm's Complexity</h3>
+            <p>
+                Walker's algorithms for arbitrary n-ary tree has complexity \(\mathcal{O}(n^2)\), 
+                where \(n\) is the number of nodes in the tree. 
+            </p>
+            <h2>Implementation</h2>
+            <p>
+                Switching between a vertical and circular layout is possible in the drawing below. Moving the mouse 
+                over the nodes will reveal the names of the nodes. The mouse wheel can be used to zoom in or out. The left 
+                click allows for moving the drawing. 
+            </p>
+            <hr>
+            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
+                <div id="walker_grid" class="grid">
+                </div>
+            <script type="module" src="./walker.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+        </div>
+    </body>
+</html>

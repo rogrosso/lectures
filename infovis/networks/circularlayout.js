@@ -401,6 +401,18 @@ async function drawAll(url1) {
             }
         })
     }
+
+    /*
+    // save svg
+    const saveSVGButton = canvas.append('div')
+    .attr('class', 'cell')
+    .attr('id', 'save-svg')
+    .append('button')
+    .text('save svg')
+    .on('click', function() {
+        saveSVG(svg.node(), 'circulat-layout.svg')
+    })
+    */
 } // drawAll()
 
 const cText = `
@@ -438,3 +450,20 @@ const hlCod = hlPre
     .attr("class", "language-javascript")
     .attr("style", "border: 1px solid #C1BAA9")
     .text(cText)
+
+/*
+// save svg
+function saveSVG(e, eName) {
+    e.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    const svgData = e.outerHTML;
+    const preface = '<?xml version="1.0" standalone="no"?>\r\n';
+    const svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = eName;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+*/
