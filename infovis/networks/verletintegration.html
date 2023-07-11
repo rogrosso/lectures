@@ -6,69 +6,20 @@
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Velocity Verlet</title>
-        <style>
-            body {
-                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
-            }
-            div.infovis-lecture {
-                margin-left: 3em;
-                width: 750px;
-            }
-            div#dropdown-menu {
-                font-family: sans-serif;
-                font-size: 1em;
-            }
-            .grid-container {
-                display: grid;
-                grid-template-columns: 300px 200px;
-                gap: 0px;
-                background-color: whitesmoke;
-                margin-left:0px;
-                width: 500px;
-                padding-left: 0px;
-                border: 1px solid teal;
-                text-align: center;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            div.cell {
-                margin: 1px;
-            }
-            li {
-                margin-top: 3px;
-                margin-bottom: 3px;
-            }
-        </style>
-        <script type="importmap">
-            {
-                "imports": {
-                    "random"   : "../../common/random.js",
-                    "utilities": "../../common/utilities.js",
-                    "colors"   : "../common/colors.js",
-                    "draw"     : "../common/draw.js",
-                    "gui"      : "../common/gui.js",
-                    "networks" : "./networks.js"
-                    //"lesmiserables" : "../data/lesmiserables.json"
-                }
-            }
-        </script>
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script
-            type="text/javascript"
-            id="MathJax-script"
-            async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
-        ></script>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
         <link  
             rel="stylesheet" 
             title="Atom One Light"
-            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
-        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
         <script>
             hljs.highlightAll()
         </script>
     </head>
-    <!-- Axes with d3 -->
     <body>
         <div class="infovis-lecture">
             <h1>Verlet Integration</h1>
@@ -141,19 +92,21 @@
                 when the distance between the centers of the nodes tends to zero.
             </p>
             <hr style="margin-top: 10px; margin-bottom: 10px;">
-            <div style="
-                border: 1px solid #CC9999; 
-                padding: 15px; 
-                text-align: center; 
-                margin-left: auto; 
-                margin-right: auto">
-                <div id="verlet-integration-layout" class="grid-container"></div>
+            <div class="canvas">
+                <div id="verlet-integration-layout" class="grid-container-2-column"></div>
                 <div id="verlet-integration-svg" class="verlet-integration" style="text-align: center;"></div>
                 <script type="module" src="./verletintegration.js"></script>
             </div>
             <hr>
             <h3>The JavaScript Code</h3>
-            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
         </div>
     </body>
 </html>

@@ -1,6 +1,6 @@
-import * as THREE from "three"
-import { OrbitControls } from "OrbitControls"
-import GUI from "lil-gui"
+import * as THREE from "../../contrib/three.module.min.js"
+import { OrbitControls } from "../../contrib/OrbitControls.js"
+import GUI from "../../contrib/lil-gui.module.min.js"
 
 import { readTextFile } from "../common/utilities.js"
 import halfedgeFactory from "../../common/halfedge.js"

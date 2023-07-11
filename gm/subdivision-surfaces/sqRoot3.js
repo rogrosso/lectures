@@ -1,6 +1,6 @@
-import * as THREE from "three"
-import { OrbitControls } from "OrbitControls"
-import GUI from "GUI"
+import * as THREE from "../../contrib/three.module.min.js"
+import { OrbitControls } from "../../contrib/OrbitControls.js"
+import GUI from "../../contrib/lil-gui.module.min.js"
 
 //import trisToroidalTetrahedron from "trisToroidalTetrahedron" assert { type: "json" }
 //import trisCube24 from "trisCube24" assert { type: "json" }
@@ -8,7 +8,7 @@ import GUI from "GUI"
 //import trisTetrahedron from "trisTetrahedron" assert { type: "json" }
 //import icosahedron_with_bnd from "icosahedron_with_bnd" assert { type: "json" }
 
-import halfedgeFactory from 'halfedge'
+import halfedgeFactory from '../../common/halfedge.js'
 import { renderBuffers, normalizeMesh, boundingBox } from '../../common/renderBuffers.js'
 import sqrt3Subdivision from "./sqrt3Subdivision.js"
 

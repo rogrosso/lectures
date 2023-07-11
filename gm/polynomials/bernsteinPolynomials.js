@@ -1,7 +1,6 @@
-import * as d3 from 'd3'
 // common
-import {axes, polynomialCurve, lineGenerator} from 'draw'
-import { colorsDos } from 'colors'
+import {axes, polynomialCurve, lineGenerator} from '../common/draw.js'
+import { colorsDos } from '../common/colors.js'
 
 const width = 500
 const height = 500

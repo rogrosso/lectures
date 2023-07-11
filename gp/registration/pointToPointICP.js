@@ -1,5 +1,5 @@
-import * as THREE from "three"
-import { OrbitControls } from "OrbitControls"
+import * as THREE from "../../contrib/three.module.min.js"
+import { OrbitControls } from "../../contrib/OrbitControls.js"
 import { readOFF } from "../common/utilities.js"
 import { renderBuffers } from "../../common/renderBuffers.js"
 import indexedFaceSetFactory from "../../common/indexedFaceSet.js"

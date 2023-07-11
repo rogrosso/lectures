@@ -1,6 +1,4 @@
-import { axes, genDivTooltip } from "draw"
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-//import cars from "cars" assert { type: "json" }
+import { axes, genDivTooltip } from "../common/draw.js"
 
 const url1 = "../data/cars.json"
 const url2 = "../data/IRIS-Dataset.csv"
@@ -188,6 +186,15 @@ async function drawAll(url1, url2) {
     }) {
         // remove all
         selection.selectAll("*").remove()
+        // formatting axes
+        let xFormat = undefined
+        if (xKey === "year") {
+            xFormat = 'd'
+        }
+        let yFormat = undefined
+        if (yKey === "year") {
+            yFormat = 'd'
+        }
         // prepare data
         const xScale = d3
             .scaleLinear()
@@ -213,8 +220,8 @@ async function drawAll(url1, url2) {
             yTickValues: undefined, //data.map( k => k[key]),
             xTickSize: -height,
             yTickSize: width,
-            xTickFormat: undefined,
-            yTickFormat: undefined,
+            xTickFormat: xFormat,
+            yTickFormat: yFormat,
             xLabel: xKey,
             yLabel: yKey,
         }

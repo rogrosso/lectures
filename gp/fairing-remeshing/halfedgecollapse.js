@@ -1,12 +1,12 @@
-import * as THREE from "three"
-import { OrbitControls } from "OrbitControls"
-import GUI from "lil-gui"
+import * as THREE from "../../contrib/three.module.min.js"
+import { OrbitControls } from "../../contrib/OrbitControls.js"
+import GUI from "../../contrib/lil-gui.module.min.js"
 
 import { readOFF, readObj } from "../common/utilities.js"
 import { dot, cross, norm, norm2, normalize, normal } from "../../common/utilities.js"
 //import { renderBuffers } from "../../common/renderBuffers.js"
-import halfedgeFactory from "halfedge"
-import binaryHeapFactory  from "binaryHeap"
+import halfedgeFactory from "../../common/halfedge.js"
+import binaryHeapFactory  from "../../common/binaryHeap.js"
 
 // main
 const bunnyUrl = "../data/bunny_noBnd.off"

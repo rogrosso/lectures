@@ -1,4 +1,3 @@
-import * as d3 from 'd3'
 // common
 import { 
     axes, 
@@ -7,9 +6,9 @@ import {
     controlPoints,
     labels,
     lineGenerator, 
-    cpGenerator } from 'draw'
-import { colorsDos as colors } from 'colors'
-import { bSplineCurve, knotVector } from 'bsplines'
+    cpGenerator } from '../common/draw.js'
+import { colorsDos as colors } from '../common/colors.js'
+import { bSplineCurve, knotVector } from './bsplines.js'
 
 const width = 500 // canvas  width
 const height = 500 // canvas height

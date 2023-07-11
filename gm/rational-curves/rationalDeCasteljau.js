@@ -1,8 +1,15 @@
-import * as d3 from 'd3'
 // common
-import {axes, polynomialCurve, controlPolygon, controlPoints, labels, lineGenerator, cpGenerator} from 'draw'
-import { rationalBezierCurve } from 'bezier'
-import { colorsDos as colors } from 'colors'
+import {
+    axes, 
+    polynomialCurve, 
+    controlPolygon, 
+    controlPoints, 
+    labels, 
+    lineGenerator, 
+    cpGenerator
+} from '../common/draw.js'
+import { colorsDos as colors } from '../common/colors.js'
+import { rationalBezierCurve } from '../bezier/bezier.js'
 
 // Problem
 const points = [

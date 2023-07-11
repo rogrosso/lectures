@@ -1,0 +1,118 @@
+body {
+    font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+}
+p.kontakt {
+    margin: 1px;
+    padding: 1px;
+}
+div.lectures {
+    margin-left: 3em;
+    width: 750px;
+}
+div.lecture {
+    margin-left: 3em;
+    width: 750px;
+}
+div.gm-lecture {
+    margin-left: 3em;
+    width: 750px;
+    background-color: white;
+}
+div.gp-lecture {
+    margin-left: 3em;
+    width: 750px;
+    background-color: white;
+}
+div.infovis-lecture {
+    margin-left: 3em;
+    width: 750px;
+    background-color: white;
+}
+div.canvas {
+    text-align: center;
+    border: 1px solid #CC9999; 
+    padding: 15px;
+}
+div.code {
+    width: 720px; 
+    margin-left: 10px;
+}
+div.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 1px;
+    background-color: aliceblue;
+    padding: 4px; 
+    margin: 0 auto; 
+    width: 600px;
+    align-items: left;
+    justify-items: left;
+    border: 1px solid teal;
+}
+div.grid-item {
+    text-align: left;
+}
+div.cell {
+    margin: 1px;
+}
+li {
+    margin-bottom: 5px;
+}
+div#dropdown-menu {
+    font-family: sans-serif;
+    font-size: 1em;
+}
+.grid-container-1-column {
+    display: grid;
+    grid-template-columns: auto;
+    gap: 1px;
+    background-color: white;
+    padding: 4px; 
+    margin: 2px; 
+    width: 660px;
+    align-items: center;
+    justify-items: center;
+    border: 1px solid teal
+}
+.grid-container-2-column {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1px;
+    background-color: white;
+    padding: 4px; 
+    margin: 2px; 
+    width: 650px;
+    align-items: center;
+    justify-items: center;
+    border: 1px solid teal
+}
+div.cell {
+    margin: 1px;
+}
+div.impressum {
+    text-align: right;
+}
+div.impressum a:link {
+    color: #688BAB;
+    text-decoration-line: underline;
+    margin-left: 20px;
+    margin-right: 2px;
+}
+div.impressum a:visited {
+    color: #BD2D28;
+    text-decoration-line: underline;
+    margin-left: 20px;
+    margin-right: 2px;
+}
+label.gui {
+    margin-left: 5px; 
+    text-align: left; 
+    font-size: 16px; 
+    font-family:'Times New Roman', Times, serif;
+}
+label.dropdown-label {
+    font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
+    font-size: 1.0em;
+    font-weight: 350;
+}
+

@@ -1,7 +1,6 @@
-import * as d3 from 'd3'
 // common
-import {axes, polynomialCurve, controlPoints, labels, lineGenerator} from 'draw'
-import {bezierCurve} from 'bezier'
+import {axes, polynomialCurve, controlPoints, labels, lineGenerator} from '../common/draw.js'
+import {bezierCurve} from '../bezier/bezier.js'
 
 
 // Problem

@@ -1,20 +1,20 @@
-import * as THREE from "three"
-import { OrbitControls } from "OrbitControls"
-import GUI from "GUI"
+import * as THREE from "../../contrib/three.module.min.js"
+import { OrbitControls } from "../../contrib/OrbitControls.js"
+import GUI from "../../contrib/lil-gui.module.min.js"
 
 //import quadToroidalTetra from 'quadToroidalTetra' assert{ type: 'json' }
 //import quadCube from 'quadCube' assert{ type: 'json' }
 //import quadCube_with_bnd from 'quadCube_with_bnd' assert{ type: 'json' }
 //import quadPawn from 'quadPawn' assert{ type: 'json' }
 
-import halfedgeFactory from "halfedge"
+import halfedgeFactory from "../../common/halfedge.js"
 import {
     renderBuffers,
     normalizeMesh,
     boundingBox
 } from "../../common/renderBuffers.js"
 import catmullClarkSubdivision from "./catmullClarkSubdivision.js"
-
+let rotationFlag = true
 export async function drawAll(url1, url2, url3, url4) {
     const response1 = await fetch(url1)
     const quadToroidalTetra = await response1.json()
@@ -92,7 +92,7 @@ export async function drawAll(url1, url2, url3, url4) {
     //}
 
     // build up gui
-    let rotationFlag = true
+    //let rotationFlag = true
     const gui = new GUI({ container: threejs_canvas })
     gui.close()
     gui.domElement.classList.add("catmullClark-gui")
@@ -213,7 +213,7 @@ export async function drawAll(url1, url2, url3, url4) {
         .add(guiProps.rendering, "rotation")
         .name("rotation")
         .listen()
-        .onChange((v) => (rotationFlag = v))
+        .onChange((v) => rotationFlag = v)
     const c = folderRendering
         .add(guiProps.rendering, "camera")
         .name("reset camera")
@@ -224,7 +224,6 @@ export async function drawAll(url1, url2, url3, url4) {
         scene,
         light1,
         light2,
-        rotationFlag,
         quadToroidalTetra,
         quadCube,
         quadCube_with_bnd,
@@ -247,7 +246,6 @@ function draw(g, config) {
         scene,
         light1,
         light2,
-        rotationFlag,
         quadToroidalTetra,
         quadCube,
         quadCube_with_bnd,

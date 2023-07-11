@@ -1,6 +1,5 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { dropdown } from "gui"
-import { genDivTooltip } from "draw"
+import { dropdown } from "../common/gui.js"
+import { genDivTooltip } from "../common/draw.js"
 //import lesmiserables from "lesmiserables" assert { type: "json" }
 
 const url1 = "../data/lesmiserables.json"

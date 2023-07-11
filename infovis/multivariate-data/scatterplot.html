@@ -6,51 +6,30 @@
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Bar Chart</title>
+        <!-- Styles -->
         <style>
-            body {
-                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
-            }
-            div.infovis-lecture {
-                margin-left: 3em;
-                width: 750px;
-            }
-            div#dropdown-menu {
-                font-family: sans-serif;
-                font-size: 1em;
-            }
-            .grid {
+            div.scatter-plot-grid {
                 display: grid;
                 grid-template-columns: auto auto auto auto;
                 gap: 1px;
-                background-color: mintcream;
+                background-color: aliceblue;
                 padding: 4px; 
-                margin: 0px; 
-                margin-left: 55px;
+                margin: 0 auto; 
                 width: 600px;
-                border: 1px solid teal
+                align-items: left;
+                justify-items: left;
+                border: 1px solid teal;
             }
         </style>
-        <script type="importmap">
-            {
-                "imports": {
-                    "colors": "../common/colors.js",
-                    "draw"  : "../common/draw.js" //,
-                    //"cars"  : "../data/cars.json"
-                }
-            }
-        </script>
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script
-            type="text/javascript"
-            id="MathJax-script"
-            async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
-        ></script>
+        <link rel="stylesheet" href="../../css/lectures.css">
         <link  
             rel="stylesheet" 
             title="Atom One Light"
-            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
-        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
         <script>
             hljs.highlightAll()
         </script>
@@ -71,14 +50,21 @@
                 for use in taxonomy problems.
             </p>
             <hr>
-            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
-                <div id="dropdown-menu" class="grid"></div>
+            <div class="canvas">
+                <div class="scatter-plot-grid" id="dropdown-menu"></div>
                 <div id="d3js_canvas"></div>
             <script type="module" src="./scatterplot.js"></script>
             </div>
             <hr>
             <h3>The JavaScript Code</h3>
-            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
         </div>
     </body>
 </html>

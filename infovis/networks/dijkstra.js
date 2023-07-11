@@ -1,9 +1,8 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { colorsUno, colorsDos, randColorsHex } from "colors"
-import { genDivTooltip } from "draw"
-import { dropdown } from "gui"
-import { random_seed } from "random"
-import { dijkstra, bfs, setNetwork } from "networks"
+import { colorsUno, colorsDos, randColorsHex } from "../common/colors.js"
+import { genDivTooltip } from "../common/draw.js"
+import { dropdown } from "../common/gui.js"
+import { random_seed } from "../../common/random.js"
+import { dijkstra, bfs, setNetwork } from "./networks.js"
 //import test01 from "test01" assert { type: "json" }
 //import test02 from "test02" assert { type: "json" }
 
@@ -258,6 +257,8 @@ async function drawAll(url1, url2) {
             })
             .on("click", function (event, d) {
                 onClick(
+                    nGroup,
+                    eGroup,
                     nodes,
                     edges,
                     neighbors,
@@ -312,6 +313,8 @@ async function drawAll(url1, url2) {
     }
 
     function onClick(
+        nGroup,
+        eGroup,
         nodes,
         edges,
         neighbors,
@@ -336,9 +339,7 @@ async function drawAll(url1, url2) {
         let distIndex = 0
         const nrDistances = distRange.length
         const recursiveColoring = () => {
-            d3.selectAll("path")
-                .data(edges)
-                .join("path")
+            eGroup
                 .attr("stroke", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
@@ -363,9 +364,7 @@ async function drawAll(url1, url2) {
                         return 0
                     }
                 })
-            d3.selectAll("circle")
-                .data(nodes)
-                .join("circle")
+            nGroup
                 .attr("fill", (d) => {
                     if (d.d <= distRange[distIndex]) return colScale(d.d)
                     else return colorScale(d.group)

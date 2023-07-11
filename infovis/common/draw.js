@@ -1,10 +1,3 @@
-//import * as d3 from "https://unpkg.com/d3@7.7.0?module"
-//import * as d3 from "https://cdn.skypack.dev/d3@7"
-//import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-//import {axisBottom, axisLeft} from "https://cdn.jsdelivr.net/npm/d3-axis@7/+esm"
-//import { format } from "https://cdn.jsdelivr.net/npm/d3-format@7/+esm"
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-
 export function axes(config) {
     const {
         selection,
@@ -40,7 +33,11 @@ export function axes(config) {
         xAxis.tickValues(xTickValues)
     }
     if (xTickFormat !== undefined) {
-        xAxis.tickFormat(xTickFormat)
+        if (typeof xTickFormat === 'string') {
+            xAxis.tickFormat(d3.format(xTickFormat))
+        } else if (typeof xTickFormat === 'function') {
+            xAxis.tickFormat(xTickFormat)
+        }
     } 
     const xAxisG = g.append('g').call(xAxis)
         .attr('transform', `translate(0, ${height})`)
@@ -55,7 +52,11 @@ export function axes(config) {
         yAxis.tickValues(yTickValues)
     }
     if (yTickFormat !== undefined) {
-        yAxis.tickFormat(format(yTickFormat))
+        if (typeof yTickFormat === 'string') {
+            yAxis.tickFormat(d3.format(yTickFormat))
+        } else if (typeof yTickFormat === 'function') {
+            yAxis.tickFormat(yTickFormat)
+        }
     }
     const yAxisG = g.append('g').call(yAxis)
         

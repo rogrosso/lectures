@@ -1,8 +1,15 @@
-import * as d3 from 'd3'
 // common
-import {axes, polynomialCurve, controlPolygon, controlPoints, labels, lineGenerator, cpGenerator} from 'draw'
-import { nurbsCurve, knotVector } from 'bsplines'
-import { colorsDos as colors } from 'colors'
+import {
+    axes, 
+    polynomialCurve, 
+    controlPolygon, 
+    controlPoints, 
+    labels, 
+    lineGenerator, 
+    cpGenerator
+} from '../common/draw.js'
+import { colorsDos as colors } from '../common/colors.js'
+import { nurbsCurve, knotVector } from '../b-splines/bsplines.js'
 
 // Problem
 /*
@@ -164,7 +171,7 @@ function dragend(event, d) {
 const wSliders = []
 for (let i = 1; i < (m-1); i++) {
     const valName = '#w'+i+'-value'
-    const idName = '#rationalBezier_w'+i
+    const idName = '#nurbs_w'+i
     wSliders.push(
         d3.select(idName).on('input', function() {
             weights[i] = +this.value

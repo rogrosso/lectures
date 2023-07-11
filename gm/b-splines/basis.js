@@ -1,11 +1,10 @@
-import * as d3 from 'd3'
 // common
 import {
     axes, 
     polynomialCurve
-} from 'draw'
-import { colorsDos as colors } from 'colors'
-import { bSplines, partitionOfUnity } from 'bsplines'
+} from '../common/draw.js'
+import { colorsDos as colors } from '../common/colors.js'
+import { bSplines, partitionOfUnity } from './bsplines.js'
 
 const width = 700 // canvas  width
 const height = 300 // canvas height

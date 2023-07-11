@@ -1,11 +1,7 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { randColorsHex } from "colors"
-import { genDivTooltip } from "draw"
-import { dropdown } from "gui"
-import { bfs, setNetwork } from "networks"
-// import assert not supported in all browsers
-//import test01 from "test01" assert { type: "json" }
-//import lesmiserables from "lesmiserables" assert { type: "json" }
+import { randColorsHex } from "../common/colors.js"
+import { genDivTooltip } from "../common/draw.js"
+import { dropdown } from "../common/gui.js"
+import { bfs, setNetwork } from "./networks.js"
 
 const url1 = "../data/test01.json"
 const url2 = "../data/lesmiserables.json"
@@ -18,6 +14,8 @@ async function drawAll(url1, url2) {
     const lesmiserables = await response2.json()
     draw(test01, lesmiserables)
 }
+// global variables
+const pathColor = "#6D191B"
 
 function draw(test01, lesmiserables) {
     const divTooltip = genDivTooltip()
@@ -178,14 +176,14 @@ function draw(test01, lesmiserables) {
             .alphaDecay(0.0001)
             .alphaMin(0.00001)
         const beta = 0.2
-        const link = g
+        const eGroup = g
             .append("g")
             .attr("fill", "none")
             .attr("stroke-opacity", 0.6)
             .selectAll("path")
             .data(links)
             .join("path")
-            .attr("stroke-width", (d) => Math.log(d.value + 3)) //Math.sqrt(d.value))
+            .attr("stroke-width", (d) => Math.log(d.value + 3)) 
             .attr("stroke", (d) => {
                 const g =
                     d.source.c > d.target.c ? d.source.group : d.target.group
@@ -201,14 +199,13 @@ function draw(test01, lesmiserables) {
                 const d1 = [x - beta * vy, y + beta * vx]
                 return lineGenerator([d0, d1, d2])
             })
-        const node = g
+        const nGroup = g
             .append("g")
             .attr("stroke", "#fff")
             .attr("stroke-width", 1.5)
             .selectAll("circle")
             .data(nodes)
             .join("circle")
-            .attr("class", "eigenvector-node")
             .attr("r", (d) => nScale(d.c))
             .attr("cx", (d) => d.x)
             .attr("cy", (d) => d.y)
@@ -228,6 +225,8 @@ function draw(test01, lesmiserables) {
             })
             .on("click", function (event, d) {
                 onClick(
+                    nGroup,
+                    eGroup,
                     nodes,
                     edges,
                     neighbors,
@@ -240,7 +239,7 @@ function draw(test01, lesmiserables) {
             })
             .call(drag(simulation))
         simulation.on("tick", () => {
-            link.attr("d", (d) => {
+            eGroup.attr("d", (d) => {
                 const d0 = [d.source.x, d.source.y]
                 const d2 = [d.target.x, d.target.y]
                 const x = (d0[0] + d2[0]) / 2
@@ -250,7 +249,7 @@ function draw(test01, lesmiserables) {
                 const d1 = [x - beta * vy, y + beta * vx]
                 return lineGenerator([d0, d1, d2])
             })
-            node.attr("cx", (d) => d.x).attr("cy", (d) => d.y)
+            nGroup.attr("cx", (d) => d.x).attr("cy", (d) => d.y)
         })
         function drag(simulation) {
             function dragstarted(event) {
@@ -328,7 +327,7 @@ function draw(test01, lesmiserables) {
             const d1 = [x + beta * vx, y + beta * vy]
             return [d0, d1, d2]
         }
-        const pathColor = "#6D191B"
+        //const pathColor = "#6D191B"
         const eGroup = g
             .selectAll("path")
             .data(edges, (d) => d.id)
@@ -364,6 +363,8 @@ function draw(test01, lesmiserables) {
             })
             .on("click", function (event, d) {
                 onClick(
+                    nGroup,
+                    eGroup,
                     nodes,
                     edges,
                     neighbors,
@@ -374,20 +375,6 @@ function draw(test01, lesmiserables) {
                     d
                 )
             })
-        /* Draw node labels
-        g.selectAll("text")
-            .data(nodes, (d) => d.id)
-            .join("text")
-            .attr("x", (d) => scale(d.x))
-            .attr("y", (d) => scale(d.y) + textOffset)
-            .attr("fill", "black")
-            .attr("font-size", "12px")
-            .attr("font-family", "sans-serif")
-            .attr("font-weight", "bold")
-            .attr("text-anchor", "middle")
-            .attr('dy', '0.35em')
-            .text((d) => d.id)
-        */
     }
 
     function mouseOver(tooltip) {
@@ -413,6 +400,8 @@ function draw(test01, lesmiserables) {
     }
 
     function onClick(
+        nGroup,
+        eGroup,
         nodes,
         edges,
         neighbors,
@@ -436,56 +425,39 @@ function draw(test01, lesmiserables) {
         let distIndex = 0
         const nrDistances = distRange.length
         const recursiveColoring = () => {
-            d3.selectAll("path")
-                .data(edges)
-                .join("path")
+            eGroup
                 .attr("stroke", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
                     const dist = Math.max(n0.d, n1.d)
                     if (dist <= distRange[distIndex]) {
                         return colScale(dist)
+                    } else {
+                        return pathColor
                     }
                 })
                 .attr("stroke-width", 2)
                 .attr("stroke-opacity", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
-                    //if ((n0.id === 36 || n0.id === 52) && (n1.id === 36 || n1.id === 52))
-                    //    debugger
                     if (n0.p === n1.id || n1.p === n0.id) {
                         const dist = Math.max(n0.d, n1.d)
-                        if (dist > distRange[distIndex]) return 0
-                        else {
+                        if (dist > distRange[distIndex]) {
+                            return 0
+                        } else {
                             return 1
                         }
                     } else {
                         return 0
                     }
                 })
-            d3.selectAll("circle")
-                .data(nodes)
+            nGroup
                 .join("circle")
                 .attr("fill", (d) => {
                     if (d.d <= distRange[distIndex]) return colScale(d.d)
                     else return colorScale(d.group)
                 })
-            d3.selectAll(".path-weight")
-                .data(edges, (d) => d.id)
-                .join("text")
-                .attr("class", "path-weight")
-                .attr("opacity", (d) => {
-                    if (distIndex >= nrDistances) return 1
-                    const n0 = nodes[sourceAccessor(d)]
-                    const n1 = nodes[targetAccessor(d)]
-                    if (n0.p === n1.id || n1.p === n0.id) {
-                        const dist = Math.max(n0.d, n1.d)
-                        if (dist > distRange[distIndex]) return 0
-                        else return 1
-                    } else {
-                        return 0
-                    }
-                })
+
             distIndex++
             if (distIndex < nrDistances) {
                 timeOuts.push(setTimeout(recursiveColoring, 300))

@@ -6,59 +6,19 @@
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Subdivision Surfaces</title>
-        <style>
-            body {
-                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
-            }
-            div.gm-lecture {
-                margin-left: 3em;
-                width: 750px;
-            }
-            .quadSubdivision{
-                display: grid;
-                width: 300px;
-                grid-template-columns: auto auto;
-                column-gap: 5px;
-            }
-            .dooSabin{
-                display: grid;
-                width: 600px;
-                grid-template-columns: auto auto auto auto;
-                column-gap: 5px;
-            }
-        </style>
-        <script type="importmap">
-            {
-                "imports": {
-                    "three": "https://unpkg.com/three@0.136.0/build/three.module.js",
-                    "OrbitControls": "https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js",
-                    "GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
-                    "colors": "../common/colors.js",
-                    "halfedge": "../../common/halfedge.js"
-                    //"quadToroidalTetra": "../data/quadToroidalTetra.json",
-                    //"hybridCube": "../data/hybridCube.json",
-                    //"quadCube": "../data/quadCube.json",
-                    //"quadPawn": "../data/quadPawn.json"
-                }
-            }
-        </script>
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script
-            type="text/javascript"
-            id="MathJax-script"
-            async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
-        ></script>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
         <link  
             rel="stylesheet" 
             title="Atom One Light"
-            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
-        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
         <script>
             hljs.highlightAll()
         </script>
     </head>
-    <!-- Axes with d3 -->
     <body>
         <div class="gm-lecture">
             <h1>Subdivision Surfaces</h1>
@@ -73,19 +33,19 @@
                     v_{new} = \frac{1}{4}(v + v_c + v_{e_1} + v_{e_2})
                 \]
             </p>
-            <div class="quadSubdivision" style="position: relative">
+            <div class="quadSubdivision" style="display: grid; grid-template-columns: auto auto;">
                 <div>
-                    <img src="../data/doo_sabin_1_270_1.png" height="220" style="bottom: 0">
+                    <img src="../data/doo_sabin_1_270_1.png" height="200">
                 </div>                
                 <div>
-                    <img src="../data/doo_sabin_2_270_1.png" height="200" style="position: absolute; bottom: 0">
+                    <img src="../data/doo_sabin_2_270_1.png" height="200" style="bottom: 0">
                 </div>
             </div>
             <hr>
             <p>
                 The general case for an hybrid mesh is illustrated in the images below.
             </p>
-            <div class="dooSabin" style="position: relative">
+            <div class="dooSabin" style="position: relative; display: grid; grid-template-columns: auto  auto;">
                 <div>
                     <img src="../data/doo_sabin_ngon_1.png" height="135">
                 </div>                
@@ -100,12 +60,20 @@
                 </div>
             </div>
             <hr>
-            <div style="border: 1px solid #CC9999; padding: 15px; display: inline-block">
+            <div class="canvas">
                 <div id="threejs_canvas"></div>
                 <script type="module" src="./dooSabin.js"></script>
             </div>
+            <hr>
             <h3>The JavaScript Code</h3>
-            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
         </div>
     </body>
 </html>

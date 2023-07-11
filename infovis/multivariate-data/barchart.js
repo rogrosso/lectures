@@ -1,5 +1,4 @@
-import { axes } from "draw"
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
+import { axes } from "../common/draw.js"
 
 const width = 650
 const height = 400
@@ -112,6 +111,12 @@ function draw({
 }) {
     // remove all
     selection.selectAll('*').remove()
+    // global variables
+    //const fillColor = '#E3BA22'
+    //const fillColor = '#E6842A'
+    //const fillColor = '#B396AD'
+    const fillColor = '#C1BAA9'
+    const strokeColor = '#7C715E'
     // prepare data
     data.sort( (a,b) => b[value] - a[value] )
     const xMaxValue = d3.max(data, d => d[value])
@@ -157,7 +162,8 @@ function draw({
                 .attr('x', 1.5)
                 .attr('width', 0 ) 
                 .attr('height', yScale.bandwidth())
-                .attr('fill', '#20B2AA')
+                .attr('fill', fillColor) // '#20B2AA')
+                .attr('stroke', strokeColor)
                 .transition(tRec).attr('width', d => xScale(d[value]))
             gEnter
                 .on('mouseover', function(event,elem) {
@@ -194,7 +200,7 @@ function draw({
                 d3.selectAll('rect')
                     .transition().duration(200)
                     .attr('fill-opacity', 1)
-                    .attr('stroke', 'none')
+                    .attr('stroke', strokeColor)
                 mouseOut()
             })
         },

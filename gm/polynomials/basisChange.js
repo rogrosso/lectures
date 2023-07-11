@@ -1,8 +1,7 @@
-import * as d3 from 'd3'
 // common
-import {axes, polynomialCurve, controlPolygon, controlPoints, labels, lineGenerator, cpGenerator} from 'draw'
-import {bezierCurve} from 'bezier'
-import gaussEliminationFactory from 'gaussEliminationFactory'
+import {axes, polynomialCurve, controlPolygon, controlPoints, labels, lineGenerator, cpGenerator} from '../common/draw.js'
+import {bezierCurve} from '../bezier/bezier.js'
+import gaussEliminationFactory from '../../common/gaussElimination.js'
 
 // Problem
 // control points of a Bezier curve, that is 

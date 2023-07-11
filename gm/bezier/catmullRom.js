@@ -1,8 +1,15 @@
-import * as d3 from 'd3'
 // common
-import {axes, polynomialCurve, controlPolygon, controlPoints, labels, lineGenerator, cpGenerator} from 'draw'
-import { bezierCurve } from 'bezier'
-import { colorsDos as colors } from 'colors'
+import {
+    axes, 
+    polynomialCurve, 
+    controlPolygon, 
+    controlPoints, 
+    labels, 
+    lineGenerator, 
+    cpGenerator
+} from '../common/draw.js'
+import { bezierCurve } from './bezier.js'
+import { colorsDos as colors } from '../common/colors.js'
 
 const width = 500 // canvas  width
 const height = 500 // canvas height

@@ -1,4 +1,3 @@
-import * as d3 from 'd3'
 // common
 import {
     axes, 
@@ -8,9 +7,9 @@ import {
     labels, 
     lineGenerator, 
     cpGenerator
-} from 'draw'
-import { bezierCurve, degreeElevation } from 'bezier'
-import { colorsDos as colors } from 'colors'
+} from '../common/draw.js'
+import { bezierCurve, degreeElevation } from './bezier.js'
+import { colorsDos as colors } from '../common/colors.js'
 
 const width = 500 // canvas  width
 const height = 500 // canvas height

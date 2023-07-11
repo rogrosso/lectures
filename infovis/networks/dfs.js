@@ -1,10 +1,7 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { randColorsHex } from "colors"
-import { genDivTooltip } from "draw"
-import { dropdown } from "gui"
-import { bfs, dfs, setNetwork } from "networks"
-//import test01 from "test01" assert { type: "json" }
-//import lesmiserables from "lesmiserables" assert { type: "json" }
+import { randColorsHex } from "../common/colors.js"
+import { genDivTooltip } from "../common/draw.js"
+import { dropdown } from "../common/gui.js"
+import { bfs, dfs, setNetwork } from "./networks.js"
 
 const url1 = "../data/test01.json"
 const url2 = "../data/lesmiserables.json"
@@ -189,7 +186,7 @@ async function drawAll(url1, url2) {
             .alphaDecay(0.0001)
             .alphaMin(0.00001)
         const beta = 0.2
-        const link = g
+        const eGroup = g
             .append("g")
             .attr("fill", "none")
             .attr("stroke-opacity", 0.6)
@@ -212,7 +209,7 @@ async function drawAll(url1, url2) {
                 const d1 = [x - beta * vy, y + beta * vx]
                 return lineGenerator([d0, d1, d2])
             })
-        const node = g
+        const nGroup = g
             .append("g")
             .attr("stroke", "#fff")
             .attr("stroke-width", 1.5)
@@ -239,6 +236,8 @@ async function drawAll(url1, url2) {
             })
             .on("click", function (event, d) {
                 onClick(
+                    nGroup,
+                    eGroup,
                     nodes,
                     edges,
                     neighbors,
@@ -252,7 +251,7 @@ async function drawAll(url1, url2) {
             })
             .call(drag(simulation))
         simulation.on("tick", () => {
-            link.attr("d", (d) => {
+            eGroup.attr("d", (d) => {
                 const d0 = [d.source.x, d.source.y]
                 const d2 = [d.target.x, d.target.y]
                 const x = (d0[0] + d2[0]) / 2
@@ -262,7 +261,7 @@ async function drawAll(url1, url2) {
                 const d1 = [x - beta * vy, y + beta * vx]
                 return lineGenerator([d0, d1, d2])
             })
-            node.attr("cx", (d) => d.x).attr("cy", (d) => d.y)
+            nGroup.attr("cx", (d) => d.x).attr("cy", (d) => d.y)
         })
         function drag(simulation) {
             function dragstarted(event) {
@@ -376,6 +375,8 @@ async function drawAll(url1, url2) {
             })
             .on("click", function (event, d) {
                 onClick(
+                    nGroup,
+                    eGroup,
                     nodes,
                     edges,
                     neighbors,
@@ -429,6 +430,8 @@ async function drawAll(url1, url2) {
     }
 
     function onClick(
+        nGroup,
+        eGroup,
         nodes,
         edges,
         neighbors,
@@ -454,9 +457,7 @@ async function drawAll(url1, url2) {
         let distIndex = 0
         const nrDistances = distRange.length
         const recursiveColoring = () => {
-            d3.selectAll("path")
-                .data(edges)
-                .join("path")
+            eGroup
                 .attr("stroke", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
@@ -469,8 +470,6 @@ async function drawAll(url1, url2) {
                 .attr("stroke-opacity", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
-                    //if ((n0.id === 36 || n0.id === 52) && (n1.id === 36 || n1.id === 52))
-                    //    debugger
                     if (n0.p === n1.id || n1.p === n0.id) {
                         const dist = Math.max(n0.d, n1.d)
                         if (dist > distRange[distIndex]) return 0
@@ -481,29 +480,12 @@ async function drawAll(url1, url2) {
                         return 0
                     }
                 })
-            d3.selectAll("circle")
-                .data(nodes)
-                .join("circle")
+            nGroup
                 .attr("fill", (d) => {
                     if (d.d <= distRange[distIndex]) return colScale(d.d)
                     else return colorScale(d.group)
                 })
-            d3.selectAll(".path-weight")
-                .data(edges, (d) => d.id)
-                .join("text")
-                .attr("class", "path-weight")
-                .attr("opacity", (d) => {
-                    if (distIndex >= nrDistances) return 1
-                    const n0 = nodes[sourceAccessor(d)]
-                    const n1 = nodes[targetAccessor(d)]
-                    if (n0.p === n1.id || n1.p === n0.id) {
-                        const dist = Math.max(n0.d, n1.d)
-                        if (dist > distRange[distIndex]) return 0
-                        else return 1
-                    } else {
-                        return 0
-                    }
-                })
+            
             distIndex++
             if (distIndex < nrDistances) {
                 timeOuts.push(setTimeout(recursiveColoring, 300))

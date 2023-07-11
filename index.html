@@ -6,61 +6,32 @@
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Lectures</title>
-        <style>
-            body {
-                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
-            }
-            div.lectures {
-                margin-left: 3em;
-                width: 850px;
-            }
-            li {
-                margin-bottom: 5px;
-            }
-        </style>
-        <script type="importmap">
-            {
-                "imports": {
-                    "three": "https://unpkg.com/three@0.136.0/build/three.module.js",
-                    "OrbitControls": "https://unpkg.com/three@0.136.0/examples/jsm/controls/OrbitControls.js",
-                    "GUI": "https://unpkg.com/three@0.136.0/examples/jsm/libs/lil-gui.module.min.js",
-                    "colors": "./common/colors.js",
-                    "halfedge": "./common/halfedge.js",
-                    "data/": "./gm/data/" //,
-                    //"quadToroidalTetra": "./gm/data/quadToroidalTetra.json",
-                    //"quadCube": "./gm/data/quadCube.json",
-                    //"quadCube_with_bnd": "./gm/data/quadCube_with_bnd.json",
-                    //"quadPawn": "./gm/data/quadPawn.json"
-                }
-            }
-        </script>
+        <!-- Styles -->
+        <link rel="stylesheet" href="./css/lectures.css">
     </head>
     <!-- Axes with d3 -->
     <body>
         <div class="lectures">
             <h1>Lectures</h1>
-            <p style="padding-bottom: 0px;">Roberto Grosso</p>
-            <p style="margin: 0px; padding-top: 0px;">Project start: Feb. 2023</p>
+            <h3>Roberto Grosso, Project start: Feb. 2023</h3>
             <p>
-                This repository contains the HTML and Javascript code implementing algorithms discussed in some of the lectures 
-                in geometry processing and information visualization. This way, the code and some background information 
-                about the algorithms can be freely accessed also from outside the University.
+                This repository contains the HTML and Javascript code implementing algorithms discussed in some geometric modeling, 
+                geometry processing, and information visualization lectures. This way, the code and some background information 
+                about the algorithms can be freely accessed also from outside the University. This website presents the implemented
+                code, which can be cloned from the GitHub site 
+                <a href="https://github.com/rogrosso/lectures">https://github.com/rogrosso/lectures</a>.
             </p>
             <p>
-                This website presents the results of the implemented code, which can be cloned from the 
-                <a href="https://github.com/rogrosso/lectures">GitHub site</a>. <strong>Note:</strong> this website does 
-                not work on tablets, iOS, iPadOS, or Firefox. Firefox does not support asserted imports jet.  
+                The web applications are interactive and based on D3 for 2D graphics and three.js for surfaces. It is strongly 
+                recommended to interact with the visualizations by selecting and dragging points, zooming, and rotating the 3D 
+                geometry. Some of the applications also include a simple user interface. The code was not implemented for 
+                industrial usage or optimized for performance, which makes the implementations much easier to read and understand. 
             </p>
             <p>
-                There is a lot of duplicated code, but it is being re-engineered. Thus it will become better in the future. 
-                The web applications are interactive and based on <strong>D3</strong> for 2D graphics and 
-                <strong>three.js</strong> for surfaces. It is strongly recommended to interact with the visualizations by 
-                selecting and dragging points or by zooming and rotating the 3D geometry. Some of the applications also 
-                include a user interface. The code is, at this moment, indeed buggy. The code was not implemented for 
-                industrial usage.  
+                <strong>Note:</strong> The code was only tested with the Edge and Chrome browsers. 
             </p>
             <hr>
-            <p>Example: Catmull-Clark Subdivision Surface</p>
+            <h3>Example: Catmull-Clark Subdivision Surface</h3>
             <div id="threejs_canvas" data-width="450" data-height="320"></div>
             <script type="module">
                 import { drawAll } from "./gm/subdivision-surfaces/catmullClark.js";
@@ -73,30 +44,39 @@
             <hr>
             <h2>Content</h2>
             <p>
-                The code is organized into three folders containing the algorithms implemented for three lectures. The lectures 
-                are the following.
+                The website is organized into three folders containing the algorithms implemented for three lectures. 
+                The folders are the following:
             </p>
-            <strong>Folder gm</strong>: <a href="./gm/index.html"><strong>Geometric Modeling</strong></a></h2>
+            <h3>Folder gm: <a href="./gm/index.html">Geometric Modeling</a></h3>
             <p>
-            We have implemented algorithm for polynomial curves, Bézier- and B-Spline curves. We have also implemented
-            algorithms for tensor product and subdivision surfaces. 
+                This section implements algorithms for polynomial curves, Bézier- and B-Spline curves. There are also 
+                implementations of algorithms for tensor product and subdivision surfaces. 
             </p>
-            <strong>Folder gp</strong>: <a href="./gp/index.html"><strong>Geometry Processing</strong></a>
+            <h3>Folder gp: <a href="./gp/index.html">Geometry Processing</a></h3>
             <p>
-                we have implemented basic algorithms the geometry processing, such point cloud registration, 
-                surface reconstruction, fairing and remeshing, ARAP and mesh parametrization.
+                This section contains basic algorithms for geometry processing, such as point cloud registration, 
+                surface reconstruction, fairing and remeshing, mesh deformation (ARAP), and parametrization.
             </p>
-            <strong>Folder infovis</strong>: <a href="./infovis/index.html"><strong>Information Visualization</strong></a>
+            <h3>Folder infovis: <a href="./infovis/index.html">Information Visualization</a></h3>
             <p>
-                We have implemented visualization algorithms for colors, multivariate data, networks analysis and
-                visualization, hierarchies, and text.
+                This section demonstrates some visualization algorithms for color manipulation, multivariate data, 
+                network analysis, visualization, hierarchies, and text visualization.
             </p>
             <h2>Disclaimer</h2>
             <p>
-                Some of the functions used in this project were implemented within the project. For example, JavaScript 
-                does not have a priority queue. In such cases, we copy an implementation from the Internet and modify 
-                and adapt it. We mention the credits in the JavaScript file. We hope we have done everything right.
+                This project aims to implement all functions and data structures required, up to the libraries 
+                for data visualization and HTML processing, such as formulas and code highlighting. Nevertheless, 
+                there always will be exemplary implementations of fundamental algorithms that one borrows from the 
+                open-source community. Credits will be included in the corresponding file whenever third-party 
+                software is used.
             </p>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="./impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="./datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
         </div>
     </body>
 </html>

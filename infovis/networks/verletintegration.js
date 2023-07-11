@@ -1,8 +1,7 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { dropdown } from "gui"
-import { genDivTooltip } from "draw"
-import { easyRandom } from "random"
-import { keyCantor } from "utilities"
+import { dropdown } from "../common/gui.js"
+import { genDivTooltip } from "../common/draw.js"
+import { easyRandom } from "../../common/random.js"
+import { keyCantor } from "../../common/utilities.js"
 import {
     jiggle,
     collisionForce,
@@ -11,12 +10,15 @@ import {
     attractingForceA,
     repulsiveForceF,
     repulsiveForceA,
-} from "networks"
-//import lesmiserables from "lesmiserables" assert { type: "json" }
+} from "./networks.js"
 
 const url1 = "../data/lesmiserables.json"
 drawAll(url1)
 async function drawAll(url) {
+    // global variables
+    const dampConst = 6
+    let damping = dampConst
+    // draw
     const lesmiserables = await d3.json(url)
 
     const divTooltip = genDivTooltip()
@@ -79,7 +81,7 @@ async function drawAll(url) {
         // compute conservative forces
         conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
         // update position, velocity and acceleration
-        const w = 3.1 //3
+        const w = damping
         const h = 0.008
         for (let n of nodes) {
             // position Verlet
@@ -104,7 +106,7 @@ async function drawAll(url) {
         // compute conservative forces
         conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
         // update position, velocity and acceleration
-        const w = 3.1//3
+        const w = damping
         const h = 0.005
         for (let n of nodes) {
             // keep position for position-Verlet
@@ -286,6 +288,7 @@ async function drawAll(url) {
     nodeG.append("title").text((d) => d.name)
 
     function dragstarted(event, d) {
+        damping = dampConst
         const x = event.sourceEvent.pageX + offsetX
         const y = event.sourceEvent.pageY - offsetY
         divTooltip
@@ -343,6 +346,7 @@ async function drawAll(url) {
     animate()
     function animate() {
         requestAnimationFrame(animate)
+        if (damping > 3) damping *= 0.99
         step(K, Kc, Kg, cR, nodes, edges, bbox, disp)
         fixPositions(nodes, bbox)
         redraw(nodeG, linkG)

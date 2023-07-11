@@ -6,63 +6,20 @@
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Network Force Directed Layout</title>
-        <style>
-            body {
-                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
-            }
-            div.infovis-lecture {
-                margin-left: 3em;
-                width: 750px;
-            }
-            div#dropdown-menu {
-                font-family: sans-serif;
-                font-size: 1em;
-            }
-            .grid {
-                display: grid;
-                grid-template-columns: auto;
-                gap: 1px;
-                background-color: white;
-                padding: 4px; 
-                margin: 2px; 
-                margin-left: 100px;
-                width: 500px;
-                border: 1px solid teal
-            }
-            div.cell {
-                margin: 1px;
-            }
-        </style>
-        <script type="importmap">
-            {
-                "imports": {
-                    "random"   : "../../common/random.js",
-                    "utilities": "../../common/utilities.js",
-                    "colors"   : "../common/colors.js",
-                    "draw"     : "../common/draw.js",
-                    "gui"      : "../common/gui.js",
-                    "networks" : "./networks.js",
-                    "lesmiserables" : "../data/lesmiserables.json"
-                }
-            }
-        </script>
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script
-            type="text/javascript"
-            id="MathJax-script"
-            async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
-        ></script>
-        <link  
-            rel="stylesheet" 
-            title="Atom One Light"
-            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
-        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
-        <script>
-            hljs.highlightAll()
-        </script>
+        <!-- Styles -->
+         <link rel="stylesheet" href="../../css/lectures.css">
+         <link  
+             rel="stylesheet" 
+             title="Atom One Light"
+             href="../../contrib/highlightjs/atom-one-light.min.css">
+         <!-- Scripts -->
+         <script src="../../contrib/highlightjs/highlight.min.js"></script>
+         <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+         <script src="../../contrib/d3.min.js"></script>
+         <script>
+             hljs.highlightAll()
+         </script>
     </head>
-    <!-- Axes with d3 -->
     <body>
         <div class="infovis-lecture">
             <h1>Force Directed Layout</h1>
@@ -94,7 +51,7 @@
     foreach v in V do
         disp(v)=0; // vector containing displacement for v
         foreach u in V and u != v do
-            d = v.pos − u.pos; // vector pointing from u to v
+            d = v.pos - u.pos; // vector pointing from u to v
             disp(v) = disp(v) + (d/norm(d)) * fr(norm(d))  // fr is repulsive force
     foreach e in E do
         d = v.pos - u.pos; // e = {v,u}
@@ -104,8 +61,8 @@
         /* limit max displacement to frame; use temperature t to scale */
         v.pos = v.pos + (disp(v)/norm(disp(v)) * min(t,norm(disp(v))
         /* check that node is in window, otherwise clip */
-        v.pos.x = min(W/2, max(−W/2, v.pos.x))
-        v.pos.y = min(L/2, max(−L/2, v.pos.y))
+        v.pos.x = min(W/2, max(-W/2, v.pos.x))
+        v.pos.y = min(L/2, max(-L/2, v.pos.y))
         t = cool(t) ; /* reduce temperature for next iteration */
             </pre></p>
             <h2>Fruchterman-Reinglod, 1990</h2>
@@ -140,14 +97,21 @@
                 \]
             </p>
             <hr>
-            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
-                <div id="force-directed-layout" class="grid" style="text-align: center;">
+            <div class="canvas">
+                <div id="force-directed-layout" class="grid=container-1-column" style="text-align: center;">
                 </div>
             <script type="module" src="./forcedirectedlayout.js"></script>
             </div>
             <hr>
             <h3>The JavaScript Code</h3>
-            <div style="width: 700px; margin-left: 10px;" id="hl-code"></div>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
         </div>
     </body>
 </html>

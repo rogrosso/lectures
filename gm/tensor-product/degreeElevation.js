@@ -1,13 +1,13 @@
-import * as THREE from "three"
-import { OrbitControls } from "OrbitControls"
-import { GUI } from "GUI"
+import * as THREE from "../../contrib/three.module.min.js"
+import { OrbitControls } from "../../contrib/OrbitControls.js"
+import { GUI } from "../../contrib/lil-gui.module.min.js"
 //import teapot from 'teapot' assert {type: 'json'}
 import {
     tessellation,
     computePatches,
     degreeElevationPatches,
-} from "tpSurfaces"
-import { randColors } from "colors"
+} from "./tpSurfaces.js"
+import { randColors } from "../common/colors.js"
 
 const url1 = "../data/teapot.json"
 async function drawAll(url1) {

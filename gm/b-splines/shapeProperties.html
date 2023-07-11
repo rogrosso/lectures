@@ -6,44 +6,20 @@
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>B-Spline Curves</title>
-        <style>
-            body {
-                font-family: Open Sans, Arial, Geneva, Helvetica, sans-serif;
-            }
-            .gm-lecture {
-                margin-left: 3em;
-                width: 750px;
-            }
-        </style>
-        <script type="importmap">
-            {
-                "imports": {
-                    //"d3": "https://cdn.skypack.dev/d3@7"
-                    //"d3": "https://unpkg.com/d3@7.7.0?module",
-                    "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
-                    "colors": "../common/colors.js",
-                    "draw": "../common/draw.js",
-                    "bsplines": "../b-splines/bsplines.js"
-                }
-            }
-        </script>
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script
-            type="text/javascript"
-            id="MathJax-script"
-            async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
-        ></script>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
         <link  
             rel="stylesheet" 
             title="Atom One Light"
-            href="//unpkg.com/@highlightjs/cdn-assets@11.7.0/styles/atom-one-light.min.css">
-        <script src="//unpkg.com/@highlightjs/cdn-assets@11.7.0/highlight.min.js"></script>
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
         <script>
             hljs.highlightAll()
         </script>
     </head>
-    <!-- Axes with d3 -->
     <body>
         <div class="gm-lecture">
             <h1>B-Spline Curves</h1>
@@ -99,38 +75,29 @@
                 </li>
             </ul>
             <hr>
-            <div style="border: 1px solid #CC9999; text-align: center; padding: 15px">
-                <div class="grid-container"
-            style="display: grid;
-                grid-template-areas:  'slider checkbox1'  'slider checkbox2' 'slider checkbox3';
-                gap: 1px;
-                background-color: white;
-                padding: 1px; 
-                margin: 0 auto; 
-                width: 450px;
-                border: 1px solid teal">
-            <div class="grid-item" style="grid-area: slider; text-align: left; border: 1px solid teal">
-                <label for="bspline_degree_slider" 
-		            style="text-align: left; margin-left: 5px; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+            <div class="canvas">
+                <div class="grid-container">
+            <div class="grid-item">
+                <label calss='gui' for="bspline_degree_slider">
 					degree = <span id="degree_value">3</span>
 				</label>
 				<input type="range" min="1" max="4" step="1" value="3"  id="bspline_degree_slider"; style="display: inline; width: 90px">
             </div>
-            <div class="grid-item" style="grid-area: checkbox1; text-align: left; border: 1px solid teal">
+            <div class="grid-item">
                 <input type="checkbox" id="n_coincident" name="n_coincident" style="display: inline-box; margin-left: 5px">
-				<label for="n_coincident" style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+				<label class='gui' for="n_coincident">
 		            n coincident control points
                 </label>	
             </div>
-            <div class="grid-item" style="grid-area: checkbox2; text-align: left; border: 1px solid teal">
+            <div class="grid-item">
                 <input type="checkbox" id="n_aligned" style="display: inline-box; margin-left: 5px" name="n_aligned">
-                <label for="n_aligned" style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+                <label class='gui' for="n_aligned">
 				    n control points on a line
                 </label>
             </div>
-            <div class="grid-item" style="grid-area: checkbox3; text-align: left; border: 1px solid teal">
+            <div class="grid-item">
                 <input type="checkbox" id="n_1_aligned" style="display: inline-box; margin-left: 5px" name="n_1_aligned">
-		    	<label for="n_1_aligned" style="text-align: left; font-size: 16px; font-family:'Times New Roman', Times, serif;">
+		    	<label class='gui' for="n_1_aligned">
 		            n+1 control points aligned
                 </label>
             </div>
@@ -138,8 +105,16 @@
                 <div id="d3js_canvas"></div>
                 <script type="module" src="./shapeProperties.js"></script>
             </div>
+            <hr>
             <h3>The JavaScript Code</h3>
-            <div style="width: 750px; margin-left: 10px;" id="hl-code"></div>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
         </div>
     </body>
 </html>

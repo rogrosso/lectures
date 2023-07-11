@@ -1,4 +1,3 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
 
 export function dropdown({
     divObj,
@@ -11,8 +10,10 @@ export function dropdown({
     for (let k of keys) dropdownOptions.push({key: k, value: k})
 
     const lab = divObj.append('label')
+        .attr('class', 'dropdown-label')
         .text(text)
     const select = divObj.append('select')
+        .attr('aria-label', text)
         .on('change', function(event) {
             handler(text, event.target.value)
         })

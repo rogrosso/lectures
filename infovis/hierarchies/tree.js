@@ -2,6 +2,12 @@
  * Implements a set of methods for tree data structures.
  * @param {Object} rn root node of the tree
  * @returns 
+ * @note The main purpose of this project is information visualization.
+ *       We deal with geometry and geometric primivites. Thus, we
+ *       have coordinates, size, width and height. 
+ *       We call the height of a node in the tree, tHeight. The height
+ *       and width occupied by the node in the visual representation
+ *       are called height and width. 
  */
 export function treeFactory(rn) {
     const root = rn
@@ -15,7 +21,7 @@ export function treeFactory(rn) {
         const q = []
         while (s.length > 0) {
             const n = s.pop()
-            n.height = 0
+            n.tHeight = 0
             q.push(n)
             for (let c of n.children) {
                 s.push(c)
@@ -24,9 +30,9 @@ export function treeFactory(rn) {
         while (q.length > 0) {
             const n = q.pop()
             if (hasChildren(n)) {
-                n.height = 1 + Math.max(...n.children.map((c) => c.height))
+                n.tHeight = 1 + Math.max(...n.children.map((c) => c.tHeight))
             }
-            h = Math.max(h, n.height)
+            h = Math.max(h, n.tHeight)
         }
         return h
     }
@@ -66,7 +72,7 @@ export function treeFactory(rn) {
     }
     /** check if the node a leaf node, i.e. it has no children */
     const isLeaf = (node) => {
-        return node.height === 0
+        return node.tHeight === 0
     }
     /** returns the number of children of a node */
     const nrChildren = (node) => {
@@ -221,6 +227,23 @@ export function treeFactory(rn) {
         return a
     }
     /**
+     * Returns the leaves of the subtree rooted at node n.
+     */
+    function leaves(n) {
+        const leaves_ = (n, l) => {
+            if (isLeaf(n)) {
+                l.push(n)
+            } else {
+                for (let c of n.children) {
+                    leaves_(c, l)
+                }
+            }
+        } 
+        const l = []
+       leaves_(n, l)
+       return l
+    }
+    /**
      * Returns the path from source to target node
      * The path is an array of nodes starting with the source node
      * and ending with the target node.
@@ -246,11 +269,12 @@ export function treeFactory(rn) {
         }
         return s.concat(lca, t.reverse())
     }
-    const height = treeHeight()
+    treeHeight()
     treeDepth()
     return {
         root,
-        height,
+        treeDepth,
+        treeHeight,
         isRoot,
         isLeaf,
         hasChildren,
@@ -266,8 +290,61 @@ export function treeFactory(rn) {
         rightMostSibling,
         leftMostChild,
         rightMostChild,
+        leaves,
         descendants,
         ancestors,
         path
     }
+}
+
+/** 
+ * construct hierarchy from flare data set 
+ * @param {Object} data flare data set is json format
+ */
+export function readFlareHierarchy(data) {
+    const hMap = new Map()
+    hMap.set("flare", {
+        name: "flare",
+        children: [],
+        parent: undefined,
+        key: "flare",
+        size: undefined,
+        imports: undefined,
+    })
+    data["flare"].forEach((n) => {
+        let n_name = n["name"]
+        hMap.set(n["name"], {
+            name: n_name.substring(n_name.lastIndexOf(".") + 1),
+            children: [],
+            parent: undefined,
+            key: n_name,
+            size: n["size"],
+            imports: n["imports"],
+        })
+        // add parent elements up to root node
+        while (n_name.lastIndexOf(".") > -1) {
+            n_name = n_name.substring(0, n_name.lastIndexOf("."))
+            if (!hMap.has(n_name)) {
+                hMap.set(n_name, {
+                    name: n_name.substring(n_name.lastIndexOf(".") + 1),
+                    children: [],
+                    parent: undefined,
+                    key: n_name,
+                    size: undefined,
+                    imports: undefined,
+                })
+            }
+        }
+    })
+    // connect parents and children
+    hMap.forEach((e, k, m) => {
+        // compute parent
+        let n_name = k
+        const pKey = n_name.substring(0, n_name.lastIndexOf("."))
+        if (pKey.length > 0) {
+            hMap.get(pKey).children.push(hMap.get(n_name))
+            hMap.get(n_name).parent = hMap.get(pKey)
+        }
+    })
+    return treeFactory(hMap.get("flare"))
 }

@@ -1,5 +1,5 @@
-import { axes, conScale, transferFunctions, genDivTooltip } from "draw"
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
+import { axes, conScale, transferFunctions, genDivTooltip } from "../common/draw.js"
+import { dropdown } from "../common/gui.js"
 
 let divTooltip = genDivTooltip()
 
@@ -132,29 +132,6 @@ function colHandler(text, value) {
     console.log(value)
     transferFunctions(trfG, { colSel: value, colMap: colMap, xScale: xAxisScale, yScale: yAxisScale })
     conScale(sclG, colId, value, colMap, sclW, sclH, tooltipConfig)
-}
-
-function dropdown({
-    divObj,
-    text,
-    selection,
-    keys,
-    handler
-}) {
-    const dropdownOptions = []
-    for (let k of keys) dropdownOptions.push({key: k, value: k})
-
-    const lab = divObj.append('label')
-        .text(text)
-    const select = divObj.append('select')
-        .on('change', function(event) {
-            handler(text, event.target.value)
-        })
-    const options = select.selectAll('option').data(dropdownOptions, d => d.key)
-        .join('option')
-        .attr('value', d => d.value)
-        .property('selected', d => d.key === selection)
-        .text(d => d.value)
 }
 
 function mouseOver(divTooltip) {

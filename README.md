@@ -1,32 +1,35 @@
 # lectures
-This repository contains the HTML and Javascript code implementing algorithms discussed in some of the lectures 
-in geometry processing and information visualization. This way, the code and some background information 
-about the algorithms can be freely accessed also from outside the University.
+This repository contains the HTML and Javascript code implementing algorithms discussed in some geometric modeling, 
+geometry processing, and information visualization lectures. This way, the code and some background information 
+about the algorithms can be freely accessed also from outside the University. This website presents the implemented
+code, which can be cloned from the GitHub site 
+<a href="https://github.com/rogrosso/lectures">https://github.com/rogrosso/lectures</a>.
 
-There is a lot of duplicated code, but it is being re-engineered. Thus it will become better in the future. 
-The web applications are interactive and based on <strong>D3</strong> for 2D graphics and 
-<strong>three.js</strong> for surfaces. It is strongly recommended to interact with the visualizations by 
-selecting and dragging points or by zooming and rotating the 3D geometry. Some of the applications also 
-include a user interface. The code is, at this moment, indeed buggy. The code was not implemented for 
-industrial usage.  
+The web applications are interactive and based on D3 for 2D graphics and three.js for surfaces. It is strongly 
+recommended to interact with the visualizations by selecting and dragging points, zooming, and rotating the 3D 
+geometry. Some of the applications also include a simple user interface. The code was not implemented for 
+industrial usage or optimized for performance, which makes the implementations much easier to read and understand.
 
-## Folder common
-This folder contains functions that that are required by some of the implementations in the different topics. One example are functions for solving simple linear systems or computing the inverse of a matrix.
+**Note:** The code was only tested with the Edge and Chrome browsers. 
 
-## Folder gm
-This folder contains the web applications implemented for the lectures corresponding to the course in *Geometric Modeling*.
+The website is organized into three folders containing the algorithms implemented for three lectures. 
+The folders are the following:
 
-## Folder gp
-This folder contains the web applications implemented for the lectures corresponding to the course in *Geometry Processing*.
+## Folder gm, Geometric Modeling
+This section implements algorithms for polynomial curves, Bézier- and B-Spline curves. There are also 
+implementations of algorithms for tensor product and subdivision surfaces. 
+
+## Folder gp, Geometry Processing
+This section contains basic algorithms for geometry processing, such as point cloud registration, 
+surface reconstruction, fairing and remeshing, mesh deformation (ARAP), and parametrization.
 
 ## Folder infovis
-This folder contains the web applications implemented for the lectures corresponding to the course in *Information Visualization*.
-
-## Remark
-I have had problems with the CDNs, particularly *unpkg* with *D3*. If a web application does not work, please edit the *html* or
- *JavaScript* file and comment in a different CDN.
+This section demonstrates some visualization algorithms for color manipulation, multivariate data, 
+network analysis, visualization, hierarchies, and text visualization.
 
 ## Disclaimer
-Some of the functions used in this project were implemented within the project. For example, JavaScript 
-does not have a priority queue. In such cases, we copy an implementation from the Internet and modify 
-and adapt it. We mention the credits in the JavaScript file. We hope we have done everything right.
+This project aims to implement all functions and data structures required, up to the libraries 
+for data visualization and HTML processing, such as formulas and code highlighting. Nevertheless, 
+there always will be exemplary implementations of fundamental algorithms that one borrows from the 
+open-source community. Credits will be included in the corresponding file whenever third-party 
+software is used.

@@ -1,5 +1,4 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm"
-import { treeFactory } from "./tree.js"
+import { treeFactory, readFlareHierarchy } from "./tree.js"
 import { genDivTooltip } from "../common/draw.js"
 import { dropdown } from "../common/gui.js"
 
@@ -183,54 +182,6 @@ function initPosition(tree, node) {
         })
     }
 }
-/** construct hierarchy from flare data set */
-function hierarchy(data) {
-    const hMap = new Map()
-    hMap.set("flare", {
-        name: "flare",
-        children: [],
-        parent: undefined,
-        key: "flare",
-        size: undefined,
-        imports: undefined,
-    })
-    data["flare"].forEach((n) => {
-        let n_name = n["name"]
-        hMap.set(n["name"], {
-            name: n_name.substring(n_name.lastIndexOf(".") + 1),
-            children: [],
-            parent: undefined,
-            key: n_name,
-            size: n["size"],
-            imports: n["imports"],
-        })
-        // add parent elements up to root node
-        while (n_name.lastIndexOf(".") > -1) {
-            n_name = n_name.substring(0, n_name.lastIndexOf("."))
-            if (!hMap.has(n_name)) {
-                hMap.set(n_name, {
-                    name: n_name.substring(n_name.lastIndexOf(".") + 1),
-                    children: [],
-                    parent: undefined,
-                    key: n_name,
-                    size: undefined,
-                    imports: undefined,
-                })
-            }
-        }
-    })
-    // connect parents and children
-    hMap.forEach((e, k, m) => {
-        // compute parent
-        let n_name = k
-        const pKey = n_name.substring(0, n_name.lastIndexOf("."))
-        if (pKey.length > 0) {
-            hMap.get(pKey).children.push(hMap.get(n_name))
-            hMap.get(n_name).parent = hMap.get(pKey)
-        }
-    })
-    return treeFactory(hMap.get("flare"))
-}
 /** main function */
 function draw(data) {
     const guiId = "walker-div"
@@ -263,7 +214,7 @@ function draw(data) {
         .style("border-color", "red")
 
     /** read data from file and generate hierarchy */
-    const tree = hierarchy(data)
+    const tree = readFlareHierarchy(data)
     /** Walker's algorithm to draw a tree */
     initPosition(tree, tree.root)
     initialX(tree, tree.root)
