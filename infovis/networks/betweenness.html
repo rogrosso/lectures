@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Betweenness Centrality</title>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <body>
+        <div class="infovis-lecture">
+            <h1>Betweenness Centrality</h1>
+            <p>
+                Betweenness centrality measures how often a node is in the shortest path of all other network nodes.
+            </p>
+            <h3>Remark</h3>
+            <p>
+                Closeness centrality measures the reachability of a node, which can be interpreted as the importance of a 
+                vertex in a network. On the other hand, cut vertices, a vertex whose removal partitions the graph, can play 
+                a central and essential role in the network. Based on this observation, researchers in social sciences 
+                introduced the concept of betweenness centrality, a widespread measure of centrality these days.
+            </p>
+            <h3>Assumption</h3>
+            <p>
+                Each pair of nodes exchange information with an equal probability per unit of time. The information flow 
+                follows the shortest path.
+            </p>
+            <h3>Centrality Measure</h3>
+            <p>
+                After a period of time large enough, the flow rate at a node is proportional to the number of shortest paths 
+                through this node.
+            </p>
+            <h2>Definition</h2>
+            <p>
+                Let \(G=(V,E)\) be a connected undirected graph. The betweenness centrality for a node \(v\) is given by
+            </p>
+            \[
+                c_B(v) = \sum_{s,t \in V(G), s\neq v, t\neq v} \frac{\sigma_{st}(v)}{\sigma_{st}}
+            \]
+            <p>
+                where \(\sigma_{st}\) is the total number of shortest paths from \(t\) to \(s\) and \(\sigma_{st}(v)\) is the 
+                number of shortest paths from \(t\) to \(s\) which contain the node \(v\).
+            </p>
+            <h3>Theorem (Brandes, 2001): time complexity</h3>
+            <p>
+                Betweenness centrality can be computed in \(\mathcal{O}(nm)\) for unweighted graphs. The time complexity for weighted graphs 
+                is \(\mathcal{O}(nm + n^2\log n)\).
+            </p>
+            <h2>Alogrithm</h2>
+            <p>
+                The algorithm is based on two main components:
+            </p>
+            <ul>
+                <li>
+                    An extension of the BFS algorithm (in case of unweighted graphs) to compute the total number of shortest 
+                    paths connecting two nodes
+                </li>
+                <li>
+                    A recursion formula to compute the dependency partial sum, which is required to calculate the betweenness 
+                    centrality of a node.
+                </li>
+            </ul>
+            <p>
+                Dependency partial sum
+                \[
+                    \delta_s(v) = \sum_{w:v\in P(w)} \frac{\sigma_{sv}}{\sigma_{sw}} ( 1 + \delta_s(w))
+                \]
+            </p>
+            <p>
+                The betweenness centrality of a node is obtained as follows:
+                \[
+                c_B(v) = \sum_{s \in V, s \neq v} \delta_s(v)
+                \]
+            </p>
+            <hr style="margin-top: 10px; margin-bottom: 10px;">
+            <div class="canvas">
+                <div id="verlet-integration-layout" class="grid-container-2-column"></div>
+                <div id="verlet-integration-svg" class="verlet-integration" style="text-align: center;"></div>
+                <script type="module" src="./betweenness.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

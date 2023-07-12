@@ -14,7 +14,7 @@ export function setNetwork(network) {
         const s = e.source 
         const t = e.target
         m_.set(key, e)
-        e.id = key
+        e.key = key
     }
     if (m_.size !== edges.length) {
         console.log(`error: undirected edges are not unique`)
@@ -34,13 +34,13 @@ export function setNetwork(network) {
     }
     // compute degree centrality, add id 
     for (let i = 0; i < nodes.length; i++) {
-        nodes[i].id = i
-        nodes[i].index = nodes[i].id
+        nodes[i].index = i
+        nodes[i].index = nodes[i].index
         nodes[i].c = neighbors[i].length
         if (typeof nodes[i].x === 'string') nodes[i].x = +nodes[i].x
         if (typeof nodes[i].y === 'string') nodes[i].y = +nodes[i].y
         if (!nodes[i].hasOwnProperty('group')) nodes[i].group = 1
-        if (!nodes[i].hasOwnProperty('name')) nodes[i].name = 'node ' + nodes[i].id
+        if (!nodes[i].hasOwnProperty('name')) nodes[i].name = 'node ' + nodes[i].index
     }
 
 }
@@ -166,8 +166,8 @@ export function gravitationalForce(kg, n, bbox, disp) {
     const dx = x / s
     const dy = y / s
     const g = kg / r
-    disp[n.id].x += g * dx
-    disp[n.id].y += g * dy
+    disp[n.index].x += g * dx
+    disp[n.index].y += g * dy
 }
 export function attractingForceF(K, nodes, e, disp) {
     const d = distance(nodes[e.source], nodes[e.target])

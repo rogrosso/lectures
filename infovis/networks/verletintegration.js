@@ -16,7 +16,7 @@ const url1 = "../data/lesmiserables.json"
 drawAll(url1)
 async function drawAll(url) {
     // global variables
-    const dampConst = 6
+    const dampConst = 10
     let damping = dampConst
     // draw
     const lesmiserables = await d3.json(url)
@@ -89,8 +89,8 @@ async function drawAll(url) {
             const yprev = n.yprev
             n.xprev = n.x
             n.yprev = n.y
-            const fx = disp[n.id].x - w * n.vx + 0.001 * jiggle() // add some noise
-            const fy = disp[n.id].y - w * n.vy + 0.001 * jiggle() // add some noise
+            const fx = disp[n.index].x - w * n.vx + 0.001 * jiggle() // add some noise
+            const fy = disp[n.index].y - w * n.vy + 0.001 * jiggle() // add some noise
             const dx = n.x - xprev + fx * h * h
             const dy = n.y - yprev + fy * h * h
             n.x = n.x + dx
@@ -124,8 +124,8 @@ async function drawAll(url) {
             n.x = n.x + dx
             n.y = n.y + dy
             // conservative force
-            const fx = disp[n.id].x
-            const fy = disp[n.id].y
+            const fx = disp[n.index].x
+            const fy = disp[n.index].y
             // update velocity
             const vx =
                 (n.vx * (1 - (w * h) / 2) + (1 / 2) * (fx + n.fx) * h) /
@@ -370,7 +370,7 @@ async function drawAll(url) {
     function initNetwork(data, width, height) {
         const { nodes, links } = data
         nodes.forEach((n, index) => {
-            n.id = index
+            n.index = index
             n.x = 0
             n.y = 0
             n.xprev = 0
@@ -482,8 +482,8 @@ function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
         const yprev = n.yprev
         n.xprev = n.x
         n.yprev = n.y
-        const fx = disp[n.id].x - w * n.vx + 0.001 * jiggle() // add some noise
-        const fy = disp[n.id].y - w * n.vy + 0.001 * jiggle() // add some noise
+        const fx = disp[n.index].x - w * n.vx + 0.001 * jiggle() // add some noise
+        const fy = disp[n.index].y - w * n.vy + 0.001 * jiggle() // add some noise
         const dx = (n.x - xprev) + fx * h * h
         const dy = (n.y - yprev) + fy * h * h
         n.x = n.x + dx 
@@ -511,8 +511,8 @@ function velocityVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
         n.x = n.x + dx
         n.y = n.y + dy 
         // conservative force
-        const fx = disp[n.id].x
-        const fy = disp[n.id].y
+        const fx = disp[n.index].x
+        const fy = disp[n.index].y
         // update velocity
         const vx = (n.vx * (1 - w*h/2) + 1/2 * (fx + n.fx) * h) / (1 + w*h/2)
         const vy = (n.vy * (1 - w*h/2) + 1/2 * (fy + n.fy) * h) / (1 + w*h/2)

@@ -1,7 +1,7 @@
 import { dropdown } from "../common/gui.js"
 import { genDivTooltip } from "../common/draw.js"
-import { keyCantor } from "../../common/utilities.js"
 import { easyRandom } from "../../common/random.js"
+import { keyCantor } from "../../common/utilities.js"
 import {
     jiggle,
     collisionForce,
@@ -10,28 +10,43 @@ import {
     attractingForceA,
     repulsiveForceF,
     repulsiveForceA,
-    controlFunction,
 } from "./networks.js"
-//import lesmiserables from "lesmiserables" assert { type: "json" }
+import { betweenness } from "./centrality.js"
 
 const url1 = "../data/lesmiserables.json"
 drawAll(url1)
-async function drawAll(url1) {
-    const response1 = await fetch(url1)
-    const lesmiserables = await response1.json()
+async function drawAll(url) {
+    // global variables
+    const dampConst = 10
+    let damping = dampConst
+    // draw
+    const lesmiserables = await d3.json(url)
 
     const divTooltip = genDivTooltip()
-    // control numerical integration
-    const alphaMin = 0.3
-    const initialAlpha = 2
-    const restartAlphaF = 0.5
-    const restartAlphaA = 0.5
-    let restartAlpha = restartAlphaF
-    const velDumpF = 1 / 100
-    const velDumpA = 1 / 160
-    const alphaF = controlFunction(alphaMin, initialAlpha, velDumpF)
-    const alphaA = controlFunction(alphaMin, initialAlpha, velDumpA)
-    let alpha = alphaF
+
+    function fixPositions(nodes, bbox) {
+        // shift center of network to center of bbox
+        const pos = { x: 0, y: 0 }
+        nodes.forEach((n) => {
+            pos.x += n.x
+            pos.y += n.y
+        })
+        pos.x /= nodes.length
+        pos.y /= nodes.length
+        pos.x = (bbox.xmax + bbox.xmin) / 2 - pos.x
+        pos.y = (bbox.ymax + bbox.ymin) / 2 - pos.y
+        nodes.forEach((n) => {
+            n.x += pos.x
+            n.y += pos.y
+        })
+        nodes.forEach((n) => {
+            if (n.x < bbox.xmin) n.x = bbox.xmin
+            if (n.x > bbox.xmax) n.x = bbox.xmax
+            if (n.y < bbox.ymin) n.y = bbox.ymin
+            if (n.y > bbox.ymax) n.y = bbox.ymax
+        })
+    }
+
     function initDisplacements(disp) {
         for (let d of disp) {
             d.x = 0
@@ -39,7 +54,7 @@ async function drawAll(url1) {
             d.d = 0
         }
     }
-    function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
+    function conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
         initDisplacements(disp)
         // compute displacements from repelling forces
         const nrNodes = nodes.length
@@ -62,56 +77,51 @@ async function drawAll(url1) {
         nodes.forEach((n, i) => {
             gravitationalForce(Kg, n, bbox, disp)
         })
-        // update nodes position
-        nodes.forEach(function (n, i) {
-            const dx = disp[n.index].x
-            const dy = disp[n.index].y
-            if (!isFinite(dx) || !isFinite(dy)) {
-                console.log("not finite")
-                return
-            }
-            if (isNaN(dx) || isNaN(dy)) {
-                console.log("is NaN")
-                return
-            }
-            const d = Math.sqrt(dx * dx + dy * dy)
-            n.x += (dx / d) * Math.min(alpha, d) + 0.001 * jiggle()
-            n.y += (dy / d) * Math.min(alpha, d) + 0.001 * jiggle()
-        })
-
-        // shift center of network to center of bbox
-        const pos = { x: 0, y: 0 }
-        nodes.forEach((n) => {
-            pos.x += n.x
-            pos.y += n.y
-        })
-        pos.x /= nodes.length
-        pos.y /= nodes.length
-        pos.x = (bbox.xmax + bbox.xmin) / 2 - pos.x
-        pos.y = (bbox.ymax + bbox.ymin) / 2 - pos.y
-        nodes.forEach((n) => {
-            n.x += pos.x
-            n.y += pos.y
-        })
-        // check bounding box
-        nodes.forEach((n) => {
-            if (n.x < bbox.xmin) n.x = bbox.xmin
-            if (n.x > bbox.xmax) n.x = bbox.xmax
-            if (n.y < bbox.ymin) n.y = bbox.ymin
-            if (n.y > bbox.ymax) n.y = bbox.ymax
-        })
+    }
+    function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
+        // compute conservative forces
+        conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+        // update position, velocity and acceleration
+        const w = damping
+        const h = 0.008
+        for (let n of nodes) {
+            // position Verlet
+            const xprev = n.xprev
+            const yprev = n.yprev
+            n.xprev = n.x
+            n.yprev = n.y
+            const fx = disp[n.index].x - w * n.vx + 0.001 * jiggle() // add some noise
+            const fy = disp[n.index].y - w * n.vy + 0.001 * jiggle() // add some noise
+            const dx = n.x - xprev + fx * h * h
+            const dy = n.y - yprev + fy * h * h
+            n.x = n.x + dx
+            n.y = n.y + dy
+            n.vx = (n.x - n.xprev) / h
+            n.vy = (n.y - n.yprev) / h
+        }
+        //
+        //fixPositions(nodes, bbox)
     }
 
     // ============================================================================
+    // helper function
+    function lerp (domain, range, u) {
+        return (
+            range[0] +
+            ((u - domain[0]) / (domain[1] - domain[0])) *
+                (range[1] - range[0])
+        )
+    }
     // drawing
     const width = 500
     const height = 500
-    const canvas = d3.select("#force-directed-layout")
+    const menuCanvas = d3.select("#verlet-integration-layout")
+    const svgCanvas = d3.select("#verlet-integration-svg")
     // gui
     const pKeys = ["Fruchterman-Reingold", "ForceAtlas2"]
     let pSel = "Fruchterman-Reingold"
-    const pId = "layout-menue"
-    const pDiv = canvas.append("div").attr("class", "cell").attr("id", pId)
+    const pId = "layout-menu"
+    const pDiv = menuCanvas.append("div").attr("class", "cell").attr("id", pId)
     const guiConfig = {
         divObj: pDiv,
         text: "layout: ",
@@ -120,6 +130,17 @@ async function drawAll(url1) {
         handler: forceHandler,
     }
     dropdown(guiConfig)
+    const mKeys = ["degree", "betweenness"]
+    let mSel = "node centrality"
+    const mId = "centrality-menu"
+    const mDiv = menuCanvas.append("div").attr("class", "cell").attr("id", mId)
+    guiConfig.divObj = mDiv
+    guiConfig.text = "node centrality: "
+    guiConfig.selection = mSel
+    guiConfig.keys = mKeys
+    guiConfig.handler = centralityHandler
+    dropdown(guiConfig)
+
     // D3
     const minNodeRadius = 4
     const maxNodeRadius = 16
@@ -132,9 +153,9 @@ async function drawAll(url1) {
     const margin = { top: 5, bottom: 5, left: 5, right: 5 }
     const iW = width - margin.left - margin.right
     const iH = height - margin.top - margin.bottom
-    const svg = canvas
+    const svg = svgCanvas
         .append("svg")
-        .attr("class", "bfs-svg")
+        .attr("class", "svg")
         .attr("width", width)
         .attr("height", height)
     svg.append("rect")
@@ -147,14 +168,22 @@ async function drawAll(url1) {
         .attr("class", "force-directed-layout-group")
         .attr("transform", `translate(${width / 2}, ${height / 2})`)
 
-    const { nodes, edges, bbox } = initNetwork(lesmiserables, iW, iH) // draw(lesmiserables, iW, iH)
+    const { nodes, edges, minDeg, maxDeg, minC, maxC, bbox } = initNetwork(lesmiserables, iW, iH)
     const sortedNodes = []
     nodes.forEach((n) => sortedNodes.push(n))
     sortedNodes.sort((n1, n2) => {
         return n1.c - n2.c
     })
+    function centralityHandler(text, value) {
+        if (value === "degree") {
+            for (let n of nodes) n.r = lerp([minDeg, maxDeg], [minNodeRadius, maxNodeRadius], n.degree)
+        } else if (value === "betweenness") { 
+            for (let n of nodes) n.r = lerp([minC, maxC], [minNodeRadius, maxNodeRadius], n.c)
+        }
+    }
 
     // d3
+    // line generator
     const lineGenerator = d3.line().curve(d3.curveBasis)
     // collects groups of nodes
     const gSet = new Set()
@@ -230,6 +259,7 @@ async function drawAll(url1) {
     nodeG.append("title").text((d) => d.name)
 
     function dragstarted(event, d) {
+        damping = dampConst
         const x = event.sourceEvent.pageX + offsetX
         const y = event.sourceEvent.pageY - offsetY
         divTooltip
@@ -245,7 +275,6 @@ async function drawAll(url1) {
         const x = event.sourceEvent.pageX + offsetX
         const y = event.sourceEvent.pageY - offsetY
         divTooltip.html(d.name).style("left", `${x}px`).style("top", `${y}px`)
-        alpha.reset(restartAlpha)
         event.subject.x = event.x
         event.subject.y = event.y
     }
@@ -260,45 +289,44 @@ async function drawAll(url1) {
     const C = 0.45 // 0.52 // 0.4537 // 3 // 0.399
     const Kf = C * Math.sqrt((width * height) / nodes.length) // Fruchterman-Reindold
     const Ka = 3.8 // ForceAtlas2
-    const KgF = 0.5
-    const KgA = 0.5 //0.0001
+    const KgF = 30 // 0.5
+    const KgA = 10 // 0.01
     let Kg = KgF
-    const Kc = 1500
+    const Kc = 1500 // 1500
     const cR = 2 // collision radius control
     let K = Kf
     let attractingForce = attractingForceF
     let repulsiveForce = repulsiveForceF
     function forceHandler(text, value) {
         if (value === "Fruchterman-Reingold") {
-            alpha = alphaF
-            restartAlpha = restartAlphaF
             attractingForce = attractingForceF
             repulsiveForce = repulsiveForceF
             K = Kf
             Kg = KgF
         } else if (value === "ForceAtlas2") {
-            alpha = alphaA
-            restartAlpha = restartAlphaA
             attractingForce = attractingForceA
             repulsiveForce = repulsiveForceA
             K = Ka
             Kg = KgA
         }
-        alpha.reset(restartAlpha)
     }
     // animaiton
     const disp = nodes.map((n) => {
-        return { d: 0, x: 0, y: 0, id: n.index }
+        return { d: 0, x: 0, y: 0, index: n.index }
     })
     animate()
     function animate() {
         requestAnimationFrame(animate)
-        step(K, Kc, Kg, cR, nodes, edges, bbox, disp, alpha.next())
-
+        if (damping > 3) damping *= 0.99
+        positionVerlet(K, Kc, Kg, cR, nodes, edges, bbox, disp)
+        fixPositions(nodes, bbox)
         redraw(nodeG, linkG)
     }
     function redraw(nodeG, linkG) {
-        nodeG.attr("cx", (d) => d.x).attr("cy", (d) => d.y)
+        nodeG
+            .attr("cx", (d) => d.x)
+            .attr("cy", (d) => d.y)
+            .attr("r", (d) => d.r)
         linkG.attr("d", (d) => {
             const source = nodes[d.source]
             const target = nodes[d.target]
@@ -319,7 +347,13 @@ async function drawAll(url1) {
             n.index = index
             n.x = 0
             n.y = 0
-            n.r = 0
+            n.xprev = 0
+            n.yprev = 0
+            n.vx = 0
+            n.vy = 0
+            n.fx = 0
+            n.fy = 0
+            n.r = 0 
             n.c = 0
             n.degree = 0
         })
@@ -344,27 +378,27 @@ async function drawAll(url1) {
             nodes[e.source].degree++
             nodes[e.target].degree++
         }
-        // computes node centrality
-        nodes.forEach((n) => {
-            n.c = n.degree
-        })
-        // compute radius depending on centrality
-        const minC = nodes.reduce(function (prev, curr) {
-            return prev.c < curr.c ? prev : curr
-        })
-        const maxC = nodes.reduce(function (prev, curr) {
-            return prev.c > curr.c ? prev : curr
-        })
-        const lerp = (domain, range, u) => {
-            return (
-                range[0] +
-                ((u - domain[0]) / (domain[1] - domain[0])) *
-                    (range[1] - range[0])
-            )
+        let minDeg = Infinity
+        let maxDeg = -Infinity
+        for (let n of nodes) {
+            if (n.degree < minDeg) minDeg = n.degree
+            if (n.degree > maxDeg) maxDeg = n.degree
         }
-        const domain = [minC.c, maxC.c]
-        const range = [minNodeRadius, maxNodeRadius]
-        nodes.forEach((n) => (n.r = lerp(domain, range, n.c)))
+        // compute node centrality
+        const A = new Array(nodes.length).fill(null).map((e) => [])
+        for (let e of edges) {
+            A[e.source].push(e.target)
+            A[e.target].push(e.source)
+        }
+        const c_ = betweenness(nodes, A)
+        const minC = Math.min(...c_)
+        const maxC = Math.max(...c_)
+
+        for (let i = 0; i < nodes.length; i++) {
+            nodes[i].c = c_[i]
+        }
+        // init node Radius with degree
+        for (let n of nodes) n.r = lerp([minDeg, maxDeg], [minNodeRadius, maxNodeRadius], n.degree)
         // init nodes position
         const random = new easyRandom(11) // wants always the same initial positions
         for (let n of nodes) {
@@ -381,119 +415,70 @@ async function drawAll(url1) {
         return {
             nodes,
             edges,
+            minDeg,
+            maxDeg,
+            minC,
+            maxC,
             bbox,
         }
     }
-} // drawAll()
-
+}
 const cText = `
-// Attracting force Fruchterman-Reingold
-function attractingForceF(K, nodes, e, disp) { 
-    const d = distance(nodes[e.source], nodes[e.target])
-    const fa = d.d * d.d / K
-    disp[e.source].x += fa * d.x
-    disp[e.source].y += fa * d.y
-    disp[e.target].x -= fa * d.x
-    disp[e.target].y -= fa * d.y
-}
-// Repulsive force Fruchterman-Reingold
-function repulsiveForceF(K, nodes, i, j, disp) {
-    // vector pointing from nodes[i] to nodes[j], and Euclidean distance
-    const d = distance(nodes[i], nodes[j]) 
-    const fr = K * K / d.d
-    disp[i].x -= fr * d.x
-    disp[i].y -= fr * d.y
-    disp[j].x += fr * d.x
-    disp[j].y += fr * d.y
-}
-// Attracting force ForceAtlas2
-function attractingForceA(K, nodes, e, disp) {
-    // vector pointing from n1 to n2, and Euclidean distance
-    const d = distance(nodes[e.source], nodes[e.target]) 
-    const fa = d.d
-    disp[e.source].x += fa * d.x
-    disp[e.source].y += fa * d.y
-    disp[e.target].x -= fa * d.x
-    disp[e.target].y -= fa * d.y
-}
-// Repulsive force ForceAtlas2
-function repulsiveForceA(K, nodes, i, j, disp) {
-    // vector pointing from nodes[i] to nodes[j], and Euclidean distance
-    const d = distance(nodes[i], nodes[j]) 
-    const fr = K * (nodes[i].degree + 1) * (nodes[j].degree + 1) / d.d
-    disp[i].x -= fr * d.x
-    disp[i].y -= fr * d.y
-    disp[j].x += fr * d.x
-    disp[j].y += fr * d.y
-}
-function initDisplacements(disp) {
-    for (let d of disp) {
-        d.x = 0
-        d.y = 0
-        d.d = 0
-    }
-}
-// one single simulation step
-function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
-    initDisplacements(disp)
-    // compute displacements from repelling forces
-    const nrNodes = nodes.length
-    for (let i = 0; i < nrNodes; i++) {
-        for (let j = i + 1; j < nrNodes; j++) {
-            repulsiveForce(K, nodes, i, j, disp)
+/**
+ * Computes the and accumulate the betweenness centrality for a source node
+ * @param {Array} A, adjacency list 
+ * @param {Number} source, index of source node
+ * @param {Array} c_, array which accumulate centrality values
+ */
+function bc_( A, source, c_ ){
+    const n = A.length
+    const d_ = new Array(n).fill(-1)
+    const sigma_ = new Array(n).fill(0)
+    const delta_ = new Array(n).fill(0)
+    d_[source] = 0
+    sigma_[source] = 1
+    const q_ = [source] // queue
+    const s_ = [] // stack
+    const p_ = new Array(n).fill(null).map( e => []) // list of parent
+    while (q_.length > 0) {
+        const v = q_.shift()
+        const d = d_[v]
+        s_.push(v)
+        for (let w of A[v]) {
+            if (d_[w] < 0) {
+                d_[w] = d + 1
+                q_.push(w)
+            }
+            if (d_[w] === d + 1) {
+                sigma_[w] += sigma_[v]
+                p_[w].push(v)
+            }
         }
     }
-    // compute displacements from attracting forces
-    edges.forEach(e => {
-        attractingForce(K, nodes, e, disp)
-    })
-    // collision force 
-    for (let i = 0; i < nrNodes; i++) {
-        for (let j = i + 1; j < nrNodes; j++) {
-            collisionForce(Kc, beta, nodes, i, j, disp)
+    while (s_.length > 0) {
+        let w = s_.pop()
+        for (let v of p_[w]) {
+            delta_[v] += (sigma_[v] / sigma_[w]) * (1 + delta_[w])
+        }
+        if (w !== source) {
+            c_[w] += delta_[w]
         }
     }
-    // apply a gravitational force
-    nodes.forEach( (n,i) => {
-        gravitationalForce(Kg, n, bbox, disp)
-    })
-    // update nodes position
-    nodes.forEach(function (n, i) {
-        const dx = disp[n.index].x
-        const dy = disp[n.index].y
-        if (!isFinite(dx) || !isFinite(dy)) {
-            console.log('not finite')
-            return
-        }
-        if (isNaN(dx) || isNaN(dy)) {
-            console.log('is NaN')
-            return
-        }
-        const d = Math.sqrt(dx * dx + dy * dy)
-        n.x += dx / d * (Math.min(alpha, d)) + 0.001 * jiggle()
-        n.y += dy / d * (Math.min(alpha, d)) + 0.001 * jiggle()
-    })
-    // shift center of network to center of bbox
-    const pos = {x: 0, y: 0}
-    nodes.forEach( n => {
-        pos.x += n.x 
-        pos.y += n.y 
-    })
-    pos.x /= nodes.length
-    pos.y /= nodes.length
-    pos.x = (bbox.xmax + bbox.xmin)/ 2 - pos.x
-    pos.y = (bbox.ymax + bbox.ymin)/ 2 - pos.y
-    nodes.forEach( n => {
-        n.x += pos.x
-        n.y += pos.y
-    })
-    // check bounding box
-    nodes.forEach( n => {
-        if (n.x < bbox.xmin) n.x = bbox.xmin;
-        if (n.x > bbox.xmax) n.x = bbox.xmax;
-        if (n.y < bbox.ymin) n.y = bbox.ymin;
-        if (n.y > bbox.ymax) n.y = bbox.ymax;
-    })
+}
+/**
+ * Computes betweenness centrality for each node in the graph
+ * @param {Array} nodes, array of nodes
+ * @param {Array} neighbors, adjacency list
+ * @returns {Array} c_, array of betweenness centrality values for each node in nodes
+ * @see https://en.wikipedia.org/wiki/Betweenness_centrality
+ * @see Brandes, Ulrik (2001). "A faster algorithm for betweenness centrality". Journal of Mathematical Sociology. 25 (2): 163–177. doi:10.1080/0022250X.2001.9990249. S2CID 14548872.
+ */
+function betweenness(nodes, neighbors) {
+    const c_ = new Array(nodes.length).fill(0)
+    for (let n of nodes) {
+        bc_(neighbors, n.index, c_)
+    }
+    return c_
 }
 `
 const hlPre = d3.select("#hl-code").append("pre")

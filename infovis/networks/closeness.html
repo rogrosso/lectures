@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Closeness Centrality</title>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <body>
+        <div class="infovis-lecture">
+            <h1>Closeness Centrality</h1>
+            <h2>Definition</h2>
+            <p>Let \(G\) be a connected graph. The closeness centrality of a vertex is defined as</p>
+            \[
+                c_C(u) = \frac{1}{\sum_{v\in V(G)} d(u,v)}\, , \qquad \left(\text{normalized } c_C(u) =
+                \frac{n-1}{\sum_{v\in V(G)} d(u,v)} \right)
+            \]
+            <p>
+                where \(d(u,v)\) is the distance between \(u\) and \(v\). In other words: The closeness of 
+                a node is high if it is close to all other nodes in the network.
+            </p>
+            <h3>Remark</h3>
+            <p>
+                Closeness typically increases logarithmically. Hence the dynamic range of values is small; therefore, 
+                it does not have good discriminant power. Furthermore, it is sensitive to small fluctuations in the network 
+                structure, i.e., small changes in the structure of the network might change the order of the centralities 
+                substantially.
+            </p>
+            <h2>Algorithm</h2>
+            <p>
+                The exact computation of the centrality is based on the BFS (Dijkstra for weighted graphs). Therefore, 
+                the complexity is \(\mathcal{O}(n(n+m))\), where \(n=|V(G)|\) and \(m=|E(G)|\); and \(\mathcal{O}(n(m+n\log n))\) 
+                for weighted graphs.
+            </p>
+            <hr>
+            <div class="canvas">
+                <div id="verlet-integration-layout" class="grid-container-2-column"></div>
+                <div id="verlet-integration-svg" class="verlet-integration"></div>
+                <script type="module" src="./closeness.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

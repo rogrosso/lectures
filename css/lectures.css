@@ -30,7 +30,7 @@ div.infovis-lecture {
 }
 div.canvas {
     text-align: center;
-    border: 1px solid #CC9999; 
+    border: 1px solid #CC9999;
     padding: 15px;
 }
 div.code {
@@ -79,9 +79,9 @@ div#dropdown-menu {
     grid-template-columns: auto auto;
     gap: 1px;
     background-color: white;
-    padding: 4px; 
-    margin: 2px; 
-    width: 650px;
+    padding: 4px;
+    margin: 0 auto;
+    width: 500px;
     align-items: center;
     justify-items: center;
     border: 1px solid teal
