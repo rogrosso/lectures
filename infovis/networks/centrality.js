@@ -93,3 +93,72 @@ export function closeness(nodes, neighbors) {
     }
     return c_
 }
+/**
+ * Computes the eigenvector centrality for each node in the graph
+ * @param {Array} A, adjacency list
+ * @param {Number} maxIter, maximum number of iterations
+ * @param {Number} eps, tolerance
+ * @returns {Array} b_, array of eigenvector centrality values for each node in the graph
+ */
+export function eigenvector(A, maxIter, eps) {
+    let b_ = new Array(A.length).fill(1)
+    let c_ = new Array(A.length).fill(0)
+    let e_ = Infinity
+    while (e_ > eps && maxIter-- > 0) {
+        let r_ = 0
+        for (let i = 0; i < A.length; i++) {
+            for (let j of A[i]) {
+                c_[i] += b_[j]
+            }
+            r_ += c_[i] * c_[i]
+        }
+        r_ = Math.sqrt(r_)
+        for (let i = 0; i < A.length; i++) {
+            c_[i] /= r_
+        }
+        e_ = 0
+        for (let i = 0; i < A.length; i++) {
+            e_ += Math.abs((b_[i] - c_[i])**2)
+            b_[i] = c_[i]
+        }
+    }
+    const m_ = Math.max(...b_)
+    for (let i = 0; i < A.length; i++) {
+        b_[i] /= m_
+    }
+    return b_
+}
+/**
+ * Computes the PageRank for each node in the graph
+ * @param {Array} I, adjacency list of incoming edges
+ * @param {Array} O, adjacency list of outgoing edges
+ * @param {Number} d, damping factor
+ * @param {Number} maxIter, maximum number of iterations
+ * @param {Number} eps, tolerance
+ * @returns {Array} b_, array of PageRank values for each node in the graph
+ */
+export function pagerank(I, O, d, maxIter, eps) {
+    const N = I.length
+    let b_ = new Array(N).fill(1/N)
+    let c_ = new Array(N).fill((1-d)/N)
+    let e_ = Infinity
+    while (e_ > eps && maxIter-- > 0) {
+        for (let i = 0; i < N; i++) {
+            //if (I[i].length === 0) continue
+            for (let j of I[i]) {
+                c_[i] += d * b_[j]/O[j].length
+            }
+        }
+        e_ = 0
+        for (let i = 0; i < N; i++) {
+            e_ += Math.abs((b_[i] - c_[i])**2)
+            b_[i] = c_[i]
+            c_[i] = (1-d)/N
+        }
+    }
+    const m_ = Math.max(...b_)
+    for (let i = 0; i < N; i++) {
+        b_[i] /= m_
+    }
+    return b_
+}

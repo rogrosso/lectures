@@ -130,7 +130,7 @@ async function drawAll(url) {
         handler: forceHandler,
     }
     dropdown(guiConfig)
-    const mKeys = ["degree", "closeness"]
+    const mKeys = ["closeness", "degree"]
     let mSel = "node centrality"
     const mId = "centrality-menu"
     const mDiv = menuCanvas.append("div").attr("class", "cell").attr("id", mId)
@@ -249,6 +249,19 @@ async function drawAll(url) {
         .attr("cx", (d) => d.x)
         .attr("cy", (d) => d.y)
         .attr("fill", (d) => colorScale(d.group))
+        .on("mouseover", function (event, d) {
+            mouseOver(divTooltip)
+        })
+        .on("mousemove", function (event, d) {
+            const pos = d3.pointer(event)
+            mouseMove(divTooltip, d.name, {
+                x: event.pageX,
+                y: event.pageY
+            })
+        })
+        .on("mouseout", function (event, d) {
+            mouseOut(divTooltip)
+        })
         .call(
             d3
                 .drag()
@@ -256,7 +269,6 @@ async function drawAll(url) {
                 .on("drag", dragged)
                 .on("end", dragend)
         )
-    nodeG.append("title").text((d) => d.name)
 
     function dragstarted(event, d) {
         damping = dampConst
@@ -398,7 +410,7 @@ async function drawAll(url) {
             nodes[i].c = c_[i]
         }
         // init node Radius with degree
-        for (let n of nodes) n.r = lerp([minDeg, maxDeg], [minNodeRadius, maxNodeRadius], n.degree)
+        for (let n of nodes) n.r = lerp([minC, maxC], [minNodeRadius, maxNodeRadius], n.c)
         // init nodes position
         const random = new easyRandom(11) // wants always the same initial positions
         for (let n of nodes) {
@@ -421,6 +433,19 @@ async function drawAll(url) {
             maxC,
             bbox,
         }
+    }
+    function mouseOver(tooltip) {
+        tooltip.style("display", "inline-block")
+    }
+    function mouseMove(tooltip, name, pos) {
+        const { x, y } = pos
+        tooltip
+            .html(name)
+            .style("left", `${x + 10}px`)
+            .style("top", `${y}px`)
+    }
+    function mouseOut(divTooltip) {
+        divTooltip.style("display", "none")
     }
 }
 const cText = `

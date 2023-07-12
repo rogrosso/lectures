@@ -11,7 +11,7 @@ import {
     repulsiveForceF,
     repulsiveForceA,
 } from "./networks.js"
-import { betweenness } from "./centrality.js"
+import { eigenvector } from "./centrality.js"
 
 const url1 = "../data/lesmiserables.json"
 drawAll(url1)
@@ -130,7 +130,7 @@ async function drawAll(url) {
         handler: forceHandler,
     }
     dropdown(guiConfig)
-    const mKeys = ["betweenness","degree"]
+    const mKeys = ["eigenvector", "degree"]
     let mSel = "node centrality"
     const mId = "centrality-menu"
     const mDiv = menuCanvas.append("div").attr("class", "cell").attr("id", mId)
@@ -177,7 +177,7 @@ async function drawAll(url) {
     function centralityHandler(text, value) {
         if (value === "degree") {
             for (let n of nodes) n.r = lerp([minDeg, maxDeg], [minNodeRadius, maxNodeRadius], n.degree)
-        } else if (value === "betweenness") { 
+        } else if (value === "eigenvector") { 
             for (let n of nodes) n.r = lerp([minC, maxC], [minNodeRadius, maxNodeRadius], n.c)
         }
     }
@@ -402,7 +402,9 @@ async function drawAll(url) {
             A[e.source].push(e.target)
             A[e.target].push(e.source)
         }
-        const c_ = betweenness(nodes, A)
+        const maxIter = 100 //1000
+        const eps = 1e-6
+        const c_ = eigenvector(A, maxIter, eps)
         const minC = Math.min(...c_)
         const maxC = Math.max(...c_)
 
@@ -450,60 +452,37 @@ async function drawAll(url) {
 }
 const cText = `
 /**
- * Computes the and accumulate the betweenness centrality for a source node
- * @param {Array} A, adjacency list 
- * @param {Number} source, index of source node
- * @param {Array} c_, array which accumulate centrality values
+ * Computes the eigenvector centrality for each node in the graph
+ * @param {Array} A, adjacency list
+ * @param {Number} maxIter, maximum number of iterations
+ * @param {Number} eps, tolerance
+ * @returns {Array} b_, array of eigenvector centrality values for each node in the graph
  */
-function bc_( A, source, c_ ){
-    const n = A.length
-    const d_ = new Array(n).fill(-1)
-    const sigma_ = new Array(n).fill(0)
-    const delta_ = new Array(n).fill(0)
-    d_[source] = 0
-    sigma_[source] = 1
-    const q_ = [source] // queue
-    const s_ = [] // stack
-    const p_ = new Array(n).fill(null).map( e => []) // list of parent
-    while (q_.length > 0) {
-        const v = q_.shift()
-        const d = d_[v]
-        s_.push(v)
-        for (let w of A[v]) {
-            if (d_[w] < 0) {
-                d_[w] = d + 1
-                q_.push(w)
+function eigenvector(A, maxIter, eps) {
+    let b_ = new Array(A.length).fill(1)
+    let c_ = new Array(A.length).fill(0)
+    let e_ = 0
+    let r_ = Infinity
+    while (Math.abs(e_ - r_) > eps && maxIter-- > 0) {
+        e_ = r_
+        r_ = 0
+        c_.fill(0)
+        for (let i = 0; i < A.length; i++) {
+            for (let j of A[i]) {
+                c_[i] += b_[j]
             }
-            if (d_[w] === d + 1) {
-                sigma_[w] += sigma_[v]
-                p_[w].push(v)
-            }
+            r_ += c_[i] * c_[i]
+        }
+        r_ = Math.sqrt(r_)
+        for (let i = 0; i < A.length; i++) {
+            b_[i] = c_[i] / r_
         }
     }
-    while (s_.length > 0) {
-        let w = s_.pop()
-        for (let v of p_[w]) {
-            delta_[v] += (sigma_[v] / sigma_[w]) * (1 + delta_[w])
-        }
-        if (w !== source) {
-            c_[w] += delta_[w]
-        }
+    const m_ = Math.max(...b_)
+    for (let i = 0; i < A.length; i++) {
+        b_[i] /= m_
     }
-}
-/**
- * Computes betweenness centrality for each node in the graph
- * @param {Array} nodes, array of nodes
- * @param {Array} neighbors, adjacency list
- * @returns {Array} c_, array of betweenness centrality values for each node in nodes
- * @see https://en.wikipedia.org/wiki/Betweenness_centrality
- * @see Brandes, Ulrik (2001). "A faster algorithm for betweenness centrality". Journal of Mathematical Sociology. 25 (2): 163–177. doi:10.1080/0022250X.2001.9990249. S2CID 14548872.
- */
-function betweenness(nodes, neighbors) {
-    const c_ = new Array(nodes.length).fill(0)
-    for (let n of nodes) {
-        bc_(neighbors, n.index, c_)
-    }
-    return c_
+    return b_
 }
 `
 const hlPre = d3.select("#hl-code").append("pre")

@@ -11,13 +11,13 @@ import {
     repulsiveForceF,
     repulsiveForceA,
 } from "./networks.js"
-import { betweenness } from "./centrality.js"
+import { pagerank } from "./centrality.js"
 
-const url1 = "../data/lesmiserables.json"
+const url1 = "../data/celegans_modularity.json"
 drawAll(url1)
 async function drawAll(url) {
     // global variables
-    const dampConst = 10
+    const dampConst = 100
     let damping = dampConst
     // draw
     const lesmiserables = await d3.json(url)
@@ -83,7 +83,7 @@ async function drawAll(url) {
         conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
         // update position, velocity and acceleration
         const w = damping
-        const h = 0.008
+        const h = 0.01
         for (let n of nodes) {
             // position Verlet
             const xprev = n.xprev
@@ -130,7 +130,7 @@ async function drawAll(url) {
         handler: forceHandler,
     }
     dropdown(guiConfig)
-    const mKeys = ["betweenness","degree"]
+    const mKeys = ["PageRank", "degree"]
     let mSel = "node centrality"
     const mId = "centrality-menu"
     const mDiv = menuCanvas.append("div").attr("class", "cell").attr("id", mId)
@@ -177,7 +177,7 @@ async function drawAll(url) {
     function centralityHandler(text, value) {
         if (value === "degree") {
             for (let n of nodes) n.r = lerp([minDeg, maxDeg], [minNodeRadius, maxNodeRadius], n.degree)
-        } else if (value === "betweenness") { 
+        } else if (value === "PageRank") { 
             for (let n of nodes) n.r = lerp([minC, maxC], [minNodeRadius, maxNodeRadius], n.c)
         }
     }
@@ -298,15 +298,17 @@ async function drawAll(url) {
     }
 
     // interaction
-    const C = 0.45 // 0.52 // 0.4537 // 3 // 0.399
+    const C = 0.9 //0.45 // 0.52 // 0.4537 // 3 // 0.399
     const Kf = C * Math.sqrt((width * height) / nodes.length) // Fruchterman-Reindold
-    const Ka = 3.8 // ForceAtlas2
-    const KgF = 30 // 0.5
-    const KgA = 10 // 0.01
+    const Ka = 1.5 // 3.8 // ForceAtlas2
+    const KgF = 20 //30 // 0.5  // gravitational force Fruchterman-Reindold
+    const KgA = 10 // 0.01     // gravitational force ForceAtlas2
     let Kg = KgF
-    const Kc = 1500 // 1500
-    const cR = 2 // collision radius control
-    let K = Kf
+    const Kc = 1000 // 1500 // collision constant
+    const cRf = 5 // collision radius control, Fruchterman-Reindold
+    const cRa = 2 // collision radius control, ForceAtlas2
+    let K = Kf  // algorithms constant
+    let cR = cRf // collision radius control
     let attractingForce = attractingForceF
     let repulsiveForce = repulsiveForceF
     function forceHandler(text, value) {
@@ -315,11 +317,13 @@ async function drawAll(url) {
             repulsiveForce = repulsiveForceF
             K = Kf
             Kg = KgF
+            cR = cRf
         } else if (value === "ForceAtlas2") {
             attractingForce = attractingForceA
             repulsiveForce = repulsiveForceA
             K = Ka
             Kg = KgA
+            cR = cRa
         }
     }
     // animaiton
@@ -354,9 +358,10 @@ async function drawAll(url) {
     }
 
     function initNetwork(data, width, height) {
-        const { nodes, links } = data
-        nodes.forEach((n, index) => {
-            n.index = index
+        const { nodes, edges } = data
+        //for (let i = 0; i < 9; i++) nodes.pop()
+        for (let n of nodes) { 
+            n.index = n.id
             n.x = 0
             n.y = 0
             n.xprev = 0
@@ -368,23 +373,14 @@ async function drawAll(url) {
             n.r = 0 
             n.c = 0
             n.degree = 0
-        })
+            n.name = n.label
+        }
         // check that edges are unique
         const eMap = new Map()
-        for (let e of links) {
+        for (let e of edges) {
             const key = keyCantor(e.source, e.target)
             eMap.set(key, e)
         }
-        const edges = [] // undirected
-        for (let [key, value] of eMap) {
-            edges.push({
-                source: value.source,
-                target: value.target,
-                value: value.value,
-                key: key,
-            })
-        }
-        eMap.clear()
         // compute node's degree
         for (let e of edges) {
             nodes[e.source].degree++
@@ -398,11 +394,26 @@ async function drawAll(url) {
         }
         // compute node centrality
         const A = new Array(nodes.length).fill(null).map((e) => [])
+        const I = new Array(nodes.length).fill(null).map((e) => [])
+        const O = new Array(nodes.length).fill(null).map((e) => [])
         for (let e of edges) {
-            A[e.source].push(e.target)
-            A[e.target].push(e.source)
+            I[e.target].push(e.source) // incoming edges
+            O[e.source].push(e.target) // outgoing edges
         }
-        const c_ = betweenness(nodes, A)
+        const links = []
+        for (let [key, value] of eMap) {
+            A[value.source].push(value.target)
+            A[value.target].push(value.source)
+            links.push({
+                source: value.source,
+                target: value.target,
+                key: key,
+            })
+        }
+        const d = 0.85
+        const maxIter = 100 //1000
+        const eps = 1e-6
+        const c_ = pagerank(I, O, d, maxIter, eps)
         const minC = Math.min(...c_)
         const maxC = Math.max(...c_)
 
@@ -414,8 +425,8 @@ async function drawAll(url) {
         // init nodes position
         const random = new easyRandom(11) // wants always the same initial positions
         for (let n of nodes) {
-            n.x = -width / 2 + random() * width
-            n.y = -height / 2 + random() * height
+            n.x = -width / 2  + random() * width * 0.5
+            n.y = -height / 2 + random() * height * 0.5
         }
         // compute bounding box
         const bbox = {
@@ -426,7 +437,7 @@ async function drawAll(url) {
         }
         return {
             nodes,
-            edges,
+            edges: links,
             minDeg,
             maxDeg,
             minC,
@@ -450,60 +461,38 @@ async function drawAll(url) {
 }
 const cText = `
 /**
- * Computes the and accumulate the betweenness centrality for a source node
- * @param {Array} A, adjacency list 
- * @param {Number} source, index of source node
- * @param {Array} c_, array which accumulate centrality values
+ * Computes the PageRank for each node in the graph
+ * @param {Array} I, adjacency list of incoming edges
+ * @param {Array} O, adjacency list of outgoing edges
+ * @param {Number} d, damping factor
+ * @param {Number} maxIter, maximum number of iterations
+ * @param {Number} eps, tolerance
+ * @returns {Array} b_, array of PageRank values for each node in the graph
  */
-function bc_( A, source, c_ ){
-    const n = A.length
-    const d_ = new Array(n).fill(-1)
-    const sigma_ = new Array(n).fill(0)
-    const delta_ = new Array(n).fill(0)
-    d_[source] = 0
-    sigma_[source] = 1
-    const q_ = [source] // queue
-    const s_ = [] // stack
-    const p_ = new Array(n).fill(null).map( e => []) // list of parent
-    while (q_.length > 0) {
-        const v = q_.shift()
-        const d = d_[v]
-        s_.push(v)
-        for (let w of A[v]) {
-            if (d_[w] < 0) {
-                d_[w] = d + 1
-                q_.push(w)
-            }
-            if (d_[w] === d + 1) {
-                sigma_[w] += sigma_[v]
-                p_[w].push(v)
+function pagerank(I, O, d, maxIter, eps) {
+    const N = I.length
+    let b_ = new Array(N).fill(1/N)
+    let c_ = new Array(N).fill((1-d)/N)
+    let e_ = Infinity
+    while (e_ > eps && maxIter-- > 0) {
+        for (let i = 0; i < N; i++) {
+            //if (I[i].length === 0) continue
+            for (let j of I[i]) {
+                c_[i] += d * b_[j]/O[j].length
             }
         }
-    }
-    while (s_.length > 0) {
-        let w = s_.pop()
-        for (let v of p_[w]) {
-            delta_[v] += (sigma_[v] / sigma_[w]) * (1 + delta_[w])
-        }
-        if (w !== source) {
-            c_[w] += delta_[w]
+        e_ = 0
+        for (let i = 0; i < N; i++) {
+            e_ += Math.abs((b_[i] - c_[i])**2)
+            b_[i] = c_[i]
+            c_[i] = (1-d)/N
         }
     }
-}
-/**
- * Computes betweenness centrality for each node in the graph
- * @param {Array} nodes, array of nodes
- * @param {Array} neighbors, adjacency list
- * @returns {Array} c_, array of betweenness centrality values for each node in nodes
- * @see https://en.wikipedia.org/wiki/Betweenness_centrality
- * @see Brandes, Ulrik (2001). "A faster algorithm for betweenness centrality". Journal of Mathematical Sociology. 25 (2): 163–177. doi:10.1080/0022250X.2001.9990249. S2CID 14548872.
- */
-function betweenness(nodes, neighbors) {
-    const c_ = new Array(nodes.length).fill(0)
-    for (let n of nodes) {
-        bc_(neighbors, n.index, c_)
+    const m_ = Math.max(...b_)
+    for (let i = 0; i < N; i++) {
+        b_[i] /= m_
     }
-    return c_
+    return b_
 }
 `
 const hlPre = d3.select("#hl-code").append("pre")
