@@ -222,7 +222,7 @@ function render(source, target, kdt) {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     canvas.appendChild(renderer.domElement)
-    window.addEventListener("resize", onWindowResize)
+   // window.addEventListener("resize", onWindowResize)
 
     // controls: camera
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -231,11 +231,7 @@ function render(source, target, kdt) {
     controls.target.set(0.0037, 0.1, 0.039)
     controls.update()
 
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight
-        camera.updateProjectionMatrix()
-        renderer.setSize(window.innerWidth, window.innerHeight)
-    }
+    
     const buff1 = renderBuffers(target, true, false, false)
     const buff2 = renderBuffers(source, true, false, false)
     // color buffers 
