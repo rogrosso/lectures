@@ -68,8 +68,8 @@ div#dropdown-menu {
     gap: 1px;
     background-color: white;
     padding: 4px; 
-    margin: 2px; 
-    width: 660px;
+    margin: 0 auto; 
+    width: 600px;
     align-items: center;
     justify-items: center;
     border: 1px solid teal

@@ -132,8 +132,8 @@ function draw(test01, lesmiserables) {
         const center = { x: margin.left + iw / 2, y: margin.top + ih / 2 }
         const { nodes, links, edges, neighbors } = lesmiserables
         clearNodes(nodes)
-        const sourceAccessor = (l) => l.source.id
-        const targetAccessor = (l) => l.target.id
+        const sourceAccessor = (l) => l.source.index
+        const targetAccessor = (l) => l.target.index
         //return
         const gSet = new Set()
         nodes.forEach((n) => {
@@ -330,7 +330,7 @@ function draw(test01, lesmiserables) {
         //const pathColor = "#6D191B"
         const eGroup = g
             .selectAll("path")
-            .data(edges, (d) => d.id)
+            .data(edges, (d) => d.index)
             .join("path")
             .attr("d", (d) => lineGenerator(controlPoints(d)))
             .attr("stroke", pathColor)
@@ -340,7 +340,7 @@ function draw(test01, lesmiserables) {
         const nodeColor = "#193556"
         const nGroup = g
             .selectAll("circle")
-            .data(nodes, (d) => d.id)
+            .data(nodes, (d) => d.index)
             .join("circle")
             .attr("cx", (d) => scale(d.x))
             .attr("cy", (d) => scale(d.y))
@@ -411,7 +411,7 @@ function draw(test01, lesmiserables) {
         event,
         d
     ) {
-        bfs(nodes, neighbors, d.id)
+        bfs(nodes, neighbors, d.index)
         clearTimeouts()
         event.stopPropagation()
         const s_ = new Set()
@@ -440,7 +440,7 @@ function draw(test01, lesmiserables) {
                 .attr("stroke-opacity", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
-                    if (n0.p === n1.id || n1.p === n0.id) {
+                    if (n0.p === n1.index || n1.p === n0.index) {
                         const dist = Math.max(n0.d, n1.d)
                         if (dist > distRange[distIndex]) {
                             return 0

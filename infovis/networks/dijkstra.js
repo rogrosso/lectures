@@ -156,7 +156,7 @@ async function drawAll(url1, url2) {
             const textPath = text
                 .text(null)
                 .append("textPath")
-                .attr("xlink:href", (d) => "#" + "_" + d.id)
+                .attr("xlink:href", (d) =>  "#" + "_" + d.key)
                 .style("text-anchor", "middle")
                 .attr("startOffset", "45%")
                 .attr(
@@ -223,10 +223,10 @@ async function drawAll(url1, url2) {
         const pathColor = "#6D191B"
         const eGroup = g
             .selectAll("path")
-            .data(edges, (d) => d.id)
+            .data(edges, (d) => d.key)
             .join("path")
             .attr("d", (d) => lineGenerator(controlPoints(d)))
-            .attr("id", (d, i) => "_" + d.id)
+            .attr("id", (d, i) => "_" + d.key)
             .attr("stroke", pathColor)
             .attr("stroke-width", 1.5)
             .attr("fill", "none")
@@ -234,7 +234,7 @@ async function drawAll(url1, url2) {
         const nodeColor = "#193556"
         const nGroup = g
             .selectAll("circle")
-            .data(nodes, (d) => d.id)
+            .data(nodes, (d) => d.index)
             .join("circle")
             .attr("cx", (d) => xscale(d.x))
             .attr("cy", (d) => yscale(d.y))
@@ -272,7 +272,7 @@ async function drawAll(url1, url2) {
             })
         const tGroup = g
             .selectAll(".path-weight")
-            .data(edges, (d) => d.id)
+            .data(edges, (d) => d.weight)
             .join("text")
             .attr("class", "path-weight")
             .call(wrapText)
@@ -325,7 +325,7 @@ async function drawAll(url1, url2) {
         event,
         d
     ) {
-        searchAlg(nodes, neighbors, d.id)
+        searchAlg(nodes, neighbors, d.index)
         clearTimeouts()
         event.stopPropagation()
         const s_ = new Set()
@@ -352,9 +352,9 @@ async function drawAll(url1, url2) {
                 .attr("stroke-opacity", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
-                    //if ((n0.id === 36 || n0.id === 52) && (n1.id === 36 || n1.id === 52))
+                    //if ((n0.index === 36 || n0.index === 52) && (n1.index === 36 || n1.index === 52))
                     //    debugger
-                    if (n0.p === n1.id || n1.p === n0.id) {
+                    if (n0.p === n1.index || n1.p === n0.index) {
                         const dist = Math.max(n0.d, n1.d)
                         if (dist > distRange[distIndex]) return 0
                         else {
@@ -370,14 +370,14 @@ async function drawAll(url1, url2) {
                     else return colorScale(d.group)
                 })
             d3.selectAll(".path-weight")
-                .data(edges, (d) => d.id)
+                .data(edges, (d) => d.key)
                 .join("text")
                 .attr("class", "path-weight")
                 .attr("opacity", (d) => {
                     if (distIndex >= nrDistances) return 1
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
-                    if (n0.p === n1.id || n1.p === n0.id) {
+                    if (n0.p === n1.index || n1.p === n0.index) {
                         const dist = Math.max(n0.d, n1.d)
                         if (dist > distRange[distIndex]) return 0
                         else return 1
