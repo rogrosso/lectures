@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Animation of Time Dependent Networks</title>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <body>
+        <div class="infovis-lecture">
+            <h1>Animation of Time Dependent Networks</h1>
+            <h2>Animation of the Super-Graph</h2>
+            <h3>The Super-Graph</h3>
+            <p>
+                Construct an aggregate of all graphs in the sequence. The super-graph contains all nodes and edges in the 
+                network during the complete time interval. 
+            </p>
+            <h3>Visualization</h3>
+            <p>
+                Compute a layout of the super-graph. Use brushing to filter nodes and edges for a given time interval. 
+                Visualize only the network elements within the time interval specified by the brushing filter, i.e., 
+                set nodes to be transparent if they are outside the specified time interval.  Node size is computed 
+                using degree-centrality. The centrality of the nodes is calculated for the time interval being visualized.
+            </p>
+            <h3>Remark</h3>
+            <p>
+                Visualization of the GEXF data set dynamic Java code, dynamic source code structure of a Java program 
+                by the evolution of commits on the SVN, by S.Heymann & J.Bilcke, 2008. In the visualization below, 
+                slide the brush filter to animate the visualization. The size of the interval can be changed. Double-click 
+                to clear the brush, or select everything if the brush-selector is empty.
+            </p>
+            <hr>
+            <div class="canvas">
+                <div id="dynamic-network" class="grid-container-1-column"></div>
+            <script type="module" src="./animation.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
