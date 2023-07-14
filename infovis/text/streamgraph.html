@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Stream Graph</title>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <body>
+        <div class="infovis-lecture">
+            <h1>Stream Graph</h1>
+            <h2>Definition</h2>
+            <p>
+                A stream graph, sometimes written as streamgraph, is a stacked plot around a "central axis," resulting in a flowing, 
+                organic shape. Stream graphs demonstrate how topics evolve.
+            </p>
+            <h3>Problem Statement</h3>
+            <p>
+                Given a time series \(\{f_1,f_2,\dots,f_n\}\) and a baseline \(g_0\)    compute the top layer to \(f_i\) 
+                as follows:
+                \[g_i = g_0 + \sum_{j=1}^{i} f_j\]
+            </p>
+            <p>
+                The question of how to compute g0 remains open. Two simple strategies are 
+            </p>
+            <ul>
+                <li>Simple model: \(g_0 \equiv 0\)</li>
+                <li>Symmetric around the \(x\)-axis: \(g_0 = -\frac{1}{2}\sum_{i=1}^{n} f_i\)</li>
+            </ul>
+            <h3>Remark</h3>
+            <p>
+                \(f_i = \{f_i(t_0), f_i(t_1), \dots, f_i(t_n)\}\), thus 
+                \(g_i = \{g_i(t_0), g_i(t_1), \dots, g_i(t_n)\}\) 
+            </p>
+            <h2>How to compute the baseline</h2>
+            <p>Reference: Stacked Graphs - Geometry and Aesthetic, L. Byron, M. Wattenberg</p>
+            <ul>
+                <li>Simple model \(g_0 \equiv 0</li>
+                <li>
+                    Solution 1: minimize silhouette (same as symmetric model)<br>
+                    silhouette: \(f(g_0) = g_0^2 + g_n^2 = g_0^2 + (g_0 + \sum_{i=1}^n f_i)^2\)<br>
+                    \(\frac{df}{dg_0} = 0 \implies g_0 = -\frac{1}{2}\sum_{i=1}^{n} f_i\)
+                </li>
+                <li>
+                    Solution 2: minimize the deviation \(g_i\) from the x-axis (minimizes the wiggle)<br>
+                    deviation: \(f(g_0) = \sum_{i=0}^n g_i^2\)<br>
+                    \(\frac{df}{dg_0}=0 \implies g_0 = -\frac{1}{n+1} \sum_{i=1}^n (n-i+1)f_i\)
+                </li>   
+            </ul>
+            <h3>Example</h3>
+            <p>
+                The follwing example visualizes the frequency of baby names in the USA from 1880 to 2015.
+            </p>
+            <hr>
+            <div class="canvas">
+                <div id="stream-graph" class="grid-container-1-column"></div>
+            <script type="module" src="./streamgraph.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
