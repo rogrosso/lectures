@@ -62,11 +62,11 @@ function network(jsonObj) {
     const nodeMap = new Map();
     let pos = 0;
     // compute nodes
-    nodes.forEach(n => {
+    nodes.forEach((n,index) => {
         const nid = +n["@attributes"].id
         const label = n["@attributes"].label
         nodeMap.set(nid, pos)
-        const gnode = { pos: pos, label: label, id: nid }
+        const gnode = { pos: pos, label: label, id: nid, index: index }
         //  compute node times intervals
         gnode.start = [];
         gnode.end = [];
@@ -111,7 +111,7 @@ function network(jsonObj) {
         pos++;
     })
     //return nList
-    edges.forEach(e => {
+    edges.forEach((e, index) => {
         const eid = +e["@attributes"].id
         const eSource = +e["@attributes"].source
         const eTarget = +e["@attributes"].target
@@ -123,7 +123,7 @@ function network(jsonObj) {
         if (e["@attributes"].hasOwnProperty('weight')) {
             weight = +e["@attributes"].weight
         }
-        const gedge = { source: nsrc, target: ndst, weight: weight }
+        const gedge = { source: nsrc, target: ndst, weight: weight, index: index }
         // dynamics graphs
         gedge.start = []
         gedge.end = []
@@ -272,8 +272,8 @@ function dynamicLayout(selection, props) {
 
     const beta = 0.2
     const controlPoints = (nodes, edge, beta) => {
-        const source = nodes[edge.source.id]
-        const target = nodes[edge.target.id]
+        const source = nodes[edge.source.index]
+        const target = nodes[edge.target.index]
         const d0 = [source.x, source.y]
         const d2 = [target.x, target.y]
         const x = (d0[0] + d2[0]) / 2
@@ -453,11 +453,11 @@ function dynamicLayout(selection, props) {
                     // an edge if visible if the time interval overlap 
                     // and if the end nodes are visible
                     const eFlag = visible(tS, tE, d)
-                    const sFlag = visible(tS, tE, nodes[d.source.id])
-                    const tFlag = visible(tS, tE, nodes[d.target.id])
+                    const sFlag = visible(tS, tE, nodes[d.source.index])
+                    const tFlag = visible(tS, tE, nodes[d.target.index])
                     if (eFlag && sFlag && tFlag) {
-                        nodes[d.source.id].c++
-                        nodes[d.target.id].c++
+                        nodes[d.source.index].c++
+                        nodes[d.target.index].c++
                         return edgeOpacity
                     }
                     else {
