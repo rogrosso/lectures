@@ -21,3 +21,18 @@ export function easyRandom(s) {
       return (seed - 1) / 2147483647
     }
 }
+
+export function normalRandomFactory(seed, m_, s_) {
+    const mu = m_
+    const sigma = s_
+    const pi2 = 2 * Math.PI
+    const random = random_seed(seed)
+    return function( ) {
+        let u1 = 1 - random()
+        let u2 = random()
+        const mag = sigma * Math.sqrt(-2 * Math.log(u1))
+        const z0 = mag * Math.cos(pi2 * u2) + mu
+        const z1 = mag * Math.sin(pi2 * u2) + mu
+        return z0
+    }
+}

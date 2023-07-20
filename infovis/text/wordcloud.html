@@ -38,6 +38,13 @@
                 </li>
                 <li>exploration: tag clouds provide suboptimal support when searching for specific tags</li>
             </ul>
+            <h3>Algorithm</h3>
+            <p>
+                The word cloud layout algorithm is straightforward. For each word, an outgoing spiraling path centered at the center 
+                of the drawing area is generated. Words are moved stepwise along the path. At each step, if the word is place in the 
+                canvas if there are no collision with other words. The computation of collisions uses OBBs and the 
+                Separating Axis Theorem.
+            </p>
             <hr>
             <div class="canvas">
                 <div id="word-cloud" class="grid-container-1-column"></div>
