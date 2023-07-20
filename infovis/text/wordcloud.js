@@ -99,6 +99,7 @@ function draw(text) {
             .attr('x', 100)
             .attr('y',110)
             .attr('font-size', d => d.height )
+            .attr('font-family', d => d.fontFalimily)
             .text(d => d.word)
             .each( function(d) { d.width = this.getComputedTextLength() })
             .remove()
