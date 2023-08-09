@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Information Visualization"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Louvain Algorithm</title>
+        <!-- Styles -->
+        <link rel="stylesheet" href="../../css/lectures.css">
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script src="../../contrib/d3.min.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <body>
+        <div class="infovis-lecture">
+            <h1>Louvain Algorithm for Community Detection</h1>
+            <p>
+                The Louvain algorithm is an agglomerative method that is widely used due to its performance (aka it is fast). 
+                It consists of two phases:
+            </p>
+            <ul>
+                <li>Phase 1: Improve the partition by moving nodes between communities</li>
+                <li>
+                    Phase 2: Improve the partition by a hierarchical agglomeration of the communities found with the method 
+                    used in Phase 1
+                </li>
+            </ul>
+            <p>Repeat until no further increase in modularity can be obtained.</p>
+            <h2>Phase 1</h2>
+            <p>Initialization</p>
+            <ul>
+                <li>Input: weighted and undirected network with \(n\) nodes.</li>
+                <li>For each node, a community is created and assigned to it.</li>
+            </ul>   
+            <p>For each node:</p>
+            <ul>
+                <li>Measure the gain in modularity to be obtained by moving node \(i\) to the community of its neighbors.</li>
+                <li>Move \(i\) to the community with the largest gain.</li>
+                <li>If the gain is negative, don't move node \(i\).</li>
+            </ul>
+            <p>Repeat this process until no gain in modularity can be measured.</p>
+            <h3>Remarks</h3>
+            <li>Each node will be processed many times.</li>
+            <li>The algorithm's output depends on the order in which the nodes are processed.</li>
+            <li>Computation time depends on the order of the nodes.</li>
+            <h3>Modularity</h3>
+            <p>The change in modularity is given by</p>
+            \[
+                \Delta Q = \left[\frac{\Sigma_{in} + 2 k_{i,in}}{am} - \left(\frac{\Sigma_{tot}
+                +k_i}{2m}\right)^2 \right]
+                - \left[\frac{\Sigma_{in}}{2m} - \left(\frac{\Sigma_{tot}}{2m}\right)^2 -
+                \left(\frac{k_i}{2m}\right)^2\right]
+            \]
+            <p>where</p>
+            <ul>
+                <li>
+                \(
+                    \Sigma_{in} = \text{sum of the weights of the links inside the community of node } i
+                \)
+            </li>
+            <li>
+                \(
+                    \Sigma_{tot} = \text{total sum of the weights of all links of the community, including edges pointing outside the community}
+                \)
+            </li>
+            <li>
+                \(
+                    \Sigma_{tot} + k_i = \text{total sum including the links of node } i
+                \)
+            </li>
+            <li>
+                \(
+                    k_{i,in} = \text{sum of the weights of the links of node } i \text{ pointing inside the community}
+                \)
+            </li>
+            <li>
+                \(
+                    k_i = \text{sum of the weights of the links incident to node } i
+                \)
+            </li>
+            </ul>   
+            <h2>Phase 2</h2>
+            <ul>
+                <li>Construct a new network where the nodes are the communities found in Phase 1.</li>
+                <li>
+                    Links between actual nodes of the communities are combined into a new link; the weight is the sum of the 
+                    weights of the links.
+                </li>
+                <li>Links between nodes within a community are combined into a loop of the new node (with weight = 2).</li>
+                <li>Apply the method of Phase 1 to the new network.</li>
+            </ul>
+            <p>
+                Continue iteratively until \(\Delta Q \leq 0\). In each iteration, a new network is being created from the 
+                communities found in the previous iteration.
+            </p>
+            <hr style="margin-top: 10px; margin-bottom: 10px;">
+            <div class="canvas">
+                <div id="verlet-integration-layout" class="grid-container-3-column"></div>
+                <div id="verlet-integration-svg" class="verlet-integration" style="text-align: center;"></div>
+                <script type="module" src="./louvain.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div class="code" id="hl-code"></div>
+            <footer>
+                <hr>
+                <div class="impressum">
+                    <a class="impressum" href="../../impressum.html">Impressum</a> 
+                    <a class="dateschuntzerklaerung" href="../../datenschutzerklaerung.html">Datenschutzerklärung</a>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

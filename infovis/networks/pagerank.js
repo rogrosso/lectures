@@ -1,5 +1,6 @@
 import { dropdown } from "../common/gui.js"
 import { genDivTooltip } from "../common/draw.js"
+import { randColorsHex } from "../common/colors.js"
 import { easyRandom } from "../../common/random.js"
 import { keyCantor } from "../../common/utilities.js"
 import {
@@ -20,7 +21,7 @@ async function drawAll(url) {
     const dampConst = 100
     let damping = dampConst
     // draw
-    const lesmiserables = await d3.json(url)
+    const celegans = await d3.json(url)
 
     const divTooltip = genDivTooltip()
 
@@ -168,7 +169,7 @@ async function drawAll(url) {
         .attr("class", "force-directed-layout-group")
         .attr("transform", `translate(${width / 2}, ${height / 2})`)
 
-    const { nodes, edges, minDeg, maxDeg, minC, maxC, bbox } = initNetwork(lesmiserables, iW, iH)
+    const { nodes, edges, minDeg, maxDeg, minC, maxC, bbox } = initNetwork(celegans, iW, iH)
     const sortedNodes = []
     nodes.forEach((n) => sortedNodes.push(n))
     sortedNodes.sort((n1, n2) => {
@@ -190,25 +191,14 @@ async function drawAll(url) {
     nodes.forEach((n) => {
         gSet.add(n.group)
     })
-    const colors = [
-        "#a6cee3",
-        "#1f78b4",
-        "#b2df8a",
-        "#33a02c",
-        "#fb9a99",
-        "#e31a1c",
-        "#fdbf6f",
-        "#ff7f00",
-        "#cab2d6",
-        "#6a3d9a",
-        "#D2691E",
-        "#b15928",
-    ]
+    const colors = []
+    const colorGenerator = randColorsHex()
+    for (let i = 0; i < gSet.size; i++) colors.push(colorGenerator())
     const colorScale = d3
         .scaleOrdinal()
         .domain(Array.from(gSet).sort())
         .range(colors)
-
+    
     const beta = 0.2
     const linkG = netwG
         .append("g")

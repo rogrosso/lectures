@@ -2,6 +2,8 @@
 export function dropdown({
     divObj,
     text,
+    name,
+    fontSize,
     selection,
     keys,
     handler
@@ -11,9 +13,13 @@ export function dropdown({
 
     const lab = divObj.append('label')
         .attr('class', 'dropdown-label')
+        .attr('for', name)
+        .style('font-size', fontSize)
         .text(text)
     const select = divObj.append('select')
         .attr('aria-label', text)
+        .attr('font-size', fontSize)
+        .attr('name', name)
         .on('change', function(event) {
             handler(text, event.target.value)
         })

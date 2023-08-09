@@ -1,9 +1,9 @@
 # lectures
 This repository contains the HTML and Javascript code implementing algorithms discussed in some geometric modeling, 
 geometry processing, and information visualization lectures. This way, the code and some background information 
-about the algorithms can be freely accessed also from outside the University. This website presents the implemented
-code, which can be cloned from the GitHub site 
-<a href="https://github.com/rogrosso/lectures">https://github.com/rogrosso/lectures</a>.
+about the algorithms can be freely accessed also from outside the University. Please feel free to visit the website 
+<a href="https://rogrosso.github.io/lectures/">https://rogrosso.github.io/lectures</a> that shows these algorithms 
+online.
 
 The web applications are interactive and based on D3 for 2D graphics and three.js for surfaces. It is strongly 
 recommended to interact with the visualizations by selecting and dragging points, zooming, and rotating the 3D 
