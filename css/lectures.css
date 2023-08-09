@@ -128,3 +128,45 @@ label.dropdown-label {
     font-weight: 350;
 }
 
+.accordion {
+    background-color: #eee;
+    color: #444;
+    box-shadow: 5px 5px 3px #888888;
+    cursor: pointer;
+    padding: 0px;
+    padding-left: 30px;
+    width: 100%;
+    text-align: left;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.4s;
+}
+.active, .accordion:hover {
+    background-color: #ccc;
+}
+.panel {
+    font-size: 16px;
+    padding: 0 18px;
+    max-height: 0;
+    background-color: white;
+    box-shadow: 2px 2px 3px #888888;
+    overflow: hidden; 
+    transition: max-height 0.2s ease-out;
+}
+button.accordion.active, button.accordion:hover {
+    background-color: #ccc;
+}
+button.accordion.active:after {
+    content: "\2212";
+}
+button.accordion:after {
+    content: '\002B';
+    color: #777;
+    font-size: 24px;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+    margin-right: 8px;
+    margin-top: 10px;
+}

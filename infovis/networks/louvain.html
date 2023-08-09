@@ -23,6 +23,50 @@
     <body>
         <div class="infovis-lecture">
             <h1>Louvain Algorithm for Community Detection</h1>
+            <p><strong>Node:</strong> open the accordion below for a detailed explanation of the algorithm's implementation</p>
+            <button class="accordion">
+                <h3 style="float:left">
+                    Click here for a detailed explanation of the implementation of the Louvain algorithm
+                </h3>
+            </button>
+            <div class="panel">
+                <h3>Modularity Update</h3>
+                <p>
+                    The change in modularity by moving one node to the community of one of its neighbors is computed as follows. 
+                    We first remove node \(i\) from its community \(D\) and then insert this node into community \(C\). 
+                </p>
+                <p>We first introduce some notation:</p>
+                <ul>
+                    <li>\(D\rightarrow C\) is the operation of moving node \(i\) from its community \(D\) to community \(C\)</li>
+                    <li>\(k_i(i \rightarrow D)\) is the total weight of all links pointing from node \(i\) to community \(D\)</li>
+                    <li>\(k_i(i \rightarrow C)\) is the total weight of all links pointing from node \(i\) to community \(C\)</li>
+                    <li>\(\Sigma_{C,in}\) sum of weights all links internal to community \(C\) including loops</li>
+                    <li>\(\Sigma_{D,in}\) sum of weights all links internal to community \(D\) including loops</li>
+                    <li>\(\Sigma_{C,tot}\) sum of weights all links of nodes in community \(C\) including loops</li>
+                    <li>\(\Sigma_{D,tot}\) sum of weights all links of nodes in community \(D\) including loops</li>
+                    <li>\(l_i\) is the weight of the loop of node \(i\)</li>
+                </ul>
+                <p>The update of modularity is given by</p>
+                \[
+                    \Delta Q = Q_{after} - Q_{before} 
+                \]
+                <p>where</p>
+                \[
+                    Q_{before} = \frac{\Sigma_{C,in}}{2m} - \left(\frac{\Sigma_{C,tot}}{2m}\right)^2 + \frac{\Sigma_{D,in}}{2m} - \left(\frac{\Sigma_{D,tot}}{2m}\right)^2
+                \]
+                <p>and</p>
+                \[
+                \begin{align}
+                    Q_{after} =&\; \frac{\Sigma_{C,in} + 2 k_i(i \rightarrow C) + l_i}{2m} - \left(\frac{\Sigma_{C,tot} + k_i}{2m}\right)^2 \\
+                               &\; + \frac{\Sigma_{D,in} - 2 k_i(i \rightarrow D) - l_i}{2m} - \left(\frac{\Sigma_{D,tot} - k_i}{2m}\right)^2
+                \end{align}
+                \]
+                <p>After some algebraic manipulations, we obtain</p>
+                \[
+                    \Delta Q = \frac{k_i(i \rightarrow C) - k_i(i \rightarrow D)}{m} 
+                                + \frac{k_i}{2m} \left(\frac{\Sigma_{C,tot} - \Sigma_{D,tot} + k_i}{2m}\right) 
+                \]
+            </div>
             <p>
                 The Louvain algorithm is an agglomerative method that is widely used due to its performance (aka it is fast). 
                 It consists of two phases:
@@ -104,7 +148,7 @@
             </p>
             <hr style="margin-top: 10px; margin-bottom: 10px;">
             <div class="canvas">
-                <div id="verlet-integration-layout" class="grid-container-3-column"></div>
+                <div id="verlet-integration-layout" class="grid-container-3-column" style="width: 560px"></div>
                 <div id="verlet-integration-svg" class="verlet-integration" style="text-align: center;"></div>
                 <script type="module" src="./louvain.js"></script>
             </div>
@@ -119,5 +163,24 @@
                 </div>
             </footer>
         </div>
+        <script>
+            const acc = document.getElementsByClassName("accordion")
+            for (let i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active")
+                    var panel = this.nextElementSibling
+                    //if (panel.style.display === "block") {
+                      //  panel.style.display = "none"
+                    //} else {
+                      //  panel.style.display = "block"
+                   // }
+                   if (panel.style.maxHeight) {
+                        panel.style.maxHeight = null
+                    } else {
+                        panel.style.maxHeight = panel.scrollHeight + "px"
+                    }
+                })
+            }
+        </script>
     </body>
 </html>

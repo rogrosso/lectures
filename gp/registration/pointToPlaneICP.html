@@ -6,49 +6,6 @@
         <meta name="author" content="Roberto Grosso" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Point-to-Plane ICP</title>
-        <!-- Styles -->
-        <style>
-            .accordion {
-                background-color: #eee;
-                color: #444;
-                box-shadow: 5px 5px 3px #888888;
-                cursor: pointer;
-                padding: 4px;
-                padding-left: 30px;
-                width: 100%;
-                text-align: left;
-                border: 1px solid #ccc;
-                border-radius: 10px;
-                outline: none;
-                transition: 0.4s;
-            }
-            .active, .accordion:hover {
-                background-color: #ccc;
-            }
-            .panel {
-                font-size: 16px;
-                padding: 0 18px;
-                max-height: 0;
-                background-color: white;
-                overflow: hidden; 
-                transition: max-height 0.2s ease-out;
-            }
-            button.accordion.active, button.accordion:hover {
-                background-color: #ccc;
-            }
-            button.accordion.active:after {
-                content: "\2212";
-            }
-            button.accordion:after {
-                content: '\002B';
-                color: #777;
-                font-size: 24px;
-                font-weight: bold;
-                float: right;
-                margin-left: 5px;
-                margin-top: 10px;
-            }
-        </style>
         <link rel="stylesheet" href="../../css/lectures.css">
         <link  
             rel="stylesheet" 
@@ -66,7 +23,7 @@
             <h1>Point-to-Plane ICP</h1>
             <p><strong>Note:</strong> open the accordion bellow for a detailed explanation of the point-to-plane algorithm</p>
             <button class="accordion">
-                <h3 style="float:left">A detailed explanation of the Point-to-Plane ICP algorithm</h3>
+                <h3 style="float:left">Click here for a detailed explanation of the Point-to-Plane ICP algorithm</h3>
             </button>
             <div class="panel">
             <p>
@@ -155,28 +112,31 @@
                 Putting all this together we obtain
                 \[
                 \begin{align}
-                |(R q_i + t - p)\cdot n_i|^2 &\approx  \Theta^T W_i^T n_i n_i^T W_i \Theta + 2 (q_i - p_i)^T n_i n_i^T W_i \Theta + (q_i-p_i)^T n_i n_i^T (q_i - p_i) \\
-                  &\approx \Theta^T C_i \, C_i^T \Theta + 2 (q_i - p_i)^T n_i C_i^T \Theta + + (q_i-p_i)^T n_i n_i^T (q_i - p_i) 
+                |(R q_i + t - p)\cdot n_i|^2 \approx&\, \Theta^T W_i^T n_i n_i^T W_i \Theta + 2 (q_i - p_i)^T n_i n_i^T W_i \Theta 
+                                                     + (q_i-p_i)^T n_i n_i^T (q_i - p_i) \\
+                                             \approx&\, \Theta^T C_i \, C_i^T \Theta + 2 (q_i - p_i)^T n_i C_i^T \Theta + (q_i-p_i)^T n_i n_i^T (q_i - p_i)
                 \end{align}
                 \]
             </p>
             <p>
-                The point-to-plane minimization problem can be formulated as follows/p>
+                The point-to-plane minimization problem can be formulated as follows:
                 \[
-                \min_{R,t} \sum_i | (R \cdot q_i + t - p_i) \cdot n_i |^2  \longrightarrow \text{min}_{(\alpha, \beta, \gamma, t_x, t_y, t_z)} F(\alpha, \beta, \gamma, t_x, t_y, t_z)
+                \min_{R,t} \sum_i | (R \cdot q_i + t - p_i) \cdot n_i |^2 \longrightarrow \text{min}_{(\alpha, \beta, \gamma, t_x, t_y, t_z)} F(\alpha, \beta, \gamma, t_x, t_y, t_z)
                 \]
             </p>
             <p>
                 where
                 \[
-                F(\alpha, \beta, \gamma, t_x, t_y, t_z) = \Theta^T \left(\sum_i C_i C_i^T \right) \Theta + 2 \left(\sum_i (q_i - p_i)^T n_i C_i^T\right) \Theta  + \sum_i (q_i-p_i)^T n_i n_i^T (q_i - p_i)
+                \begin{align}
+                F(\alpha, \beta, \gamma, t_x, t_y, t_z) = &\; \Theta^T \left(\sum_i C_i C_i^T \right) \Theta + 2 \left(\sum_i (q_i - p_i)^T n_i C_i^T\right) \Theta \\
+                                                          &\; + \sum_i (q_i-p_i)^T n_i n_i^T (q_i - p_i)
+                \end{align} 
                 \]
             </p>
             <p>In matrix notation we have
                 \[
                 \begin{align}
-                F(\alpha, \beta, \gamma, t_x, t_y, t_z) &= \Theta^T \left(\sum_i C_i C_i^T \right) \Theta + 2 \left(\sum_i (q_i - p_i)^T n_i C_i^T\right) \Theta  + \sum_i (q_i-p_i)^T n_i n_i^T (q_i - p_i)\\
-                &= \Theta^T K \Theta + 2 b^T \Theta + c\\
+                F(\alpha, \beta, \gamma, t_x, t_y, t_z) &= \Theta^T K \Theta + 2 b^T \Theta + c\\
                 \end{align}
                 \]
             </p>
