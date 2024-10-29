@@ -1,5 +1,5 @@
 import { keyGen } from "../../common/utilities.js"
-import halfedgeFactory from "../../common/halfedge.js"
+import { halfedgeFactory } from "../../common/halfedge.js"
 
 const EVEN_VERTEX = 1
 const ODD_VERTEX = 2
@@ -157,7 +157,7 @@ function smoothEvenVertex(v, onering) {
     return v
 }
 
-export default function loopSubdivision(im) {
+export function loopSubdivision(im) {
     let om = triSubdivision(im)
     smooth(om, im)
     return om

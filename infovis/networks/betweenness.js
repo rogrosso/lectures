@@ -13,7 +13,8 @@ import {
 } from "./networks.js"
 import { betweenness } from "./centrality.js"
 
-const url1 = "../data/lesmiserables.json"
+//const url1 = "../data/lesmiserables.json"
+const url1 = "../data/test03.json"
 drawAll(url1)
 async function drawAll(url) {
     // global variables
@@ -243,7 +244,8 @@ async function drawAll(url) {
         .attr("stroke", nodeStrokeColor)
         .attr("stroke-width", nodeStrokeWidth)
         .selectAll("circle")
-        .data(sortedNodes)
+        //.data(sortedNodes)
+        .data(nodes)
         .join("circle")
         .attr("r", (d) => d.r)
         .attr("cx", (d) => d.x)
@@ -254,7 +256,7 @@ async function drawAll(url) {
         })
         .on("mousemove", function (event, d) {
             const pos = d3.pointer(event)
-            mouseMove(divTooltip, d.name, {
+            mouseMove(divTooltip, d, {
                 x: event.pageX,
                 y: event.pageY
             })
@@ -369,6 +371,11 @@ async function drawAll(url) {
             n.c = 0
             n.degree = 0
         })
+        // check data for edges
+        for (let e of links) {
+            if (typeof e.source === "string") e.source = +e.source
+            if (typeof e.target === "string") e.target = +e.target
+        }
         // check that edges are unique
         const eMap = new Map()
         for (let e of links) {
@@ -437,10 +444,11 @@ async function drawAll(url) {
     function mouseOver(tooltip) {
         tooltip.style("display", "inline-block")
     }
-    function mouseMove(tooltip, name, pos) {
+    function mouseMove(tooltip, d, pos) {
+        const text = d.name + '<br>' + 'degree: ' + d.degree + '<br>' + 'betweenness centrality: ' + d.c.toFixed(4)
         const { x, y } = pos
         tooltip
-            .html(name)
+            .html(text)
             .style("left", `${x + 10}px`)
             .style("top", `${y}px`)
     }

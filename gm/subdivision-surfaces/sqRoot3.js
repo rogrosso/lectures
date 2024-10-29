@@ -8,9 +8,9 @@ import GUI from "../../contrib/lil-gui.module.min.js"
 //import trisTetrahedron from "trisTetrahedron" assert { type: "json" }
 //import icosahedron_with_bnd from "icosahedron_with_bnd" assert { type: "json" }
 
-import halfedgeFactory from '../../common/halfedge.js'
+import { halfedgeFactory } from '../../common/halfedge.js'
 import { renderBuffers, normalizeMesh, boundingBox } from '../../common/renderBuffers.js'
-import sqrt3Subdivision from "./sqrt3Subdivision.js"
+import { sqrt3Subdivision } from "./sqrt3Subdivision.js"
 
 const url1 = "../data/trisToroidalTetrahedron.json"
 const url2 = "../data/trisCube24.json"

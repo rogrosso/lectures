@@ -3,7 +3,7 @@
  * This is a factory of matrix functions.
  * @returns 
  */
-const matrixFactory = () => {
+export function matrixFactory() {
     function create(m, n) {
         return new Array(m).fill(0).map( row => new Array(n).fill(0))
         
@@ -135,6 +135,4 @@ const matrixFactory = () => {
         multMatrixTranspose,
         transpose
     } // return 
-  } // matrixFactory()
-  
-  export default matrixFactory
+} // matrixFactory()

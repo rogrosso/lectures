@@ -8,7 +8,7 @@
  * 3. computes the determinant of a matrix
  * @returns {Object} Gauss elimination object
  */
-export default function gaussEliminationFactory() {
+export function gaussEliminationFactory() {
     let n = 0      // matrix size
     let pIndex = 0 // pivot index
     let sign = 1   // sign to account for rows swap

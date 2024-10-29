@@ -1,7 +1,7 @@
-import halfedgeFactory from '../../common/halfedge.js'
+import { halfedgeFactory } from '../../common/halfedge.js'
 
 // input is a halfedge mesh
-export default function dooSabinSubdivision(mesh) {
+export function dooSabinSubdivision(mesh) {
     // create first an indexed face set
     const ifaces = []
     const ivertices = []

@@ -1,7 +1,7 @@
 /**
  * Implements an indexed face set.
  */
-export default function indexedFaceSetFactory(v_, f_) {
+export function indexedFaceSetFactory(v_, f_) {
     const v_array = v_
     const n_array = []
     const f_array = f_

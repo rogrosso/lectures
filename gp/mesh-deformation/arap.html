@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Geometry Processing"/>
+        <meta name="author" content="Roberto Grosso" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ARAP Mesh Deformation</title>
+        <link rel="stylesheet" href="../../css/lectures.css">
+        <link  
+            rel="stylesheet" 
+            title="Atom One Light"
+            href="../../contrib/highlightjs/atom-one-light.min.css">
+        <!-- Scripts -->
+        <script src="../../contrib/highlightjs/highlight.min.js"></script>
+        <script id="MathJax-script" async src="../../contrib/mathjax/es5/tex-mml-svg.js"></script>
+        <script>
+            hljs.highlightAll()
+        </script>
+    </head>
+    <body>
+        <div class="gp-lecture">
+            <h1>As-Rigid-As-Possible (ARAP) Deformation</h1>
+            <h2>Input</h2>
+            <ul>
+                <li>Vertices of the source mesh: \(V_s = \{ v_0, v_1, \ldots, v_n \}\)</li>
+                <li>Target positions: \(\{ \hat{v}_3 = c_3, \hat{v}_9 = c_9, \ldots, \hat{v}_l = c_l \}\)</li>
+            </ul>
+            <h2>Initialization</h2>
+            <p>Compute the mesh Laplacian (Laplace-Beltramin Operator)</p>
+            \[
+            L = D + LU 
+            \]
+            <p>where the decomposition is for convenience, and the diagonal matrix \(D\) has the form</p>
+            \[
+            (D)_{ii} = w_{ii}
+            \]
+            <p>and the lower-upper matrix is</p>
+            \[
+            (LU)_{ij} = \begin{cases}
+            -w_{ij} & \text{if } \, j \in N(i)\\
+            0 & \text{otherwise}
+            \end{cases}
+            \]
+            <p>and the weights are</p>
+            \[
+            w_{ij} = \begin{cases}
+            \text{deg}(v_i) & \text{if}\, i = j\\
+            1 & \text{if}\, j \in N(i)\\
+            0 & \text{otherwise}
+            \end{cases}
+            \]
+            <p>for the uniform Laplacian, or cotangent weights for the cotangent Laplacian</p>
+            \[
+            w_{ij} = \begin{cases}
+            \sum_{k \in N(i)} w_{kj} & \text{if}\, i = j\\
+            \frac{\cot \alpha_{ij} + \cot \beta_{ij}}{2} & \text{if}\, j \in N(i)\\
+            0 & \text{otherwise}
+            \end{cases}
+            \]
+            <h2>Solution via Flip-Flop Iteration</h2>
+            <h3>Estimate Rotation Matrices</h3>
+            \[ A_i = \sum_{j\in N(i)} w_{ij} (v_i - v_j)(\hat{v}_i - \hat{v}_j)^T \rightarrow A_i = USV^T \rightarrow R_i = VU^T \]
+            <p><strong>Remark</strong></p>
+            <p>The As-Rigid-As-Possible deformation techniques require the use of a positive weighting scheme to guarantee the 
+            correct minimization of the energy. When using the default cotangent weighting scheme, this means that the input 
+            surface mesh must be clean. That is, that for all edges in the surface mesh the sum of the angles opposite to the 
+            edge in the incident triangles is less than \(\pi\). In the implementation below, we use a uniform Procrustes, 
+            that is, the weights are all equal to one. This produces acceptable results. The mesh has many cells with negative 
+            cotangent weights.</p>
+            <h3>Estimate Translations</h3>
+            \[ \sum_{v_j \in N(v_i)} w_{ij} (\hat{v}_i - \hat{v}_j)= \sum_{v_j \in N(v_i)} \frac{w_{ij}}{2} (R_i + R_j) (v_i - v_j) \]
+            <p>and the soft constraints for the target positions</p>
+            \[ \sum_{v_j \in N(v_k)} w_{kj} (\hat{v}_k - \hat{v}_k) + \gamma \hat{v}_k = \sum_{v_j \in N(v_k)} \frac{w_{kj}}{2} (R_k + R_j) (v_k - v_j) + \gamma \hat{c}_k \]
+            <p><strong>Remark</strong></p>
+            <p>The linear system is solved with a Cholesky spar matrix solver.</p>
+            <p><strong>Remark</strong></p>
+            <p>Computation of the cotangent weights</p>
+            <table>
+                <tr>
+                    <td style="padding-right: 50px;padding-left: 40px;">
+                    \[
+                    \cot \alpha_{ij} = \frac{(v_i - v_n)\cdot (v_j - v_n)}{||(v_i - v_n)\times (v_j - v_n)||}
+                    \]
+                    \[
+                    \cot \beta_{ij} = \frac{(v_j - v_p)\cdot (v_i - v_p)}{||(v_j - v_p)\times (v_i - v_p)||}
+                    \]
+                    </td>
+                    <td>
+                        <img src="../data/HowToComputeCotangent.png" alt="How to compute cotangent weights" style="width:300px;">
+                    </td>
+                </tr>
+            </table>
+            <div class="canvas">
+                <div id="threejs_canvas"></div>
+                <script type="module" src="./arap.js"></script>
+            </div>
+            <hr>
+            <h3>The JavaScript Code</h3>
+            <div class="code" id="hl-code"></div>
+        </div>
+       
+    </body>
+</html>

@@ -1,5 +1,5 @@
 import { keyGen } from "../../common/utilities.js"
-import halfedgeFactory from "../../common/halfedge.js"
+import { halfedgeFactory } from "../../common/halfedge.js"
 
 const FACE_VERTEX = 1
 const EDGE_VERTEX = 2
@@ -192,7 +192,7 @@ function smooth(m) {
 }
 
 
-export default function catmullClarkSubdivison(im) {
+export function catmullClarkSubdivision(im) {
     const om = quadSubdivision(im)
     smooth(om)
     return om

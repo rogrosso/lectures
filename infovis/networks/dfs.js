@@ -513,11 +513,12 @@ function dfs(nodes, neighbors, index) {
         const d = nodes[s].d
         if (nodes[s].v === false) {
             nodes[s].v = true
-            neighbors[s].forEach(n => {
-                if (!nodes[n].v) {
-                    nodes[n].p = s
-                    nodes[n].d = d + 1
-                    q.push(n)
+            neighbors[s].forEach(n_index => {
+                const n = nodes[n_index]
+                if (!n.v) {
+                    n.p = s
+                    n.d = d + 1
+                    q.push(n_index)
                 }
             })
         }

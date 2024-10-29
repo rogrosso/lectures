@@ -1,5 +1,5 @@
 //import { keyGen } from "../../common/utilities.js"
-import halfedgeFactory from "../../common/halfedge.js"
+import { halfedgeFactory } from "../../common/halfedge.js"
 
 const OLD_VERTEX = 1
 const NEW_VERTEX = 2
@@ -167,7 +167,7 @@ function smooth(om, im) {
     }
     return om
 }
-export default function sqrt3Subdivision(im) {
+export function sqrt3Subdivision(im) {
     if (im.nrSubdivisions === undefined) {
         im.nrSubdivisions = 0    
     }

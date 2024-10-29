@@ -10,15 +10,16 @@
  * contains the eigenvectors as columns. The eigenvalues can be sorted from smallest to largest.
  * @returns {Object} eigenvalues and eigenvectors object
  */
-export default function jacobiEigenvalueFactory() {
+export function jacobiEigenvalueFactory() {
     let A_ = undefined
     let U_ = undefined
     let l_ = undefined
     let V_ = undefined
     let n = 0
     let eps = 1e-12
-    let maxIter = 1000 // maximum number of iterations
-    let flag = true // true if the eigenvalues are sorted
+    let maxIter = 100 // maximum number of iterations
+    let sort_ = 'desc' // true if the eigenvalues are sorted
+    
     /**
      * Find pair of indices p and q such that |A[p][q]| is maximal
      * @returns {Object} object with indices p and q
@@ -46,8 +47,10 @@ export default function jacobiEigenvalueFactory() {
         for (let i = 0; i < n; i++) {
             l.push({ index: i, value: A_[i][i] })
         }
-        if (flag) {
+        if (sort_ === 'asc') {
             l.sort((a, b) => a.value - b.value)
+        } else if (sort_ === 'desc') {
+            l.sort((a, b) => b.value - a.value)
         }
         for (let i = 0; i < n; i++) {
             l_[i] = l[i].value
@@ -90,11 +93,12 @@ export default function jacobiEigenvalueFactory() {
                 }
             }
             if (S < eps) {
-                sortEigenvalues()
-                //console.log(`jacobi: iter=${iter}`)
+                if (sort_ !== 'unsorted') sortEigenvalues()
                 return {l: l_, V: V_}
             } 
         }
+        // if you reach this point, the algorithm did not converge
+        throw new Error(`Jacobi algorithm did not converge in ${maxIter} iterations`)
     }
     return {
         jacobi(A) {
@@ -104,9 +108,10 @@ export default function jacobiEigenvalueFactory() {
             for (let i = 0; i < n; i++) U_[i][i] = 1
             return solve()
         },
-        sort(f) { // if f is true, the eigenvalues are sorted
-            if (f === true) flag = true 
-            else if (f === false) flag = false 
+        set sortOrder(f) { 
+            if (f === 'asc' || f === 'desc' || f === 'unsorted') {
+                sortFlag = f
+            }
         }
     }
 }

@@ -6,9 +6,9 @@
  *  3. the distance metric is the euclidean distance.
  */
 
-import binaryHeapFactory from "./binaryHeap.js"
+import { binaryHeapFactory } from "./binaryHeap.js"
 
-export default function kdTreeFactory(points_) {
+export function kdTreeFactory(points_) {
     const nodeFactory = (index, dimension, parent) => ({
         index,
         dimension,

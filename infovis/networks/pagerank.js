@@ -244,7 +244,7 @@ async function drawAll(url) {
         })
         .on("mousemove", function (event, d) {
             const pos = d3.pointer(event)
-            mouseMove(divTooltip, d.name, {
+            mouseMove(divTooltip, d, {
                 x: event.pageX,
                 y: event.pageY
             })
@@ -438,10 +438,11 @@ async function drawAll(url) {
     function mouseOver(tooltip) {
         tooltip.style("display", "inline-block")
     }
-    function mouseMove(tooltip, name, pos) {
+    function mouseMove(tooltip, d, pos) {
+        const text = d.name + '<br>' + 'degree: ' + d.degree + '<br>' + 'PageRank: ' + d.c.toFixed(4)
         const { x, y } = pos
         tooltip
-            .html(name)
+            .html(text)
             .style("left", `${x + 10}px`)
             .style("top", `${y}px`)
     }

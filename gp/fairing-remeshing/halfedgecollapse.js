@@ -5,8 +5,8 @@ import GUI from "../../contrib/lil-gui.module.min.js"
 import { readOFF, readObj } from "../common/utilities.js"
 import { dot, cross, norm, norm2, normalize, normal } from "../../common/utilities.js"
 //import { renderBuffers } from "../../common/renderBuffers.js"
-import halfedgeFactory from "../../common/halfedge.js"
-import binaryHeapFactory  from "../../common/binaryHeap.js"
+import { halfedgeFactory } from "../../common/halfedge.js"
+import { binaryHeapFactory }  from "../../common/binaryHeap.js"
 
 // main
 const bunnyUrl = "../data/bunny_noBnd.off"

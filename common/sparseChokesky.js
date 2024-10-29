@@ -11,7 +11,7 @@
  * 3. The function factorization2() implements the algorithm presented in the book "Numerische Mathematik 1" for the numeric factorization.
  * @returns a sparse Cholesky factorization object
  */
-export default function sparseCholeskyFactory2() {
+export function sparseCholeskyFactory() {
     let A = undefined
     let n = 0
     let L = undefined

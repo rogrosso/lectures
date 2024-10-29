@@ -6,7 +6,7 @@
  * Numerische Mathematik 
  * 7., überarbeitete Auflage, 2009
  */
-export default function choleskyFactory() {
+export function choleskyFactory() {
     let n = 0
     let L = undefined
     function cholesky(A) {

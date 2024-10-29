@@ -44,7 +44,7 @@ async function drawAll(url1, url2) {
     ]
     let dataSel = "test01"
     let algSel = "dijkstra"
-    let traversal = dijkstra
+    let traversal = "dijkstra"
     let network = test01
 
     const dijkId = "dijkstra-traversal-div"
@@ -178,7 +178,7 @@ async function drawAll(url1, url2) {
         const iw = width - margin.left - margin.right
         const ih = height - margin.top - margin.bottom
         const center = { x: margin.left + iw / 2, y: margin.top + ih / 2 }
-        const { nodes, edges, neighbors } = network
+        const { nodes, edges, neighbors, weights } = network
         const sourceAccessor = (l) => l.source
         const targetAccessor = (l) => l.target
         //return
@@ -247,7 +247,7 @@ async function drawAll(url1, url2) {
             })
             .on("mousemove", function (event, d) {
                 const pos = d3.pointer(event)
-                mouseMove(divTooltip, d.name, {
+                mouseMove(divTooltip, d, {
                     x: event.pageX,
                     y: event.pageY,
                 })
@@ -262,6 +262,7 @@ async function drawAll(url1, url2) {
                     nodes,
                     edges,
                     neighbors,
+                    weights,
                     colorScale,
                     sourceAccessor,
                     targetAccessor,
@@ -281,10 +282,11 @@ async function drawAll(url1, url2) {
     function mouseOver(tooltip) {
         tooltip.style("display", "inline-block")
     }
-    function mouseMove(tooltip, name, pos) {
+    function mouseMove(tooltip, d, pos) {
+        const text = "node " + d.name + "<br>" + "distance: " + d.d
         const { x, y } = pos
         tooltip
-            .html(name)
+            .html(text)
             .style("left", `${x + 10}px`)
             .style("top", `${y}px`)
     }
@@ -305,8 +307,10 @@ async function drawAll(url1, url2) {
                 break
             default: {
                 algSel = event
-                if (event === "dijkstra") traversal = dijkstra
-                else traversal = bfs
+                // this is not nice
+                //if (event === "dijkstra") traversal = dijkstra
+                //else traversal = bfs
+                traversal = event 
             }
         }
         draw(network, drawConfig)
@@ -318,6 +322,7 @@ async function drawAll(url1, url2) {
         nodes,
         edges,
         neighbors,
+        weights,
         colorScale,
         sourceAccessor,
         targetAccessor,
@@ -325,7 +330,12 @@ async function drawAll(url1, url2) {
         event,
         d
     ) {
-        searchAlg(nodes, neighbors, d.index)
+        if (searchAlg === undefined) return
+        else if (searchAlg === "dijkstra") {
+            dijkstra(nodes, neighbors, weights, d.index)
+        } else if (searchAlg === "bfs") {
+            bfs(nodes, neighbors, d.index)
+        }
         clearTimeouts()
         event.stopPropagation()
         const s_ = new Set()
@@ -397,7 +407,7 @@ async function drawAll(url1, url2) {
 }
 const cText = `
 // Dijkstra: Single-source shortest path with backtracing
-function dijkstra(nodes, neighbors, index) {
+function dijkstra(nodes, neighbors, weights, index) {
     const pQ = binaryHeapFactory( n => n.d )
     nodes.forEach(n => {
       n.d = Infinity
@@ -409,12 +419,14 @@ function dijkstra(nodes, neighbors, index) {
     while (!pQ.empty()) {
       const s = pQ.pop()
       const d = s.d
-      neighbors[s.index].forEach(e => {
-        const n = nodes[e.index]
-        if (d + e.weight < n.d) {
+      const n_weights = weights[s.index]
+      neighbors[s.index].forEach((n_index, i) => {
+        const n = nodes[n_index]
+        const weight = n_weights[i] 
+        if (d + weight < n.d) {
             // update this element
             n.p = s.index
-            n.d = d + e.weight
+            n.d = d + weight
             pQ.update(n)
         }
       })

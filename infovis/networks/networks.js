@@ -1,4 +1,4 @@
-import binaryHeapFactory from '../../common/binaryHeap.js'
+import { binaryHeapFactory } from '../../common/binaryHeap.js'
 import { keyCantor as keyGen } from '../../common/utilities.js'
 import { easyRandom } from '../../common/random.js'
 
@@ -21,13 +21,21 @@ export function setNetwork(network) {
     }
     // compute node neighbors
     network.neighbors = new Array(nodes.length).fill(null).map( e => []) 
-    const {neighbors} = network
+    network.weights = new Array(nodes.length).fill(null).map( e => [])
+    const {neighbors, weights} = network
     // at this point, edges are unique
     for (let e of edges) {
         const s = e.source
         const t = e.target
-        neighbors[s].push({ index: t, weight: e.weight })
-        neighbors[t].push({ index: s, weight: e.weight })
+        neighbors[s].push(t) // { index: t, weight: e.weight })
+        neighbors[t].push(s) // ({ index: s, weight: e.weight })
+        if (e.hasOwnProperty('weight')) {
+            weights[s].push(e.weight)
+            weights[t].push(e.weight)
+        } else {
+            weights[s].push(1)
+            weights[t].push(1)
+        }
     }
     for (let i = 0; i < neighbors.length; i++) {
         neighbors[i] = Array.from(neighbors[i])
@@ -81,18 +89,49 @@ export function bfs(nodes, neighbors, index) {
     while (q.length > 0) {
         const s = q.shift()
         const d = nodes[s].d
-        neighbors[s].forEach((e) => {
-            const n = nodes[e.index]
+        neighbors[s].forEach((n_index) => {
+            const n = nodes[n_index]
             if (n.v === false) {
                 n.v = true
                 n.p = s
                 n.d = d + 1
-                q.push(n.index)
+                q.push(n_index)
             }
         })
     } // step()
 }
 
+// Modified BFS: breadth-first search with backtracking to count the 
+// number of shortest paths from the root node to all other nodes
+export function bfsCount(nodes, neighbors, index) {
+    nodes.forEach((n) => {
+        n.v = false
+        n.d = Number.MAX_VALUE
+        n.p = -2
+        n.n = 0
+    })
+    nodes[index].d = 0
+    nodes[index].v = true
+    nodes[index].p = -1
+    nodes[index].n = 1
+    const q = [index] // queue
+    while (q.length > 0) {
+        const s = q.shift()
+        const d = nodes[s].d
+        neighbors[s].forEach((n_index) => {
+            const n = nodes[n_index]
+            if (n.v === false) {
+                n.v = true
+                n.p = s
+                n.d = d + 1
+                n.n = nodes[s].n
+                q.push(n_index)
+            } else if (n.d === d + 1) {
+                n.n += nodes[s].n
+            }
+        })
+    } // step()
+}
 // DFS: depth-first search with backtracking
 export function dfs(nodes, neighbors, index) {
     nodes.forEach(n => {
@@ -109,11 +148,12 @@ export function dfs(nodes, neighbors, index) {
         const d = nodes[s].d
         if (nodes[s].v === false) {
             nodes[s].v = true
-            neighbors[s].forEach(n => {
-                if (!nodes[n.index].v) {
-                    nodes[n.index].p = s
-                    nodes[n.index].d = d + 1
-                    q.push(n.index)
+            neighbors[s].forEach(n_index => {
+                const n = nodes[n_index]
+                if (!n.v) {
+                    n.p = s
+                    n.d = d + 1
+                    q.push(n_index)
                 }
             })
         }
@@ -121,7 +161,7 @@ export function dfs(nodes, neighbors, index) {
     nodes[index].p = -1 // this is the root node
 }
 
-export function dijkstra(nodes, neighbors, index) {
+export function dijkstra(nodes, neighbors, weights, index) {
     const pQ = binaryHeapFactory( n => n.d )
     nodes.forEach(n => {
       n.d = Infinity
@@ -133,12 +173,14 @@ export function dijkstra(nodes, neighbors, index) {
     while (!pQ.empty()) {
       const s = pQ.pop()
       const d = s.d
-      neighbors[s.index].forEach(e => {
-        const n = nodes[e.index]
-        if (d + e.weight < n.d) {
+      const n_weights = weights[s.index]
+      neighbors[s.index].forEach((n_index, i) => {
+        const n = nodes[n_index]
+        const weight = n_weights[i] 
+        if (d + weight < n.d) {
             // update this element
             n.p = s.index
-            n.d = d + e.weight
+            n.d = d + weight //e.weight
             pQ.update(n)
         }
       })

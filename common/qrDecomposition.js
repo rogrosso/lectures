@@ -8,7 +8,7 @@
  * 3. is commonly used to solve the least squares problem
  * @returns {Object} QR decomposition object
  */
-export default function qrDecompositionFactory() {
+export function qrDecompositionFactory() {
     let N = 0
     let n = 0
     let U_ = undefined
@@ -100,17 +100,15 @@ export default function qrDecompositionFactory() {
         return true
     } // solve()
     return {
-        decomposition(A) {
+        decomposition: (A) => {
             N = A.length
             n = A[0].length
             U_ = new Array(N).fill(0).map((e, i) => [...A[i]])
             t_ = new Array(n).fill(0)
             householder()
         },
-        getQR() {
-            return qr_()
-        },
-        solve(d) {
+        getQR: () => qr_(),
+        solve: (d) => {
             const x = new Array(n).fill(0)
             const d_ = Array.from(d)
             if (solve_(d_, x)) {

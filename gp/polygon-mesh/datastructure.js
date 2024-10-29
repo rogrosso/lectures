@@ -3,7 +3,7 @@ import { OrbitControls } from "../../contrib/OrbitControls.js"
 import GUI from "../../contrib/lil-gui.module.min.js"
 
 import { readTextFile } from "../common/utilities.js"
-import halfedgeFactory from "../../common/halfedge.js"
+import { halfedgeFactory } from "../../common/halfedge.js"
 import { renderBuffers, normalizeMesh } from "../../common/renderBuffers.js"
 
 const urlBunny = '../data/bunny_noBnd.off'

@@ -6,7 +6,7 @@
  * the same coefficient matrix but different righ-hand sides.
  * @returns {Object} LU-decompotion {lu, solve} object
  */
-export default function luDecompositionFactory() {
+export function luDecompositionFactory() {
     let n = 0      // matrix size
     let pIndex = 0 // pivot index
     let R = undefined

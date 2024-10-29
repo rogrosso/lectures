@@ -7,7 +7,7 @@ import {
     isObject
 } from './utilities.js'
 
-export default function halfedgeFactory(fList, vList) {
+export function halfedgeFactory(fList, vList) {
     const v_array = []
     const n_array = []
     const f_array = []
@@ -635,5 +635,4 @@ export default function halfedgeFactory(fList, vList) {
         h: function(i) { return h_array[i] },
         e: function(i) { return e_array[i] }
     }
-
 }

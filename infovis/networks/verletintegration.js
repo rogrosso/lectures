@@ -85,28 +85,22 @@ async function drawAll(url) {
         const h = 0.008
         for (let n of nodes) {
             // position Verlet
-            const xprev = n.xprev
-            const yprev = n.yprev
-            n.xprev = n.x
-            n.yprev = n.y
             const fx = disp[n.index].x - w * n.vx + 0.001 * jiggle() // add some noise
             const fy = disp[n.index].y - w * n.vy + 0.001 * jiggle() // add some noise
-            const dx = n.x - xprev + fx * h * h
-            const dy = n.y - yprev + fy * h * h
+            const dx = n.x - n.xprev + fx * h * h
+            const dy = n.y - n.yprev + fy * h * h
+            n.xprev = n.x
+            n.yprev = n.y
             n.x = n.x + dx
             n.y = n.y + dy
-            n.vx = (n.x - n.xprev) / h
-            n.vy = (n.y - n.yprev) / h
+            n.vx = dx / h //(n.x - n.xprev) / h
+            n.vy = dy / h // (n.y - n.yprev) / h
         }
-        //
-        //fixPositions(nodes, bbox)
     }
 
     function velocityVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
-        // compute conservative forces
-        conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
         // update position, velocity and acceleration
-        const w = damping
+        const w = damping + 1
         const h = 0.005
         for (let n of nodes) {
             // keep position for position-Verlet
@@ -123,6 +117,9 @@ async function drawAll(url) {
                 0.001 * jiggle() // add some noise
             n.x = n.x + dx
             n.y = n.y + dy
+        }
+        conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+        for (let n of nodes) {
             // conservative force
             const fx = disp[n.index].x
             const fy = disp[n.index].y
@@ -139,8 +136,6 @@ async function drawAll(url) {
             n.fx = fx
             n.fy = fy
         }
-        //
-        //fixPositions(nodes, bbox)
     }
     let step = positionVerlet
 
@@ -478,52 +473,57 @@ function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
     const h = 0.008
     for (let n of nodes) {
         // position Verlet
-        const xprev = n.xprev
-        const yprev = n.yprev
-        n.xprev = n.x
-        n.yprev = n.y
         const fx = disp[n.index].x - w * n.vx + 0.001 * jiggle() // add some noise
         const fy = disp[n.index].y - w * n.vy + 0.001 * jiggle() // add some noise
-        const dx = (n.x - xprev) + fx * h * h
-        const dy = (n.y - yprev) + fy * h * h
-        n.x = n.x + dx 
-        n.y = n.y + dy 
-        n.vx = (n.x - n.xprev) / h
-        n.vy = (n.y - n.yprev) / h
-    }    
-    // 
-    fixPositions(nodes, bbox)
+        const dx = n.x - n.xprev + fx * h * h
+        const dy = n.y - n.yprev + fy * h * h
+        n.xprev = n.x
+        n.yprev = n.y
+        n.x = n.x + dx
+        n.y = n.y + dy
+        n.vx = dx / h // (n.x - n.xprev) / h
+        n.vy = dy / h //(n.y - n.yprev) / h
+    } 
 }
 
 function velocityVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) { 
-    // compute conservative forces
-    conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
     // update position, velocity and acceleration
-    const w = 3
+    const w = damping + 1
     const h = 0.005
     for (let n of nodes) {
         // keep position for position-Verlet
-        n.xprev = n.x 
+        n.xprev = n.x
         n.yprev = n.y
         // update position
-        const dx = n.vx * h + 1/2 * (n.fx - w * n.vx) * h**2 + 0.001 * jiggle() // add some noise
-        const dy = n.vy * h + 1/2 * (n.fy - w * n.vy) * h**2 + 0.001 * jiggle() // add some noise
+        const dx =
+            n.vx * h +
+            (1 / 2) * (n.fx - w * n.vx) * h ** 2 +
+            0.001 * jiggle() // add some noise
+        const dy =
+            n.vy * h +
+            (1 / 2) * (n.fy - w * n.vy) * h ** 2 +
+            0.001 * jiggle() // add some noise
         n.x = n.x + dx
-        n.y = n.y + dy 
+        n.y = n.y + dy
+    }
+    conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+    for (let n of nodes) {
         // conservative force
         const fx = disp[n.index].x
         const fy = disp[n.index].y
         // update velocity
-        const vx = (n.vx * (1 - w*h/2) + 1/2 * (fx + n.fx) * h) / (1 + w*h/2)
-        const vy = (n.vy * (1 - w*h/2) + 1/2 * (fy + n.fy) * h) / (1 + w*h/2)
+        const vx =
+            (n.vx * (1 - (w * h) / 2) + (1 / 2) * (fx + n.fx) * h) /
+            (1 + (w * h) / 2)
+        const vy =
+            (n.vy * (1 - (w * h) / 2) + (1 / 2) * (fy + n.fy) * h) /
+            (1 + (w * h) / 2)
         // keep data for next time step
         n.vx = vx
         n.vy = vy
         n.fx = fx
         n.fy = fy
     }
-    // 
-    fixPositions(nodes, bbox)
 }
 `
 const hlPre = d3.select("#hl-code").append("pre")

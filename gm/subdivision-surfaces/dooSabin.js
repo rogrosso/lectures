@@ -7,9 +7,9 @@ import GUI from '../../contrib/lil-gui.module.min.js'
 //import quadPawn from 'quadPawn' assert{ type: 'json' }
 //import quadToroidalTetra from 'quadToroidalTetra' assert{ type: 'json' }
 
-import halfedgeFactory from '../../common/halfedge.js'
+import { halfedgeFactory } from '../../common/halfedge.js'
 import { renderBuffers, normalizeMesh, boundingBox } from '../../common/renderBuffers.js'
-import dooSabinSubdivision from './dooSabinSubdivision.js'
+import { dooSabinSubdivision } from './dooSabinSubdivision.js'
 
 const url1 = "../data/hybridCube.json"
 const url2 = "../data/quadCube.json"

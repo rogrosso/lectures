@@ -17,416 +17,63 @@ import {
 import { betweenness } from "./centrality.js"
 import { louvain } from "./communities.js"
 
-/**
- * This example was taken from https://github.com/upphiminn/jLouvain
- */
-const node_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-    28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55,
-    56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73
-  ];
-const edge_data = [{
-    "source": 5,
-    "target": 0,
-    "weight": 1.2857142857142856
-  }, {
-    "source": 8,
-    "target": 5,
-    "weight": 0.125
-  }, {
-    "source": 10,
-    "target": 5,
-    "weight": 0.125
-  }, {
-    "source": 14,
-    "target": 33,
-    "weight": 0.2
-  }, {
-    "source": 16,
-    "target": 17,
-    "weight": 0.5
-  }, {
-    "source": 16,
-    "target": 57,
-    "weight": 0.2
-  }, {
-    "source": 17,
-    "target": 16,
-    "weight": 0.5
-  }, {
-    "source": 17,
-    "target": 0,
-    "weight": 0.25
-  }, {
-    "source": 20,
-    "target": 38,
-    "weight": 0.25
-  }, {
-    "source": 20,
-    "target": 36,
-    "weight": 0.8333333333333333
-  }, {
-    "source": 29,
-    "target": 17,
-    "weight": 0.5
-  }, {
-    "source": 32,
-    "target": 17,
-    "weight": 0.25
-  }, {
-    "source": 33,
-    "target": 2,
-    "weight": 0.3333333333333333
-  }, {
-    "source": 33,
-    "target": 4,
-    "weight": 0.2
-  }, {
-    "source": 34,
-    "target": 35,
-    "weight": 0.75
-  }, {
-    "source": 34,
-    "target": 58,
-    "weight": 0.16666666666666666
-  }, {
-    "source": 34,
-    "target": 9,
-    "weight": 0.5
-  }, {
-    "source": 35,
-    "target": 34,
-    "weight": 0.75
-  }, {
-    "source": 36,
-    "target": 35,
-    "weight": 0.3333333333333333
-  }, {
-    "source": 36,
-    "target": 57,
-    "weight": 0.2
-  }, {
-    "source": 38,
-    "target": 0,
-    "weight": 0.5
-  }, {
-    "source": 38,
-    "target": 20,
-    "weight": 0.25
-  }, {
-    "source": 38,
-    "target": 58,
-    "weight": 0.16666666666666666
-  }, {
-    "source": 37,
-    "target": 35,
-    "weight": 0.5833333333333333
-  }, {
-    "source": 39,
-    "target": 7,
-    "weight": 0.2
-  }, {
-    "source": 40,
-    "target": 0,
-    "weight": 0.5
-  }, {
-    "source": 41,
-    "target": 21,
-    "weight": 0.1111111111111111
-  }, {
-    "source": 41,
-    "target": 52,
-    "weight": 0.5
-  }, {
-    "source": 42,
-    "target": 22,
-    "weight": 0.5
-  }, {
-    "source": 43,
-    "target": 15,
-    "weight": 0.9663059163059161
-  }, {
-    "source": 44,
-    "target": 43,
-    "weight": 0.39285714285714285
-  }, {
-    "source": 45,
-    "target": 14,
-    "weight": 0.16666666666666666
-  }, {
-    "source": 45,
-    "target": 58,
-    "weight": 0.41666666666666663
-  }, {
-    "source": 46,
-    "target": 47,
-    "weight": 0.5095238095238095
-  }, {
-    "source": 47,
-    "target": 46,
-    "weight": 0.5095238095238095
-  }, {
-    "source": 48,
-    "target": 46,
-    "weight": 1.4773809523809522
-  }, {
-    "source": 49,
-    "target": 30,
-    "weight": 0.4583333333333333
-  }, {
-    "source": 50,
-    "target": 8,
-    "weight": 0.14285714285714285
-  }, {
-    "source": 51,
-    "target": 8,
-    "weight": 0.14285714285714285
-  }, {
-    "source": 51,
-    "target": 0,
-    "weight": 0.2
-  }, {
-    "source": 52,
-    "target": 41,
-    "weight": 0.5
-  }, {
-    "source": 53,
-    "target": 20,
-    "weight": 0.25
-  }, {
-    "source": 54,
-    "target": 20,
-    "weight": 0.25
-  }, {
-    "source": 56,
-    "target": 54,
-    "weight": 0.3333333333333333
-  }, {
-    "source": 57,
-    "target": 58,
-    "weight": 1.6666666666666665
-  }, {
-    "source": 58,
-    "target": 0,
-    "weight": 1.3666666666666665
-  }, {
-    "source": 59,
-    "target": 0,
-    "weight": 0.2
-  }, {
-    "source": 60,
-    "target": 28,
-    "weight": 0.16666666666666666
-  }, {
-    "source": 61,
-    "target": 60,
-    "weight": 0.16666666666666666
-  }, {
-    "source": 55,
-    "target": 9,
-    "weight": 1.3095238095238095
-  }, {
-    "source": 62,
-    "target": 9,
-    "weight": 0.39285714285714285
-  }, {
-    "source": 63,
-    "target": 58,
-    "weight": 0.5
-  }, {
-    "source": 64,
-    "target": 57,
-    "weight": 0.2
-  }, {
-    "source": 65,
-    "target": 64,
-    "weight": 0.3333333333333333
-  }, {
-    "source": 66,
-    "target": 15,
-    "weight": 0.25
-  }, {
-    "source": 67,
-    "target": 15,
-    "weight": 2.2
-  }, {
-    "source": 67,
-    "target": 20,
-    "weight": 0.25
-  }, {
-    "source": 68,
-    "target": 15,
-    "weight": 0.25
-  }, {
-    "source": 69,
-    "target": 22,
-    "weight": 0.6984126984126984
-  }, {
-    "source": 70,
-    "target": 9,
-    "weight": 0.14285714285714285
-  }, {
-    "source": 70,
-    "target": 22,
-    "weight": 0.3333333333333333
-  }, {
-    "source": 71,
-    "target": 14,
-    "weight": 0.3333333333333333
-  }, {
-    "source": 72,
-    "target": 71,
-    "weight": 0.3333333333333333
-  }, {
-    "source": 73,
-    "target": 3,
-    "weight": 0.2222222222222222
-  }];
 
-function testNetwork01(node_data, edge_data) {
-    const nodes = []
-    for (let n of node_data) {
-        nodes.push({
-            index: n,
-            name: n.toString(),
-            x: 0,
-            y: 0,
-            xprev: 0,
-            yprev: 0,
-            vx: 0,
-            vy: 0,
-            fx: 0,
-            fy: 0,
-            r: 0,
-            c: 0,
-            degree: 0
-        })
-    }
-    const edges = []
-    for (let e of edge_data) {
-        edges.push({
-            source: e.source,
-            target: e.target,
-            value: e.weight,
-            key: keyCantor(e.source, e.target),
-            weight: e.weight
-        })
-    }
-    return {
-        nodes,
-        links: edges
-    }
-}
-
-function testNetwork02() {
-    const nodes = []
-    for (let i = 0; i < 16; i++) {
-        nodes.push(   
-            { 
-                index: i, 
-                name: i.toString(), 
-                x: 0, 
-                y: 0, 
-                xprev: 0, 
-                yprev: 0, 
-                vx: 0, 
-                vy: 0, 
-                fx: 0, 
-                fy: 0, 
-                r: 0, 
-                c: 0, 
-                degree: 0 
-            }
-        )
-    }
-    const edges = [
-        { source: 0, target: 2, value: 1 },
-        { source: 0, target: 2, value: 1 },
-        { source: 0, target: 2, value: 1 },
-        { source: 0, target: 3, value: 1 },
-        { source: 0, target: 4, value: 1 },
-        { source: 0, target: 5, value: 1 },
-        { source: 1, target: 2, value: 1 },
-        { source: 1, target: 4, value: 1 },
-        { source: 1, target: 7, value: 1 },
-        { source: 2, target: 0, value: 1 },
-        { source: 2, target: 1, value: 1 },
-        { source: 2, target: 4, value: 1 },
-        { source: 2, target: 5, value: 1 },
-        { source: 2, target: 6, value: 1 },
-        { source: 3, target: 0, value: 1 },
-        { source: 3, target: 7, value: 1 },
-        { source: 4, target: 0, value: 1 },
-        { source: 4, target: 1, value: 1 },
-        { source: 4, target: 2, value: 1 },
-        { source: 4, target: 10, value: 1 },
-        { source: 5, target: 0, value: 1 },
-        { source: 5, target: 2, value: 1 },
-        { source: 5, target: 7, value: 1 },
-        { source: 5, target: 11, value: 1 },
-        { source: 6, target: 2, value: 1 },
-        { source: 6, target: 7, value: 1 },
-        { source: 6, target: 11, value: 1 },
-        { source: 7, target: 1, value: 1 },
-        { source: 7, target: 3, value: 1 },
-        { source: 7, target: 5, value: 1 },
-        { source: 7, target: 6, value: 1 },
-        { source: 8, target: 9, value: 1 },
-        { source: 8, target: 10, value: 1 },
-        { source: 8, target: 11, value: 1 },
-        { source: 8, target: 14, value: 1 },
-        { source: 8, target: 15, value: 1 },
-        { source: 9, target: 8, value: 1 },
-        { source: 9, target: 12, value: 1 },
-        { source: 9, target: 14, value: 1 },
-        { source: 10, target: 4, value: 1 },
-        { source: 10, target: 8, value: 1 },
-        { source: 10, target: 11, value: 1 },
-        { source: 10, target: 12, value: 1 },
-        { source: 10, target: 13, value: 1 },
-        { source: 10, target: 14, value: 1 },
-        { source: 10, target: 14, value: 1 },
-        { source: 11, target: 5, value: 1 },
-        { source: 11, target: 6, value: 1 },
-        { source: 11, target: 8, value: 1 },
-        { source: 11, target: 10, value: 1 },
-        { source: 11, target: 13, value: 1 },
-        { source: 12, target: 9, value: 1 },
-        { source: 12, target: 10, value: 1 },
-        { source: 13, target: 10, value: 1 },
-        { source: 13, target: 11, value: 1 },
-        { source: 14, target: 8, value: 1 },
-        { source: 14, target: 9, value: 1 },
-        { source: 14, target: 10, value: 1 },
-        { source: 15, target: 8, value: 1 },
-    ]
-    for (let e of edges) e.weight = 1
-    return {
-        nodes,
-        links: edges
-    }
-}
-function testNetwork03(celegans) {
-    const { nodes, edges: links } = celegans
-    for (let e of links) e.weight = 1
-    for (let n of nodes) {
-        n.name = n.label
-    }
-    return {
-        nodes,
-        links
-    }
-}
 const url1 = "../data/lesmiserables.json"
 const url2 = "../data/celegans_modularity.json"
-drawAll(url1, url2)
-async function drawAll(url) {
+const url3 = "../data/louvain_unweighted.json"
+const url4 = "../data/louvain_weighted.json"
+drawAll(url1, url2, url3, url4)
+async function drawAll(url1, url2, url3, url4) {
     // global variables
-    const dampConst = 100
-    let damping = dampConst
-    // draw
-    const lesmiserables = await d3.json(url)
-    for (let e of lesmiserables.links) e.weight = 1
+    let dataset = "Les Miserables"
+    let force = "Fruchterman-Reingold"
+    let nodeG = undefined // group of nodes in svg
+    let linkG = undefined // group of links in svg
+    let netwG = undefined // group of network in svg
+    let network = undefined // current network
+    // rendering parameters
+    const beta = 0.2
+    const minNodeRadius = 4
+    const maxNodeRadius = 16
+    const nodeStrokeWidth = 1.5
+    const selNodeStrokeWidth = 3
+    const nodeStrokeColor = "#ffffff"
+    const selNodeStrokeColor = "#867979"
+    const offsetX = 7
+    const offsetY = 7
+
+    // collenct data
+    const lesmiserables = await d3.json(url1)
     const celegans = await d3.json(url2)
+    const louvain_unweighted = await d3.json(url3)
+    const louvain_weighted = await d3.json(url4)
+    // prepare data
+    lesmiserables.edges = []
+    for (let i = 0; i < lesmiserables.links.length; i++) {
+        const e = lesmiserables.links[i]
+        e.weight = 1
+        lesmiserables.edges.push(e)
+    }
+    for (let e of celegans.edges) {
+        e.weight = 1
+    }
+    for (let n of celegans.nodes) {
+        n.name = n.label
+        delete n.label
+    }
+    for (let e of louvain_unweighted.edges) {
+        e.weight = 1
+    }
+    const louvain_un = []
+    for (let i = 0; i < louvain_unweighted.nodes.length; i++) {
+        louvain_un.push({ name: i.toString() })
+    }
+    louvain_unweighted.nodes = louvain_un
+    const louvain_w = [] 
+    for (let i = 0; i < louvain_weighted.nodes.length; i++) {
+        louvain_w.push({ name: i.toString() })
+    }
+    louvain_weighted.nodes = louvain_w
 
     // tooltip
     const divTooltip = genDivTooltip()
@@ -461,7 +108,7 @@ async function drawAll(url) {
             d.d = 0
         }
     }
-    function conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
+    function conservativeForces(K, Kc, Kg, cR, attractingForce, repulsiveForce, nodes, edges, bbox, disp) {
         initDisplacements(disp)
         // compute displacements from repelling forces
         const nrNodes = nodes.length
@@ -477,7 +124,7 @@ async function drawAll(url) {
         // collision force
         for (let i = 0; i < nrNodes; i++) {
             for (let j = i + 1; j < nrNodes; j++) {
-                collisionForce(Kc, beta, nodes, i, j, disp)
+                collisionForce(Kc, cR, nodes, i, j, disp)
             }
         }
         // apply a gravitational force
@@ -485,9 +132,18 @@ async function drawAll(url) {
             gravitationalForce(Kg, n, bbox, disp)
         })
     }
-    function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
+    function positionVerlet(physConfig, nodes, edges, bbox, disp) {
+        const {
+            K,
+            Kc,
+            Kg,
+            cR,
+            damping,
+            attractingForce,
+            repulsiveForce,
+        } = physConfig
         // compute conservative forces
-        conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+        conservativeForces(K, Kc, Kg, cR, attractingForce, repulsiveForce, nodes, edges, bbox, disp)
         // update position, velocity and acceleration
         const w = damping
         const h = 0.008
@@ -506,8 +162,6 @@ async function drawAll(url) {
             n.vx = (n.x - n.xprev) / h
             n.vy = (n.y - n.yprev) / h
         }
-        //
-        //fixPositions(nodes, bbox)
     }
 
     // ============================================================================
@@ -520,28 +174,22 @@ async function drawAll(url) {
         )
     }
     // drawing
-    const width = 500
-    const height = 500
-    const margin = { top: 5, bottom: 5, left: 5, right: 5 }
+    const width = 550
+    const height = 550
+    const margin = { top: 10, bottom: 10, left: 10, right: 10 }
     const iW = width - margin.left - margin.right
     const iH = height - margin.top - margin.bottom
-    // rendering parameters
-    let netwG = undefined
-    const beta = 0.2
-    const minNodeRadius = 4
-    const maxNodeRadius = 16
-    const nodeStrokeWidth = 1.5
-    const selNodeStrokeWidth = 3
-    const nodeStrokeColor = "#ffffff"
-    const selNodeStrokeColor = "#867979"
-    const offsetX = 7
-    const offsetY = 7
+    // init networks to this size
+    initNetwork(lesmiserables, iW, iH)
+    initNetwork(celegans, iW, iH)
+    initNetwork(louvain_unweighted, iW, iH)
+    initNetwork(louvain_weighted, iW, iH)
 
     // menu
     const menuCanvas = d3.select("#verlet-integration-layout")
     const svgCanvas = d3.select("#verlet-integration-svg")
     // gui
-    const dKeys = ['Les Miserables', 'celegans', 'test01', 'test02']
+    const dKeys = ['Les Miserables', 'C. Elegans', 'test01', 'test02']
     let dSel = "Les Miserables"
     const dId = "data-menu"
     const dDiv = menuCanvas.append("div").attr("class", "cell").attr("id", dId)
@@ -576,78 +224,92 @@ async function drawAll(url) {
     guiConfig.handler = centralityHandler
     dropdown(guiConfig)
 
+    // force-directed layout configuration
+    const dampConst = 100
+    const physConfig = {
+        damping: undefined, // friction force
+        force: undefined, // force-directed layout
+        C: 0.5, //0.45, // Fruchterman-Reingold constant
+        Kf: undefined, // Fructerman-Reingold constant
+        Ka: undefined, // ForceAtlas
+        Kg: undefined, // gravitation
+        Kc: undefined, // collision 
+        K:  undefined, // general force constant
+        cR: undefined, // collision radius
+        attractingForce: null,
+        repulsiveForce: null
+    }
+    
     // data
-    let network = lesmiserables
-    const nodes = []
-    const edges = []
-    const disp = []
-    let { minDeg, maxDeg, minC, maxC, bbox, nr_g } = initNetwork(network, iW, iH, nodes, edges) 
-    setDisplacements(disp, nodes.length)
-    function setDisplacements(disp, nrNodes) {
-        disp.length = 0
-        for (let i = 0; i < nrNodes; i++) {
-            disp.push( { x: 0, y: 0, d: 0 } )
+    let { nodes, edges, disp, minDeg, maxDeg, minC, maxC, bbox, nr_g } = lesmiserables
+    physConfig.Kf = physConfig.C * Math.sqrt((width * height) / nodes.length)
+
+    function forceHandler(text, value) {
+        physConfig.damping = dampConst
+        if (value === "Fruchterman-Reingold") {
+            physConfig.attractingForce = attractingForceF
+            physConfig.repulsiveForce = repulsiveForceF
+            physConfig.Kg = 15
+            physConfig.Kc = 1200
+            physConfig.cR = 4
+            if (dataset === 'C. Elegans') {
+                physConfig.Kg = 1
+                physConfig.cR = 5
+                physConfig.Kc = 2500
+            }
+            physConfig.K = physConfig.Kf
+            physConfig.force = "Fruchterman-Reingold"
+        } else if (value === "ForceAtlas2") {
+            physConfig.attractingForce = attractingForceA
+            physConfig.repulsiveForce = repulsiveForceA
+            physConfig.Ka = 10//5
+            physConfig.Kg = 12
+            physConfig.Kc = 1000
+            physConfig.cR = 3
+            physConfig.force = "ForceAtlas2"
+            if (dataset === 'C. Elegans') {
+                physConfig.Kg = 60
+                physConfig.Ka = 2.5 //0.9
+                physConfig.Kc = 1000
+                physConfig.cR = 3
+            }
+            physConfig.K = physConfig.Ka
         }
     }
-
-    // Force directed layout
-    let force = 'Fruchterman-Reingold'
-    let C = 0.45 // 0.52 // 0.4537 // 3 // 0.399
-    let Kf = C * Math.sqrt((width * height) / nodes.length) // Fruchterman-Reindold
-    let Ka = 3.8 // ForceAtlas2
-    let KgF = 30 // 0.5
-    let KgA = 10 // 0.01
-    let Kg = KgF
-    let Kc = 1500 // 1500
-    let cRf = 4 // collision radius control Fruchterman-Reingold
-    let cRa = 2 // collision radius control ForceAtlas2
-    let K = Kf
-    let cR = cRf
-
     function dataHandler(text, value) {
-        damping = dampConst
-        C = 0.45
-        Ka = 3.8
-        KgF = 30
-        KgA = 10
-        Kc = 1500
-        cRf = 4
-        cRa = 2
-        if (value === "Les Miserables") {
-            network = lesmiserables
-        } else if (value === "celegans") {
-            C = 0.9
-            Ka = 1.5
-            KgF = 20
-            KgA = 10
-            Kc = 1000
-            cRf = 5
-            cRa = 2
-            network = testNetwork03(celegans)
-        } else if (value === "test01") {
-            network = testNetwork01(node_data, edge_data)
-        } else if (value === "test02") {
-            network = testNetwork02()
+        physConfig.damping = dampConst
+        dataset = value
+        switch(value) {
+            case "Les Miserables":
+                network = lesmiserables
+                break
+            case 'C. Elegans':
+                network = celegans
+                break
+            case 'test01':
+                network = louvain_unweighted
+                break
+            case 'test02':
+                network = louvain_weighted
+                break
         }
-        ( { minDeg, maxDeg, minC, maxC, bbox, nr_g } = initNetwork(network, iW, iH, nodes, edges) )
-        Kf = C * Math.sqrt((width * height) / nodes.length)
-        K = Kf
-        if (force === 'Fruchterman-Reingold') {
-            Kg = KgF
-            cR = cRf
-        } else if (force === 'ForceAtlas2') {
-            Kg = KgA
-            cR = cRa
-        }
-        //setDisplacements(disp, nodes.length)
-        disp.length = 0
-        for (let i = 0; i < nodes.length; i++) {
-            disp.push( { x: 0, y: 0, d: 0 } )
-        }
-        ({ nodeG, linkG} = updateNetwork(netwG, nodes, edges))
+        ( { nodes, edges, disp, minDeg, maxDeg, minC, maxC, bbox, nr_g } = network )
+        physConfig.Kf = physConfig.C * Math.sqrt((width * height) / nodes.length)
+        forceHandler(text, physConfig.force)
+        updateNetwork()
     }
+    function centralityHandler(text, value) {
+        if (value === "degree") {
+            for (let n of nodes) n.r = lerp([minDeg, maxDeg], [minNodeRadius, maxNodeRadius], n.degree)
+        } else if (value === "betweenness") { 
+            for (let n of nodes) n.r = lerp([minC, maxC], [minNodeRadius, maxNodeRadius], n.c)
+        }
+    }
+    // Init data
+    forceHandler("layout", "Fruchterman-Reingold")
+    network = lesmiserables
 
-    // D3
+    // Init SVG
     const svg = svgCanvas
         .append("svg")
         .attr("class", "svg")
@@ -663,22 +325,18 @@ async function drawAll(url) {
         .attr("class", "force-directed-layout-group")
         .attr("transform", `translate(${width / 2}, ${height / 2})`)
 
-    function centralityHandler(text, value) {
-        if (value === "degree") {
-            for (let n of nodes) n.r = lerp([minDeg, maxDeg], [minNodeRadius, maxNodeRadius], n.degree)
-        } else if (value === "betweenness") { 
-            for (let n of nodes) n.r = lerp([minC, maxC], [minNodeRadius, maxNodeRadius], n.c)
-        }
-    }
 
     // d3
     // line generator
     const lineGenerator = d3.line().curve(d3.curveBasis)
-    let nodeG, linkG
-    ( {nodeG, linkG } = updateNetwork(netwG, nodes, edges) )
-    function updateNetwork(selection, nodes, edges) {
+    // draw and animate
+    updateNetwork() 
+    animate()
+
+    // functions
+    function updateNetwork() {
         // can be done better, but for now this is simple
-        selection.selectAll("g").remove()
+        netwG.selectAll("g").remove()
         // color scale
         // collects groups of nodes
         const gSet = new Set()
@@ -693,7 +351,7 @@ async function drawAll(url) {
             .domain(Array.from(gSet).sort())
             .range(colors)
         // draw edges
-        const linkG = selection
+        linkG = netwG
             .append("g")
             .attr("stroke", "#999")
             .attr("stroke-opacity", 0.6)
@@ -722,7 +380,7 @@ async function drawAll(url) {
             .attr("fill", "none")
             .attr("opacity", 0.6)
         // draw nodes
-        const nodeG = selection
+        nodeG = netwG
             .append("g")
             .attr("stroke", nodeStrokeColor)
             .attr("stroke-width", nodeStrokeWidth)
@@ -761,14 +419,9 @@ async function drawAll(url) {
                     .on("drag", dragged)
                     .on("end", dragend)
             )
-
-        return {
-            nodeG,
-            linkG
-        }
     }
     function dragstarted(event, d) {
-        damping = dampConst
+        physConfig.damping = dampConst
         const x = event.sourceEvent.pageX + offsetX
         const y = event.sourceEvent.pageY - offsetY
         divTooltip
@@ -781,6 +434,7 @@ async function drawAll(url) {
             .attr("stroke-width", selNodeStrokeWidth)
     }
     function dragged(event, d) {
+        physConfig.damping = dampConst
         const x = event.sourceEvent.pageX + offsetX
         const y = event.sourceEvent.pageY - offsetY
         divTooltip.html(d.name).style("left", `${x}px`).style("top", `${y}px`)
@@ -793,32 +447,10 @@ async function drawAll(url) {
             .attr("stroke", nodeStrokeColor)
             .attr("stroke-width", nodeStrokeWidth)
     }
-
-    // interaction
-    let attractingForce = attractingForceF
-    let repulsiveForce = repulsiveForceF
-    function forceHandler(text, value) {
-        if (value === "Fruchterman-Reingold") {
-            attractingForce = attractingForceF
-            repulsiveForce = repulsiveForceF
-            K = Kf
-            Kg = KgF
-            cR = cRf
-            force = "Fruchterman-Reingold"
-        } else if (value === "ForceAtlas2") {
-            attractingForce = attractingForceA
-            repulsiveForce = repulsiveForceA
-            K = Ka
-            Kg = KgA
-            cR = cRa
-            force = "ForceAtlas2"
-        }
-    }
-    animate()
     function animate() {
         requestAnimationFrame(animate)
-        if (damping > 3) damping *= 0.99
-        positionVerlet(K, Kc, Kg, cR, nodes, edges, bbox, disp)
+        if (physConfig.damping > 3) physConfig.damping *= 0.99
+        positionVerlet(physConfig, nodes, edges, bbox, disp)
         fixPositions(nodes, bbox)
         redraw(nodeG, linkG)
     }
@@ -841,35 +473,33 @@ async function drawAll(url) {
         })
     }
 
-    function initNetwork(data, width, height, nodes, edges) {
-        //nodes.length = 0
-        while (nodes.length > 0) nodes.pop()
-        edges.length = 0 //data.links.length
-        for (let i = 0; i < data.nodes.length; i++) { // }.forEach((n, index) => {
-            nodes.push( {
-                index : i,
-                name : data.nodes[i].name,
-                x : 0,
-                y : 0,
-                xprev : 0,
-                yprev : 0,
-                vx : 0,
-                vy : 0,
-                fx : 0,
-                fy : 0,
-                r : 0,
-                c : 0,
-                degree : 0,
-                key: (100000 * Math.random()).toFixed(0)
-            } )
+    function initNetwork(data, width, height) {
+        let nodes = data.nodes
+        let edges = data.edges
+        const displacements = []
+        for (let i = 0; i < nodes.length; i++) { // }.forEach((n, index) => {
+            nodes[i].index = i
+            nodes[i].x = 0,
+            nodes[i].y = 0,
+            nodes[i].xprev = 0,
+            nodes[i].yprev = 0,
+            nodes[i].vx = 0,
+            nodes[i].vy = 0,
+            nodes[i].fx = 0,
+            nodes[i].fy = 0,
+            nodes[i].r = 0,
+            nodes[i].c = 0,
+            nodes[i].degree = 0,
+            nodes[i].key = (100000 * Math.random()).toFixed(0)
+            displacements.push( { x: 0, y: 0, d: 0 } )
         }
         // check that edges are unique
         const eMap = new Map()
-        for (let e of data.links) {
+        for (let e of edges) {
             const key = keyCantor(e.source, e.target)
             eMap.set(key, e)
         }
-        //const edges = [] // undirected
+        edges.length = 0
         for (let [key, value] of eMap) {
             edges.push({
                 source: value.source,
@@ -910,8 +540,8 @@ async function drawAll(url) {
         // init nodes position
         const random = new easyRandom(11) // wants always the same initial positions
         for (let n of nodes) {
-            n.x = 0.5 * ( 1 - 2 * random() ) * width / 2 
-            n.y = 0.5 * ( 1 - 2 * random() ) * height / 2 
+            n.x = 0.1 * ( 1 - 2 * random() ) * width / 2 
+            n.y = 0.1 * ( 1 - 2 * random() ) * height / 2 
         }
         // compute bounding box
         const bbox = {
@@ -920,14 +550,13 @@ async function drawAll(url) {
             ymin: -height / 2,
             ymax: height / 2,
         }
-        return {
-            minDeg,
-            maxDeg,
-            minC,
-            maxC,
-            bbox,
-            nr_g,
-        }
+        data.disp = displacements
+        data.minDeg = minDeg
+        data.maxDeg = maxDeg
+        data.minC = minC
+        data.maxC = maxC
+        data.bbox = bbox
+        data.nr_g = nr_g
     }
     function mouseOver(tooltip) {
         tooltip.style("display", "inline-block")

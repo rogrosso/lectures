@@ -7,13 +7,13 @@ import GUI from "../../contrib/lil-gui.module.min.js"
 //import quadCube_with_bnd from 'quadCube_with_bnd' assert{ type: 'json' }
 //import quadPawn from 'quadPawn' assert{ type: 'json' }
 
-import halfedgeFactory from "../../common/halfedge.js"
+import { halfedgeFactory } from "../../common/halfedge.js"
 import {
     renderBuffers,
     normalizeMesh,
     boundingBox
 } from "../../common/renderBuffers.js"
-import catmullClarkSubdivision from "./catmullClarkSubdivision.js"
+import { catmullClarkSubdivision } from "./catmullClarkSubdivision.js"
 let rotationFlag = true
 export async function drawAll(url1, url2, url3, url4) {
     const response1 = await fetch(url1)

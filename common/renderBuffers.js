@@ -1,4 +1,4 @@
-import halfedgeFactory from "./halfedge.js"
+import { halfedgeFactory } from "./halfedge.js"
 
 export function boundingBox(xMin, xMax, yMin, yMax, zMin, zMax) {
     const bbox = []

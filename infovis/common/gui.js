@@ -8,6 +8,8 @@ export function dropdown({
     keys,
     handler
 }) {
+    if (fontSize === undefined) fontSize = '1em'
+    if (name === undefined) name = text
     const dropdownOptions = []
     for (let k of keys) dropdownOptions.push({key: k, value: k})
 

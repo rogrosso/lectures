@@ -1,7 +1,7 @@
 import { randColorsHex } from "../common/colors.js"
 import { genDivTooltip } from "../common/draw.js"
 import { dropdown } from "../common/gui.js"
-import { bfs, setNetwork } from "./networks.js"
+import { bfsCount, setNetwork } from "./networks.js"
 
 const url1 = "../data/test01.json"
 const url2 = "../data/lesmiserables.json"
@@ -28,6 +28,7 @@ function draw(test01, lesmiserables) {
             n.v = false
             n.p = -2
             n.d = Number.MAX_VALUE
+            n.n = 0
         })
     }
     const colors = [
@@ -113,6 +114,7 @@ function draw(test01, lesmiserables) {
         for (let n of nodes) {
             delete n.d
             delete n.p
+            delete n.n
             delete n.v
             delete n.x
             delete n.y
@@ -120,11 +122,7 @@ function draw(test01, lesmiserables) {
             delete n.vy
         }
     }
-    function initNodes(nodes) {
-        for (let n of nodes) {
-            n.d = undefined
-        }
-    }
+
     function drawLesmiserables(lesmiserables, drawConfig) {
         const { selection, width, height, margin } = drawConfig
         selection.selectAll("*").remove()
@@ -135,12 +133,14 @@ function draw(test01, lesmiserables) {
         const ih = height - margin.top - margin.bottom
         const center = { x: margin.left + iw / 2, y: margin.top + ih / 2 }
         const { nodes, links, edges, neighbors } = lesmiserables
-        //clearNodes(nodes)
+        clearNodes(nodes)
         const sourceAccessor = (l) => l.source.index
         const targetAccessor = (l) => l.target.index
         //return
         const gSet = new Set()
         nodes.forEach((n) => {
+            n.d = undefined //Number.MAX_VALUE
+            n.n = 0
             gSet.add(n.group)
         })
         const lineGenerator = d3.line().curve(d3.curveBasis)
@@ -177,8 +177,8 @@ function draw(test01, lesmiserables) {
                 })
             )
             .alpha(0.2)
-            .alphaDecay(0.008)
-            .alphaMin(0.0001)
+            .alphaDecay(0.0001)
+            .alphaMin(0.00001)
         const beta = 0.2
         const eGroup = g
             .append("g")
@@ -296,6 +296,8 @@ function draw(test01, lesmiserables) {
         //return
         const gSet = new Set()
         nodes.forEach((n) => {
+            n.d = undefined //Number.MAX_VALUE
+            n.n = 0
             gSet.add(n.group)
         })
         // colors
@@ -357,7 +359,7 @@ function draw(test01, lesmiserables) {
             })
             .on("mousemove", function (event, d) {
                 const pos = d3.pointer(event)
-                mouseMove(divTooltip, d, {
+                mouseMove(divTooltip,d, {
                     x: event.pageX,
                     y: event.pageY
                 })
@@ -385,7 +387,7 @@ function draw(test01, lesmiserables) {
         tooltip.style("display", "inline-block")
     }
     function mouseMove(tooltip, d, pos) {
-        const text = d.name + '<br>' + 'distance: ' + d.d
+        const text = d.name + '<br>' + 'n: ' + d.n + '<br>' + 'd: ' + d.d
         const { x, y } = pos
         tooltip
             .html(text)
@@ -399,13 +401,9 @@ function draw(test01, lesmiserables) {
     function bfsHandler(text, event) {
         clearTimeouts()
         bfsSel = event
-        if (event === "lesmiserable") {
-            initNodes(lesmiserables.nodes)
+        if (event === "lesmiserable")
             drawLesmiserables(lesmiserables, drawConfig)
-        } else if (event === "test01") {
-            initNodes(test01.nodes)
-            drawTest01(test01, drawConfig)
-        }
+        if (event === "test01") drawTest01(test01, drawConfig)
     }
 
     function onClick(
@@ -420,7 +418,7 @@ function draw(test01, lesmiserables) {
         event,
         d
     ) {
-        bfs(nodes, neighbors, d.index)
+        bfsCount(nodes, neighbors, d.index)
         clearTimeouts()
         event.stopPropagation()
         const s_ = new Set()
@@ -445,19 +443,30 @@ function draw(test01, lesmiserables) {
                         return pathColor
                     }
                 })
-                .attr("stroke-width", 2)
+                .attr("stroke-width", d =>{
+                    const n0 = nodes[sourceAccessor(d)]
+                    const n1 = nodes[targetAccessor(d)]
+                    const dist = Math.max(n0.d, n1.d)
+                    if (n0.p === n1.index || n1.p === n0.index) {
+                        if (dist <= distRange[distIndex]) {
+                            return 3
+                        } else {
+                            return 1
+                        }
+                    }
+                })
                 .attr("stroke-opacity", (d) => {
                     const n0 = nodes[sourceAccessor(d)]
                     const n1 = nodes[targetAccessor(d)]
                     if (n0.p === n1.index || n1.p === n0.index) {
                         const dist = Math.max(n0.d, n1.d)
                         if (dist > distRange[distIndex]) {
-                            return 0
+                            return 0.5
                         } else {
                             return 1
                         }
                     } else {
-                        return 0
+                        return 0.5
                     }
                 })
             nGroup
@@ -478,16 +487,19 @@ function draw(test01, lesmiserables) {
     }
 } // draw()
 const cText = `
-// Breadth-first search with backtracing
-function bfs(nodes, neighbors, index) {
+// Modified BFS to count the number of shortest paths
+// from the root node to all other nodes
+function bfsCount(nodes, neighbors, index) {
     nodes.forEach((n) => {
         n.v = false
         n.d = Number.MAX_VALUE
         n.p = -2
+        n.n = 0
     })
     nodes[index].d = 0
     nodes[index].v = true
     nodes[index].p = -1
+    nodes[index].n = 1
     const q = [index] // queue
     while (q.length > 0) {
         const s = q.shift()
@@ -498,7 +510,10 @@ function bfs(nodes, neighbors, index) {
                 n.v = true
                 n.p = s
                 n.d = d + 1
+                n.n = nodes[s].n
                 q.push(n_index)
+            } else if (n.d === d + 1) {
+                n.n += nodes[s].n
             }
         })
     } // step()

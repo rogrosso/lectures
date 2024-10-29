@@ -20,7 +20,7 @@
  *      5. Some new simple functions, for usability
  */
 
-export default function binaryHeapFactory(scoreFunction) {
+export function binaryHeapFactory(scoreFunction) {
     const content = []
     const map = new Map()
     return {

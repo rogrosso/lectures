@@ -2,10 +2,10 @@ import * as THREE from "../../contrib/three.module.min.js"
 import { OrbitControls } from "../../contrib/OrbitControls.js"
 import { readOFF } from "../common/utilities.js"
 import { renderBuffers } from "../../common/renderBuffers.js"
-import indexedFaceSetFactory from "../../common/indexedFaceSet.js"
-import kdTreeFactory from "../../common/kdTree.js"
-import matrixFactory from "../../common/matrix.js"
-import svdFactory from "../../common/svd.js"
+import { indexedFaceSetFactory } from "../../common/indexedFaceSet.js"
+import { kdTreeFactory } from "../../common/kdTree.js"
+import { matrixFactory } from "../../common/matrix.js"
+import { svdFactory } from "../../common/svd.js"
 
 
 const url1 = "../data/bunny_part1.off"
@@ -133,8 +133,7 @@ function estimateRigidTransformation(pairs) {
         }
     }
     const svd = svdFactory()
-    const r = svd.fastSvd(m)
-    const { U, V } = r
+    const {U, V} = svd.svd3x3(m) //svd.jacobi(m)
     const rot = new Array(3).fill(0).map((row) => new Array(3).fill(0))
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {

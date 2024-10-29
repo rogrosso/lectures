@@ -52,6 +52,11 @@ export function betweenness(nodes, neighbors) {
     for (let n of nodes) {
         bc_(neighbors, n.index, c_)
     }
+    const n = nodes.length
+    const val = (n - 1) * (n - 2) // Brandes normalization, it counts each path twice
+    for (let i = 0; i < n; i++) {
+        c_[i] /= val
+    }
     return c_
 }
 /**
@@ -107,6 +112,7 @@ export function eigenvector(A, maxIter, eps) {
     while (e_ > eps && maxIter-- > 0) {
         let r_ = 0
         for (let i = 0; i < A.length; i++) {
+            c_[i] = 0
             for (let j of A[i]) {
                 c_[i] += b_[j]
             }
@@ -144,7 +150,6 @@ export function pagerank(I, O, d, maxIter, eps) {
     let e_ = Infinity
     while (e_ > eps && maxIter-- > 0) {
         for (let i = 0; i < N; i++) {
-            //if (I[i].length === 0) continue
             for (let j of I[i]) {
                 c_[i] += d * b_[j]/O[j].length
             }
@@ -155,6 +160,7 @@ export function pagerank(I, O, d, maxIter, eps) {
             b_[i] = c_[i]
             c_[i] = (1-d)/N
         }
+        e_ = Math.sqrt(e_)
     }
     const m_ = Math.max(...b_)
     for (let i = 0; i < N; i++) {
