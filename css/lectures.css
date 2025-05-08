@@ -7,25 +7,25 @@ p.kontakt {
 }
 div.lectures {
     margin-left: 3em;
-    width: 750px;
+    width: 850px;
 }
 div.lecture {
     margin-left: 3em;
-    width: 750px;
+    width: 850px;
 }
 div.gm-lecture {
     margin-left: 3em;
-    width: 750px;
+    width: 850px;
     background-color: white;
 }
 div.gp-lecture {
     margin-left: 3em;
-    width: 750px;
+    width: 850px;
     background-color: white;
 }
 div.infovis-lecture {
     margin-left: 3em;
-    width: 750px;
+    width: 850px;
     background-color: white;
 }
 div.canvas {
@@ -34,7 +34,7 @@ div.canvas {
     padding: 15px;
 }
 div.code {
-    width: 720px; 
+    width: 800px; 
     margin-left: 10px;
 }
 div.grid-container {

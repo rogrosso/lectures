@@ -6,8 +6,8 @@ import {
     jiggle,
     collisionForce,
     gravitationalForce,
-    attractingForceF,
-    attractingForceA,
+    attractiveForceF,
+    attractiveForceA,
     repulsiveForceF,
     repulsiveForceA,
     controlFunction,
@@ -41,29 +41,20 @@ async function drawAll(url1) {
     }
     function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
         initDisplacements(disp)
-        // compute displacements from repelling forces
+        // compute displacements
         const nrNodes = nodes.length
         for (let i = 0; i < nrNodes; i++) {
             for (let j = i + 1; j < nrNodes; j++) {
-                repulsiveForce(K, nodes, i, j, disp)
+                repulsiveForce(K, nodes[i], nodes[j], disp)
+                collisionForce(Kc, beta, nodes[i], nodes[j], disp)
             }
+            gravitationalForce(Kg, nodes[i], bbox, disp)
         }
-        // compute displacements from attracting forces
-        edges.forEach((e) => {
-            attractingForce(K, nodes, e, disp)
-        })
-        // collision force
-        for (let i = 0; i < nrNodes; i++) {
-            for (let j = i + 1; j < nrNodes; j++) {
-                collisionForce(Kc, beta, nodes, i, j, disp)
-            }
+        for (let e of edges) { // }.forEach((e) => {
+            attractiveForce(K, nodes[e.source], nodes[e.target], disp)
         }
-        // apply a gravitational force
-        nodes.forEach((n, i) => {
-            gravitationalForce(Kg, n, bbox, disp)
-        })
         // update nodes position
-        nodes.forEach(function (n, i) {
+        for (let n of nodes) {
             const dx = disp[n.index].x
             const dy = disp[n.index].y
             if (!isFinite(dx) || !isFinite(dy)) {
@@ -77,7 +68,7 @@ async function drawAll(url1) {
             const d = Math.sqrt(dx * dx + dy * dy)
             n.x += (dx / d) * Math.min(alpha, d) + 0.001 * jiggle()
             n.y += (dy / d) * Math.min(alpha, d) + 0.001 * jiggle()
-        })
+        }
 
         // shift center of network to center of bbox
         const pos = { x: 0, y: 0 }
@@ -266,20 +257,20 @@ async function drawAll(url1) {
     const Kc = 1500
     const cR = 2 // collision radius control
     let K = Kf
-    let attractingForce = attractingForceF
+    let attractiveForce = attractiveForceF
     let repulsiveForce = repulsiveForceF
     function forceHandler(text, value) {
         if (value === "Fruchterman-Reingold") {
             alpha = alphaF
             restartAlpha = restartAlphaF
-            attractingForce = attractingForceF
+            attractiveForce = attractiveForceF
             repulsiveForce = repulsiveForceF
             K = Kf
             Kg = KgF
         } else if (value === "ForceAtlas2") {
             alpha = alphaA
             restartAlpha = restartAlphaA
-            attractingForce = attractingForceA
+            attractiveForce = attractiveForceA
             repulsiveForce = repulsiveForceA
             K = Ka
             Kg = KgA
@@ -388,7 +379,7 @@ async function drawAll(url1) {
 
 const cText = `
 // Attracting force Fruchterman-Reingold
-function attractingForceF(K, nodes, e, disp) { 
+function attractiveForceF(K, nodes, e, disp) { 
     const d = distance(nodes[e.source], nodes[e.target])
     const fa = d.d * d.d / K
     disp[e.source].x += fa * d.x
@@ -407,7 +398,7 @@ function repulsiveForceF(K, nodes, i, j, disp) {
     disp[j].y += fr * d.y
 }
 // Attracting force ForceAtlas2
-function attractingForceA(K, nodes, e, disp) {
+function attractiveForceA(K, nodes, e, disp) {
     // vector pointing from n1 to n2, and Euclidean distance
     const d = distance(nodes[e.source], nodes[e.target]) 
     const fa = d.d
@@ -445,7 +436,7 @@ function step(K, Kc, Kg, beta, nodes, edges, bbox, disp, alpha) {
     }
     // compute displacements from attracting forces
     edges.forEach(e => {
-        attractingForce(K, nodes, e, disp)
+        attractiveForce(K, nodes, e, disp)
     })
     // collision force 
     for (let i = 0; i < nrNodes; i++) {

@@ -187,19 +187,119 @@ export function dijkstra(nodes, neighbors, weights, index) {
     }
 } // dijkstra()
 
-
-export function collisionForce(k, beta, nodes, i, j, disp) {
-    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j]
-    const s = beta * (nodes[i].r + nodes[j].r)
-    const l = d.d - s 
-    if (l < 0 && d.d > 0.001) {
-        const fr = k * Math.abs(l / (l + s))
-        disp[i].x -= fr * d.x
-        disp[i].y -= fr * d.y
-        disp[j].x += fr * d.x
-        disp[j].y += fr * d.y
-    } 
+// set total force (displacement) on nodes to zero for each iteration
+export function initDisplacements(disp) {
+    for (let d of disp) {
+        d.x = 0
+        d.y = 0
+        d.d = 0
+    }
 }
+// compute conservative forces for Fruchterman-Reingold model
+export function conservativeForcesF(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
+    initDisplacements(disp)
+    // compute displacements from repelling forces
+    const nrNodes = nodes.length
+    for (let i = 0; i < nrNodes; i++) {
+        for (let j = i + 1; j < nrNodes; j++) {
+            repulsiveForceF(K, nodes[i], nodes[j], disp)
+            collisionForce(Kc, beta, nodes[i], nodes[j], disp)
+        }
+        gravitationalForce(Kg, nodes[i], bbox, disp)
+    }
+    // compute displacements from attracting forces
+    for (let e of edges) {
+        attractiveForceF(K, nodes[e.source], nodes[e.target], disp)
+    }
+}
+// compute conservative forces for ForceAtlas2 model
+export function conservativeForcesA(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
+    initDisplacements(disp)
+    const nrNodes = nodes.length
+    for (let i = 0; i < nrNodes; i++) {
+        for (let j = i + 1; j < nrNodes; j++) {
+            repulsiveForceA(K, nodes[i], nodes[j], disp)
+            collisionForce(Kc, beta, nodes[i], nodes[j], disp)
+        }
+        gravitationalForce(Kg, nodes[i], bbox, disp)
+    }
+    // compute displacements from attracting forces
+    for (let e of edges) {
+        attractiveForceA(K, nodes[e.source], nodes[e.target], disp)
+    }
+}
+// Position Verlet integration modified to include a non-conservative damping
+// factor to lose energy and find a steady state
+export function positionVerlet(model, K, Kc, Kg, damping, beta, nodes, edges, bbox, disp) {
+    // compute conservative forces
+    switch (model) {
+        case 'Fruchterman-Reingold':
+            conservativeForcesF(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+            break
+        case 'ForceAtlas2':
+            conservativeForcesA(K, Kc, Kg, beta, nodes, edges, bbox, disp)
+            break
+    }
+    // update position, velocity and acceleration
+    const w = damping
+    const h = 0.008
+    for (let n of nodes) {
+        // position Verlet
+        const xprev = n.xprev
+        const yprev = n.yprev
+        n.xprev = n.x
+        n.yprev = n.y
+        const fx = disp[n.index].x - w * n.vx + 0.001 * jiggle() // add some noise
+        const fy = disp[n.index].y - w * n.vy + 0.001 * jiggle() // add some noise
+        const dx = n.x - xprev + fx * h * h
+        const dy = n.y - yprev + fy * h * h
+        n.x = n.x + dx
+        n.y = n.y + dy
+        n.vx = (n.x - n.xprev) / h
+        n.vy = (n.y - n.yprev) / h
+    }
+}
+// fix positions of nodes after an iteration step
+// to keep the network centered in the drawing area
+// and to avoid nodes going out of the drawing area
+export function fixPositions(nodes, bbox) {
+    // shift center of network to center of bbox
+    const pos = { x: 0, y: 0 }
+    nodes.forEach((n) => {
+        pos.x += n.x
+        pos.y += n.y
+    })
+    pos.x /= nodes.length
+    pos.y /= nodes.length
+    pos.x = (bbox.xmax + bbox.xmin) / 2 - pos.x
+    pos.y = (bbox.ymax + bbox.ymin) / 2 - pos.y
+    nodes.forEach((n) => {
+        n.x += pos.x
+        n.y += pos.y
+    })
+    nodes.forEach((n) => {
+        if (n.x < bbox.xmin) n.x = bbox.xmin
+        if (n.x > bbox.xmax) n.x = bbox.xmax
+        if (n.y < bbox.ymin) n.y = bbox.ymin
+        if (n.y > bbox.ymax) n.y = bbox.ymax
+    })
+}
+// collision force to avoid overlapping nodes
+export function collisionForce(k, beta, n1, n2, disp) {
+    const d = distance(n1, n2) // vector pointing from node n1 to node n2
+    const s = beta * (n1.r + n2.r)
+    const r = d.d - s 
+    const alpha = 0.05
+    if (r < 0) {
+        const fr = (d.d > alpha) ? k * Math.abs(r / d.d) : k * Math.abs(r / alpha)
+        disp[n1.index].x -= fr * d.x
+        disp[n1.index].y -= fr * d.y
+        disp[n2.index].x += fr * d.x
+        disp[n2.index].y += fr * d.y
+    }
+}
+// gravitational force to keep the network in the center of the drawing area
+// and avoid nodes with few neighbors (or disconnected) to go out of the drawing area
 export function gravitationalForce(kg, n, bbox, disp) {
     const x = (bbox.xmax+bbox.xmin) / 2 - n.x
     const y = (bbox.ymax+bbox.ymin) / 2 - n.y
@@ -211,50 +311,53 @@ export function gravitationalForce(kg, n, bbox, disp) {
     disp[n.index].x += g * dx
     disp[n.index].y += g * dy
 }
-export function attractingForceF(K, nodes, e, disp) {
-    const d = distance(nodes[e.source], nodes[e.target])
+// Fruchtman-Reingold forces
+export function attractiveForceF(K, n1, n2, disp) {
+    const d = distance(n1, n2)
     const fa = d.d * d.d / K
-    disp[e.source].x += fa * d.x
-    disp[e.source].y += fa * d.y
-    disp[e.target].x -= fa * d.x
-    disp[e.target].y -= fa * d.y
+    disp[n1.index].x += fa * d.x
+    disp[n1.index].y += fa * d.y
+    disp[n2.index].x -= fa * d.x
+    disp[n2.index].y -= fa * d.y
 }
-export function repulsiveForceF(K, nodes, i, j, disp) {
-    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
+export function repulsiveForceF(K, n1, n2, disp) {
+    const d = distance(n1, n2) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
     const fr = K * K / d.d
-    disp[i].x -= fr * d.x
-    disp[i].y -= fr * d.y
-    disp[j].x += fr * d.x
-    disp[j].y += fr * d.y
+    disp[n1.index].x -= fr * d.x
+    disp[n1.index].y -= fr * d.y
+    disp[n2.index].x += fr * d.x
+    disp[n2.index].y += fr * d.y
 }
-export function attractingForceA(K, nodes, e, disp) {
-    const d = distance(nodes[e.source], nodes[e.target]) // vector pointing from n1 to n2, and Euclidean distance
+// ForceAtlas2 forces
+export function attractiveForceA(K, n1, n2, disp) {
+    const d = distance(n1, n2) // vector pointing from n1 to n2, and Euclidean distance
     const fa = d.d
-    disp[e.source].x += fa * d.x
-    disp[e.source].y += fa * d.y
-    disp[e.target].x -= fa * d.x
-    disp[e.target].y -= fa * d.y
+    disp[n1.index].x += fa * d.x
+    disp[n1.index].y += fa * d.y
+    disp[n2.index].x -= fa * d.x
+    disp[n2.index].y -= fa * d.y
 }
-export function repulsiveForceA(K, nodes, i, j, disp) {
-    const d = distance(nodes[i], nodes[j]) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
-    const fr = K * (nodes[i].degree + 1) * (nodes[j].degree + 1) / d.d
-    disp[i].x -= fr * d.x
-    disp[i].y -= fr * d.y
-    disp[j].x += fr * d.x
-    disp[j].y += fr * d.y
+export function repulsiveForceA(K, n1, n2, disp) {
+    const d = distance(n1, n2) // vector pointing from nodes[i] to nodes[j], and Euclidean distance
+    const fr = K * (n1.degree + 1) * (n2.degree + 1) / d.d
+    disp[n1.index].x -= fr * d.x
+    disp[n1.index].y -= fr * d.y
+    disp[n2.index].x += fr * d.x
+    disp[n2.index].y += fr * d.y
 }
+// add some noise to the position of nodes to avoid them to be stuck in a local minimum
 const randJiggle = easyRandom(13)
 export function jiggle() { return (randJiggle() - 0.5) * 1e-4 }
 export function distance(n1,n2) {
     let dx = n2.x - n1.x
     let dy = n2.y - n1.y
-    let l = Math.sqrt(dx * dx + dy * dy)
-    if (l === 0) {
+    let d = Math.sqrt(dx * dx + dy * dy)
+    if (d === 0) {
         dx = jiggle()
         dy = jiggle()
-        l = Math.sqrt(dx * dx + dy * dy)
+        d = Math.sqrt(dx * dx + dy * dy)
     }
-    return { x: dx / l, y: dy / l, d: l }
+    return { x: dx / d, y: dy / d, d: d }
 }
 export function controlFunction(mAlpha, iAlpha, vDump) {
     const minAlpha = mAlpha

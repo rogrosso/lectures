@@ -6,8 +6,8 @@ import {
     jiggle,
     collisionForce,
     gravitationalForce,
-    attractingForceF,
-    attractingForceA,
+    attractiveForceF,
+    attractiveForceA,
     repulsiveForceF,
     repulsiveForceA,
 } from "./networks.js"
@@ -59,23 +59,15 @@ async function drawAll(url) {
         const nrNodes = nodes.length
         for (let i = 0; i < nrNodes; i++) {
             for (let j = i + 1; j < nrNodes; j++) {
-                repulsiveForce(K, nodes, i, j, disp)
+                repulsiveForce(K, nodes[i], nodes[j], disp)
+                collisionForce(Kc, beta, nodes[i], nodes[j], disp)
             }
+            gravitationalForce(Kg, nodes[i], bbox, disp)
         }
         // compute displacements from attracting forces
-        edges.forEach((e) => {
-            attractingForce(K, nodes, e, disp)
-        })
-        // collision force
-        for (let i = 0; i < nrNodes; i++) {
-            for (let j = i + 1; j < nrNodes; j++) {
-                collisionForce(Kc, beta, nodes, i, j, disp)
-            }
+        for (let e of edges) {
+            attractiveForce(K, nodes[e.source], nodes[e.target], disp)
         }
-        // apply a gravitational force
-        nodes.forEach((n, i) => {
-            gravitationalForce(Kg, n, bbox, disp)
-        })
     }
     function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
         // compute conservative forces
@@ -319,16 +311,16 @@ async function drawAll(url) {
     const Kc = 1500 // 1500
     const cR = 2 // collision radius control
     let K = Kf
-    let attractingForce = attractingForceF
+    let attractiveForce = attractiveForceF
     let repulsiveForce = repulsiveForceF
     function forceHandler(text, value) {
         if (value === "Fruchterman-Reingold") {
-            attractingForce = attractingForceF
+            attractiveForce = attractiveForceF
             repulsiveForce = repulsiveForceF
             K = Kf
             Kg = KgF
         } else if (value === "ForceAtlas2") {
-            attractingForce = attractingForceA
+            attractiveForce = attractiveForceA
             repulsiveForce = repulsiveForceA
             K = Ka
             Kg = KgA
@@ -338,11 +330,14 @@ async function drawAll(url) {
     const disp = nodes.map((n) => {
         return { d: 0, x: 0, y: 0, id: n.index }
     })
+    //let nr_iterations = 0
     animate()
     function animate() {
         requestAnimationFrame(animate)
         if (damping > 3) damping *= 0.99
         step(K, Kc, Kg, cR, nodes, edges, bbox, disp)
+        //nr_iterations++
+        //console.log('nr_iterations', nr_iterations)
         fixPositions(nodes, bbox)
         redraw(nodeG, linkG)
     }
@@ -452,7 +447,7 @@ function conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
     }
     // compute displacements from attracting forces
     edges.forEach(e => {
-        attractingForce(K, nodes, e, disp)
+        attractiveForce(K, nodes, e, disp)
     })
     // collision force 
     for (let i = 0; i < nrNodes; i++) {

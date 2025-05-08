@@ -3,15 +3,7 @@ import { genDivTooltip } from "../common/draw.js"
 import { randColorsHex } from "../common/colors.js"
 import { easyRandom } from "../../common/random.js"
 import { keyCantor } from "../../common/utilities.js"
-import {
-    jiggle,
-    collisionForce,
-    gravitationalForce,
-    attractingForceF,
-    attractingForceA,
-    repulsiveForceF,
-    repulsiveForceA,
-} from "./networks.js"
+import { fixPositions, positionVerlet } from "./networks.js"
 import { pagerank } from "./centrality.js"
 
 const url1 = "../data/celegans_modularity.json"
@@ -20,89 +12,10 @@ async function drawAll(url) {
     // global variables
     const dampConst = 100
     let damping = dampConst
+    let model = "Fruchterman-Reingold"
     // draw
     const celegans = await d3.json(url)
-
     const divTooltip = genDivTooltip()
-
-    function fixPositions(nodes, bbox) {
-        // shift center of network to center of bbox
-        const pos = { x: 0, y: 0 }
-        nodes.forEach((n) => {
-            pos.x += n.x
-            pos.y += n.y
-        })
-        pos.x /= nodes.length
-        pos.y /= nodes.length
-        pos.x = (bbox.xmax + bbox.xmin) / 2 - pos.x
-        pos.y = (bbox.ymax + bbox.ymin) / 2 - pos.y
-        nodes.forEach((n) => {
-            n.x += pos.x
-            n.y += pos.y
-        })
-        nodes.forEach((n) => {
-            if (n.x < bbox.xmin) n.x = bbox.xmin
-            if (n.x > bbox.xmax) n.x = bbox.xmax
-            if (n.y < bbox.ymin) n.y = bbox.ymin
-            if (n.y > bbox.ymax) n.y = bbox.ymax
-        })
-    }
-
-    function initDisplacements(disp) {
-        for (let d of disp) {
-            d.x = 0
-            d.y = 0
-            d.d = 0
-        }
-    }
-    function conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
-        initDisplacements(disp)
-        // compute displacements from repelling forces
-        const nrNodes = nodes.length
-        for (let i = 0; i < nrNodes; i++) {
-            for (let j = i + 1; j < nrNodes; j++) {
-                repulsiveForce(K, nodes, i, j, disp)
-            }
-        }
-        // compute displacements from attracting forces
-        edges.forEach((e) => {
-            attractingForce(K, nodes, e, disp)
-        })
-        // collision force
-        for (let i = 0; i < nrNodes; i++) {
-            for (let j = i + 1; j < nrNodes; j++) {
-                collisionForce(Kc, beta, nodes, i, j, disp)
-            }
-        }
-        // apply a gravitational force
-        nodes.forEach((n, i) => {
-            gravitationalForce(Kg, n, bbox, disp)
-        })
-    }
-    function positionVerlet(K, Kc, Kg, beta, nodes, edges, bbox, disp) {
-        // compute conservative forces
-        conservativeForces(K, Kc, Kg, beta, nodes, edges, bbox, disp)
-        // update position, velocity and acceleration
-        const w = damping
-        const h = 0.01
-        for (let n of nodes) {
-            // position Verlet
-            const xprev = n.xprev
-            const yprev = n.yprev
-            n.xprev = n.x
-            n.yprev = n.y
-            const fx = disp[n.index].x - w * n.vx + 0.001 * jiggle() // add some noise
-            const fy = disp[n.index].y - w * n.vy + 0.001 * jiggle() // add some noise
-            const dx = n.x - xprev + fx * h * h
-            const dy = n.y - yprev + fy * h * h
-            n.x = n.x + dx
-            n.y = n.y + dy
-            n.vx = (n.x - n.xprev) / h
-            n.vy = (n.y - n.yprev) / h
-        }
-        //
-        //fixPositions(nodes, bbox)
-    }
 
     // ============================================================================
     // helper function
@@ -299,18 +212,14 @@ async function drawAll(url) {
     const cRa = 2 // collision radius control, ForceAtlas2
     let K = Kf  // algorithms constant
     let cR = cRf // collision radius control
-    let attractingForce = attractingForceF
-    let repulsiveForce = repulsiveForceF
     function forceHandler(text, value) {
         if (value === "Fruchterman-Reingold") {
-            attractingForce = attractingForceF
-            repulsiveForce = repulsiveForceF
+            model = "Fruchterman-Reingold"
             K = Kf
             Kg = KgF
             cR = cRf
         } else if (value === "ForceAtlas2") {
-            attractingForce = attractingForceA
-            repulsiveForce = repulsiveForceA
+            model = "ForceAtlas2"
             K = Ka
             Kg = KgA
             cR = cRa
@@ -324,7 +233,7 @@ async function drawAll(url) {
     function animate() {
         requestAnimationFrame(animate)
         if (damping > 3) damping *= 0.99
-        positionVerlet(K, Kc, Kg, cR, nodes, edges, bbox, disp)
+        positionVerlet(model, K, Kc, Kg, damping, cR, nodes, edges, bbox, disp)
         fixPositions(nodes, bbox)
         redraw(nodeG, linkG)
     }

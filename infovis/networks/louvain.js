@@ -9,8 +9,8 @@ import {
     jiggle,
     collisionForce,
     gravitationalForce,
-    attractingForceF,
-    attractingForceA,
+    attractiveForceF,
+    attractiveForceA,
     repulsiveForceF,
     repulsiveForceA,
 } from "./networks.js"
@@ -108,7 +108,7 @@ async function drawAll(url1, url2, url3, url4) {
             d.d = 0
         }
     }
-    function conservativeForces(K, Kc, Kg, cR, attractingForce, repulsiveForce, nodes, edges, bbox, disp) {
+    function conservativeForces(K, Kc, Kg, cR, attractiveForce, repulsiveForce, nodes, edges, bbox, disp) {
         initDisplacements(disp)
         // compute displacements from repelling forces
         const nrNodes = nodes.length
@@ -119,7 +119,7 @@ async function drawAll(url1, url2, url3, url4) {
         }
         // compute displacements from attracting forces
         edges.forEach((e) => {
-            attractingForce(K, nodes, e, disp)
+            attractiveForce(K, nodes, e, disp)
         })
         // collision force
         for (let i = 0; i < nrNodes; i++) {
@@ -139,11 +139,11 @@ async function drawAll(url1, url2, url3, url4) {
             Kg,
             cR,
             damping,
-            attractingForce,
+            attractiveForce,
             repulsiveForce,
         } = physConfig
         // compute conservative forces
-        conservativeForces(K, Kc, Kg, cR, attractingForce, repulsiveForce, nodes, edges, bbox, disp)
+        conservativeForces(K, Kc, Kg, cR, attractiveForce, repulsiveForce, nodes, edges, bbox, disp)
         // update position, velocity and acceleration
         const w = damping
         const h = 0.008
@@ -236,7 +236,7 @@ async function drawAll(url1, url2, url3, url4) {
         Kc: undefined, // collision 
         K:  undefined, // general force constant
         cR: undefined, // collision radius
-        attractingForce: null,
+        attractiveForce: null,
         repulsiveForce: null
     }
     
@@ -247,7 +247,7 @@ async function drawAll(url1, url2, url3, url4) {
     function forceHandler(text, value) {
         physConfig.damping = dampConst
         if (value === "Fruchterman-Reingold") {
-            physConfig.attractingForce = attractingForceF
+            physConfig.attractiveForce = attractiveForceF
             physConfig.repulsiveForce = repulsiveForceF
             physConfig.Kg = 15
             physConfig.Kc = 1200
@@ -260,7 +260,7 @@ async function drawAll(url1, url2, url3, url4) {
             physConfig.K = physConfig.Kf
             physConfig.force = "Fruchterman-Reingold"
         } else if (value === "ForceAtlas2") {
-            physConfig.attractingForce = attractingForceA
+            physConfig.attractiveForce = attractiveForceA
             physConfig.repulsiveForce = repulsiveForceA
             physConfig.Ka = 10//5
             physConfig.Kg = 12
